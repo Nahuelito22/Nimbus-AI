@@ -1,0 +1,22 @@
+# -- Manejo y Análisis de Datos --
+pandas
+numpy
+
+# -- Visualización de Datos --
+matplotlib
+seaborn
+plotly
+
+# -- Machine Learning y Deep Learning --
+tensorflow
+scikit-learn
+
+# -- Entorno de Desarrollo Interactivo --
+jupyterlab
+
+# -- Servidor de API (para el deploy del modelo) --
+fastapi
+uvicorn
+
+# -- Manejo de Imágenes --
+Pillow

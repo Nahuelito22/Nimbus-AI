@@ -31,9 +31,9 @@ Nimbus AI propone una solución proactiva:
 
 ### Equipo y Roles
 
-- **Data Science & Model Lead:** Matías Nahuel Ghilardi Salinas
-- **Backend Development:** Gustavo
-- **Frontend Development:** Renzo
+- **Data Science & Model Lead:**  Nahuel Ghilardi 
+- **Backend Development:** Gustavo Garcia
+- **Frontend Development:** Renzo Merino
 
 ---
 
