@@ -1,6 +1,8 @@
 # Ignorar entorno virtual
 venv/
 .venv/
+venvNimbus/
+.venvNimbus/
 # Archivos de compilación de Python
 __pycache__/
 *.pyc
