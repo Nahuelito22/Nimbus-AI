@@ -25,9 +25,6 @@ def get_clima(city_name):
                 "humedad": data["main"]["humidity"],
                 "clima": data["weather"][0]["description"],
                 "icono": data["weather"][0]["icon"],
-                "viento": data["wind"]["speed"],
-                "presion": data["main"]["pressure"],
-                "visibilidad": data.get("visibility", "N/A")
             }
         else:
             return {"error": f"Error API: {response.status_code}"}
