@@ -1,0 +1,108 @@
+ID	Fecha	Ubicación(es)	Hora de Ocurrencia	Precisión Temporal	Características de la Tormenta	Fuente(s) Verificadas	Observaciones Clave / Cronología
+1	2000-01-01	Aeropuerto El Plumerillo (Norte de Mendoza)	22:45 - 23:20 UTC	Rango Horario	Precipitación muy intensa (66.1 mm en una hora).		La tormenta convectiva se registró en las últimas horas del día. Inició a las 22:45 UTC y alcanzó su máxima intensidad a las 23:20 UTC. Las fuentes académicas aclaran que el granizo se registró a 40 km al este del aeropuerto (SAME), no directamente sobre él.
+2	2002-03-08	Puente de Hierro (Guaymallén)	N/D	No Disponible	N/D		La información proviene de un decreto provincial (N° 264 del 7 de marzo de 2002) que declara la emergencia agropecuaria. No se especifican detalles horarios del evento.
+3	2005-02-16	Luján de Cuyo	Tarde	Período General	Viento, lluvia y granizo. 90 mm de precipitación en 25 minutos.		El artículo, publicado el 16 de febrero, se refiere al temporal ocurrido "el pasado lunes", que corresponde al 14 de febrero de 2005. No se especifica la hora exacta, solo que ocurrió durante el día. Destruyó 3,500 hectáreas de viñedos.
+4	2006-02-12	Luján de Cuyo (Perdriel, Vistalba)	N/D	No Disponible	Llovió en dos horas casi la mitad del promedio anual.		La fuente es un módulo educativo que cita un titular de prensa. No se proporciona información horaria. Destruyó 4,000 hectáreas de viñedos.
+5	2008-01-31	Ciudad de Mendoza	20:20 - 20:37 hs	Hora Específica	Leve granizada que duró pocos minutos.		La tormenta se descargó en la Capital cerca de las 20:20 hs y concluyó a las 20:37 hs.
+6	2008-11-26	Maipú y Godoy Cruz	Cerca de las 14:00 hs	Hora Aproximada	"Super celda" de tormenta. Duró unos 10 minutos. Afectó también Luján y zona Este.		Las precipitaciones comenzaron cerca de las 14:00 hs y se extendieron por aproximadamente 10 minutos, causando destrozos en zonas urbanas y cultivos, especialmente en Coquimbito (Maipú).
+7	2008-12-18	Las Heras, Godoy Cruz, Valle de Uco	18:20 hs	Hora Específica	Magnitud evaluada como "moderada o leve".		En la Ciudad de Mendoza (Capital), la granizada ocurrió a las 18:20 hs. La tormenta mostró la formación de cinco núcleos graniceros que se desplazaron de sur a noreste.
+8	2009-01-11	Maipú y zona Este	N/D	No Disponible	Afectó áreas productivas.		Las fuentes mencionan que las tormentas afectaron la zona Este durante enero, pero no proporcionan una hora específica para el evento del día 11.
+9	2010-09-28	Luján (Perdriel, M. Drummond, Ugarteche, Anchoris), Maipú (Rodeo del Medio)	Mediodía	Hora Aproximada	Piedras pequeñas, sin daños reportados.		La caída de granizo se registró al mediodía. A pesar de la inestabilidad climática, la piedra fue de pequeño tamaño y no produjo daños.
+10	2010-11-26	Guaymallén, Las Heras	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+11	2010-12-06	Ciudad, Guaymallén, Las Heras	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+12	2011-02-23	Godoy Cruz, Guaymallén	Tarde (aprox. 18:00 hs)	Hora Aproximada	"Nube tornádica", fenómeno extremo con agua, granizo y viento.		La tormenta afectó la provincia durante la tarde. Alrededor de las 18:00 hs, el frente de tormenta todavía castigaba el departamento de Rivadavia, lo que sitúa el evento en el Gran Mendoza en un marco temporal similar.
+13	2011-11-20	Ciudad de Mendoza (Cuarta Secc.), Las Heras	Tarde (después de las 16:00 hs)	Hora Aproximada	Fuerte tormenta con granizo persistente, inundaciones y destrozos.		
+Una fuente indica que la tormenta afectó al Gran Mendoza "esta tarde". Otra fuente, aunque parece referirse a un evento de 2020, menciona una tormenta que comenzó "pasadas las 16:00 hs". Se asume un marco temporal similar para el evento de 2011.   
+
+14	2012-10-29	San Rafael	08:30 hs	Hora Específica	Pico de intensidad de la tormenta.		El pico de la tormenta de granizo fue alrededor de las 8:30 hs. El sistema de lucha antigranizo operó con aviones y generadores de superficie durante casi 12 horas.
+15	2012-11-16	Guaymallén (San José, Dorrego), Capital, Las Heras, Maipú (Luzuriaga)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+16	2013-02-09	Godoy Cruz, Ciudad, Guaymallén, Maipú, Las Heras	Noche (alerta a las 21:00 hs)	Rango Horario	Fuerte temporal con destrucción de vidrios, techos y caída de árboles.		La alerta se emitió a las 21:00 hs del viernes y el servicio de emergencias finalizó a la 01:00 hs del sábado, lo que sitúa la tormenta en ese rango horario nocturno.
+17	2013-12-08	Mendoza (centro y noreste)	N/D	No Disponible	N/D		Las fuentes son informes generales sobre la temporada de tormentas 2013-2014, sin detallar eventos específicos por fecha y hora.
+18	2014-10-26	Luján de Cuyo	Noche	Período General	Chaparrones y tormentas aisladas.		La tormenta de granizo ocurrió durante la noche. Previamente, los aviones de lucha antigranizo ya trabajaban en las zonas de Ugarteche y El Carrizal.
+19	2014-12-09	Tupungato (Villa Bastías, El Peral, La Arboleda)	Tarde (desde las 13:00 hs)	Rango Horario	Lluvias y granizo que provocaron evacuaciones.		Las lluvias comenzaron en el Gran Mendoza alrededor de las 14:00 hs. En el Valle de Uco, los aviones de lucha antigranizo trabajaban desde las 13:00 hs. La inestabilidad se extendió hasta la tarde-noche.
+20	2014-12-16	Maipú, Godoy Cruz, Ciudad	Madrugada	Período General	Fuertes vientos y granizo.		El titular de la noticia indica que los fenómenos ocurrieron "durante la madrugada".
+21	2015-09-08	Godoy Cruz, Guaymallén, Maipú	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+22	2015-09-25	Tupungato, Junín, San Martín, Rivadavia	Tarde	Período General	Tormenta violenta, granizo en seco.		El evento ocurrió durante la tarde. Testigos relataron que el cielo, despejado al mediodía, se nubló rápidamente antes de la tormenta.
+23	2016-03-01	Gran Mendoza (excepto Luján), Sur de Mendoza	Noche	Período General	Fuerte tormenta con vientos de más de 75 km/h y granizo.		El informe de Defensa Civil, con fecha del 1 de marzo, se refiere a la tormenta ocurrida "anoche". En General Alvear, precipitaron más de 35 mm en menos de 20 minutos.
+24	2017-04-04	San Carlos, Maipú, Godoy Cruz, Guaymallén	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+25	2017-04-05	Gran Mendoza, Valle de Uco, zona Este	Tarde-Noche (15:00 - 19:00 hs)	Rango Horario	Intensa tormenta de lluvia y granizo.		El temporal comenzó cerca de las 15:00 hs en San Carlos (Valle de Uco) y afectó al Gran Mendoza cerca de las 19:00 hs.
+26	2018-02-16	Tunuyán, Luján de Cuyo (Ugarteche, Perdriel)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+27	2018-11-12	General Alvear, Gran Mendoza (Las Heras, Guaymallén, Ciudad)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+28	2018-11-22	Gran Mendoza	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+29	2019-11-13	Godoy Cruz	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+30	2019-11-21	Capital provincial, Sur de Mendoza	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+31	2020-11-12	Gran Mendoza (Godoy Cruz, Luján, Las Heras, Ciudad, Guaymallén, Maipú)	Tarde	Período General	Intensas tormentas de lluvia y granizo.		La fuente describe una tormenta vespertina que causó inundaciones en calles y en el Parque General San Martín.
+32	2022-01-25	Luján de Cuyo, Godoy Cruz, Ciudad de Mendoza	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+33	2022-02-23	Gran Mendoza (especialmente Guaymallén)	Noche	Período General	Tormenta intensa con granizo del tamaño de una pelota de golf.		La fuente describe una de las tormentas más intensas de los últimos tiempos, ocurrida durante la noche del miércoles 23 de febrero.
+34	2023-01-26	San Martín (Palmira), Guaymallén, Maipú	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+35	2023-12-23	Gran Mendoza, Valle de Uco, zona Este, General Alvear, San Rafael	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+36	2024-02-28	Maipú, Lavalle, Gran Mendoza	Noche	Período General	Fuerte tormenta con granizo y abundante agua.		Las fuentes describen una tormenta ocurrida el miércoles por la noche que provocó importantes daños y pérdidas, especialmente en Maipú y Lavalle.
+37	2024-12-31	Luján de Cuyo (Vistalba, Mayor Drummond)	N/A	No Verificable	N/A		La fecha corresponde a un evento futuro y no puede ser verificada con datos históricos.
+38	2017-03-26	Santa Rosa	Tarde	Período General	Tormenta con actividad eléctrica y granizo de tamaño no considerable.		El evento se enmarca en la "Tormenta de Santa Rosa", que se hizo sentir el domingo por la tarde.
+39	2018-11-25	La Paz	Noche	Período General	Granizada de 10 minutos de duración.		Una fuente indica que una lluvia de 45 minutos, que incluyó 10 minutos de granizo, se registró la noche del miércoles. Aunque el año en la fuente es 2016, el día de la semana y la fecha coinciden, sugiriendo un error tipográfico en el año de la fuente.
+40	2018-12-17	Junín (Medrano), Rivadavia (Medrano)	N/D	No Disponible	Graves daños.		La fuente solo menciona el titular "GRAVES DAÑOS DEJÓ EL GRANIZO EN JUNÍN Y RIVADAVIA" con la fecha correspondiente, sin detalles horarios.
+41	2018-12-19	San Martín (departamento)	Madrugada	Período General	Diluvio y granizo.		La tormenta se registró en las últimas horas del 18 de diciembre y la madrugada del 19.
+42	2021-12-16	Junín, Las Heras, Rivadavia, San Rafael, Santa Rosa, Tupungato, Lavalle, San Martín	Tarde-Noche	Período General	Múltiples tormentas en 8 departamentos.		
+El informe gubernamental detalla los daños de las tormentas del 16 de diciembre. Videos de eventos similares en la región en esa época muestran tormentas vespertinas y nocturnas.   
+
+43	2022-01-26	Rivadavia (Los Campamentos)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+44	2022-12-22	San Martín (centro), Junín (La Colonia)	N/D	No Disponible	N/D		Las fuentes son genéricas sobre alertas meteorológicas y no detallan el evento específico de esta fecha y hora.
+45	2023-03-08	San Martín (Alto Verde), Junín (A. Grande, Philips), Rivadavia (S. M. de Oro, Los Campamentos)	Noche	Período General	Granizo del tamaño de un huevo, vientos huracanados.		La fuerte granizada azotó la zona Este "anoche", en referencia a la fecha de publicación del 9 de marzo.
+46	2023-11-28	Rivadavia (de Reducción a La Central), San Martín	Tarde	Período General	Granizo de tamaño no dañino, pero con muchísima agua.		Un reporte en vivo describe la caída de granizo y lluvia intensa durante la tarde, indicando que el evento ocurrió unos "10 o 20 minutos atrás".
+47	2024-01-25	San Martín, Maipú	Noche	Período General	Granizo de gran tamaño con "filo", causando daños severos.		La tormenta ocurrió en "horas de la noche del jueves", causando pérdidas de hasta el 100% en algunos cultivos.
+48	2024-11-20	Valle de Uco (San Carlos), Zona Este	N/A	No Verificable	N/A		La fecha corresponde a un evento futuro y no puede ser verificada con datos históricos.
+49	2024-12-18	San Martín, Junín, Rivadavia	N/A	No Verificable	N/A		La fecha corresponde a un evento futuro y no puede ser verificada con datos históricos.
+50	2007-01-27	San Rafael	17:15 hs	Hora Específica	Fuerte tormenta con granizo y ráfagas de viento. Duró 30-40 minutos.		El fenómeno se presentó pasadas las 17:15 hs. Un decreto provincial menciona la tormenta del 26 de enero, pero el informe meteorológico detalla el evento del día 27.
+51	2010-02-12	General Alvear (Oeste, C. Negras, La Escandinava)	Tarde-Noche (aprox. 20:00 hs)	Hora Aproximada	Granizo del tamaño de pelota de ping pong. Duró 20 minutos.		
+La fuente indica que el fenómeno comenzó "cerca de las 20 hs". Otra fuente  describe una tormenta en Gral. Alvear el 2 de enero de 2010, también a las 20:00 hs, lo que podría indicar una posible confusión de fechas en los registros.   
+
+52	2015-11-23	San Rafael	Tarde (16:00 hs)	Hora Específica	Viento, lluvia y granizo. Duró 45 minutos.		
+El fenómeno comenzó a las 16:00 hs. Los vientos alcanzaron 84 km/h. Un video lo describe como ocurrido en "las primeras horas de la media tarde de este lunes".   
+
+53	2017-03-25	San Rafael	Tarde-Noche	Período General	Bolas de hielo del tamaño de una pelota de tenis, vientos de más de 100 km/h.		La tormenta afectó la región de Cuyo en la "tarde-noche del lunes". El evento fue calificado como un "brutal temporal" con pérdidas millonarias.
+54	2018-11-04	San Rafael	Tarde	Período General	Fuerte tormenta granicera. Duró unos 5 minutos.		La tormenta se abatió en la "tarde de este domingo". Fue la cuarta tormenta con granizo en la zona en una semana.
+55	2018-11-29	General Alvear, San Rafael	16:00 - 21:30 hs	Rango Horario	Lluvias débiles a moderadas, sin registro de granizo en zonas cultivadas.		Los operativos de siembra de nubes se extendieron de las 16:00 a las 21:30 hs en la zona Sur. El resultado fue óptimo, evitando la precipitación de granizo en áreas cultivadas.
+56	2018-12-29	San Rafael	Tarde (desde las 16:00 hs)	Rango Horario	Granizo de gran tamaño, vientos elevados.		Las tareas de mitigación comenzaron a las 16:00 hs. La tormenta golpeó "ayer por la tarde", según un artículo del 29/12. Dejó 9 heridos.
+57	2019-01-01	General Alvear (Bowen)	Tarde (desde las 16:45 hs)	Rango Horario	Granizo de más de 5 cm de diámetro ("tamaño de bola de billar"), en seco.		Los vuelos de mitigación comenzaron a las 16:45 hs. Un video confirma que el "fuerte granizo azotó Bowen en horas de la tarde".
+58	2019-03-31	San Rafael	Tarde	Período General	Granizo y abundante agua.		
+Un video describe la tormenta desatándose en "las primeras horas de la media tarde". Sin embargo, otra fuente  habla de un temporal el 20 de abril de 2021 con características similares, lo que podría indicar una posible discrepancia en la fecha.   
+
+59	2020-02-08	General Alvear (San Pedro del Atuel)	Noche (aprox. 23:00 hs)	Hora Aproximada	Granizo en la Colonia Rusa.		
+La precipitación de granizo ocurrió "ayer, a las 23h aproximadamente". Otra fuente menciona la tormenta en la "noche del sábado".   
+
+60	2021-02-17	San Rafael (Cuesta de Los Terneros, El Nihuil, Cañón del Atuel, Valle Grande)	Tarde (aprox. 18:00 hs)	Hora Aproximada	Sorpresiva y abundante tormenta de granizo y agua.		La tormenta azotó la zona "durante la tarde del miércoles". Un tuit citado en el artículo fue publicado a las 18:00 hs.
+61	2021-04-20	San Rafael	Tarde	Período General	Feroz tormenta con piedra de gran tamaño, desborde de canales.		El temporal del "martes" golpeó con violencia, causando daños gravísimos, especialmente en Colonia Española.
+62	2021-12-07	San Rafael	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+63	2022-02-04	San Rafael (Rama Caída)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+64	2024-01-11	San Rafael (Ciudad, Las Paredes, etc.), Gral. Alvear	Tarde-Noche	Período General	Granizo del tamaño de pelotas de golf. Duró media hora.		Las precipitaciones comenzaron en la "última hora de la tarde, llegando a la noche" del jueves.
+65	2024-01-21	San Rafael (Las Paredes, El Cerrito, etc.), Gral. Alvear (Carmensa)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+66	2024-08-22	San Rafael	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+67	2024-11-01	San Rafael (Sur y Este, M. Comán, etc.)	N/A	No Verificable	N/A		La fecha corresponde a un evento futuro y no puede ser verificada con datos históricos.
+68	2024-12-17	General Alvear, San Rafael, Zona Este	N/A	No Verificable	N/A		La fecha corresponde a un evento futuro y no puede ser verificada con datos históricos.
+69	2014-12-14	Paraje Carapacho (70 km al sur de Malargüe)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+70	2015-11-11	Malargüe	N/D	No Disponible	N/D		La fuente es un video sobre un evento en Rivadavia y menciona el Paso Pehuenche en Malargüe en otro contexto, sin dar detalles del evento del 11/11/2015.
+71	2017-02-02	Ingreso a Malargüe (El Sosneado)	Tarde	Período General	Importante tormenta con granizo.		La tormenta precipitó "esta tarde" sobre la Ruta Nacional 40, entre Pareditas y El Sosneado.
+72	2017-03-27	Cuesta de los Terneros, Ruta Nacional 40 km 2920	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+73	2017-03-28	Sur de la ciudad de Malargüe	Tarde	Período General	Lluvia y granizo.		La tormenta se registró "en horas de la tarde de ayer lunes" (27 de marzo), causando una crecida. La fecha en el archivo del usuario (28 de marzo) es probablemente la fecha de reporte.
+74	2019-03-16	Ruta Nacional 40 (Las Leñas - El Sosneado)	Mediodía	Hora Aproximada	Tormenta de granizo que dejó un manto blanco sobre la ruta.		El evento ocurrió "alrededor del mediodía de este sábado".
+75	2019-12-29	El Sosneado	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+76	2020-01-02	Las Chacras, El Chihuido Chico	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+77	2020-02-06	Ciudad de Malargüe, Colonia Pehuenche	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+78	2020-11-23	Ciudad de Malargüe	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+79	2021-01-13	Ingreso norte de Malargüe (Ruta 40)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+80	2021-02-14	Ruta Nacional 40 (Pareditas - El Sosneado)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+81	2021-02-15	Noreste urbano de Malargüe	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+82	2021-04-02	Ruta 40 (El Chihuido – Bardas Blancas), Zona de El Atuel	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+83	2021-11-10	Ruta Nacional 40 (El Sosneado - Pareditas)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+84	2022-01-25	Zona petrolera de Fortunoso (sureste de Malargüe)	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+85	2022-01-26	El Sosneado	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+86	2022-09-18	Ciudad de Malargüe	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+87	2022-11-09	Yacimiento El Corcovo	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+88	2024-02-09	Ciudad de Malargüe	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+89	2024-02-25	Malargüe, Gran Mendoza	N/D	No Disponible	N/D		No se encontró información adicional sobre este evento en las fuentes proporcionadas.
+90	2008-12-08	Luján de Cuyo, Santa Rosa, San Rafael	Madrugada (aprox. 01:30 hs)	Hora Aproximada	Granizo muy pequeño y abundante agua.		El artículo menciona una tormenta ocurrida el 8 de diciembre de 2008 alrededor de la 1:30 AM. Este evento no estaba en la lista original del usuario, pero se incluye por su relevancia y la precisión de la fuente.
+91	2025-08-24	San Rafael	N/A	No Verificable	N/A		Las fuentes mencionan un evento en esta fecha, pero el año es 2024. La fecha 24/8/2025 parece ser un error en la fuente o una fecha futura.
+92	2025-08-31	Mendoza (varios deptos.)	N/A	No Verificable	N/A		Las fuentes describen la "Tormenta de Santa Rosa" del 31 de agosto de 2025, una fecha futura.
+93	2025-07-25	La Paz	N/A	No Verificable	N/A		La fuente menciona esta fecha futura en el contexto de noticias no relacionadas.
+94	2025-02-19	La Paz	N/A	No Verificable	N/A		Las fuentes conmemoran la trágica granizada de 2002, pero la fecha de publicación es del futuro (19 de febrero de 2025).
+95	2025-01-17	Mendoza (varios deptos.)	N/A	No Verificable	N/A		Las fuentes corresponden a un decreto de emergencia agropecuaria emitido en una fecha futura.
