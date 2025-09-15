@@ -31,12 +31,15 @@ Nimbus AI propone una solución proactiva:
 
 ### Equipo y Roles
 
-- **Data Science & Model Lead:**  Nahuel Ghilardi 
-- **Backend Development:** Gustavo Garcia
-- **Frontend Development:** Renzo Merino
+- **Data Science & Model Lead:** Nahuel Ghilardi  
+- **Backend & Frontend Development:** Nahuel Ghilardi, Gustavo Garcia  
 
 ---
 
 ### Estado Actual
 
 Actualmente, el proyecto se encuentra en la fase de **recolección de datos y desarrollo del modelo de predicción inicial (MVP)**.
+
+---
+
+> Nota: Se actualizó la sección de equipo para reflejar los roles activos.  
