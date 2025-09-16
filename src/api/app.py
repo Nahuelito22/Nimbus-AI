@@ -1,7 +1,8 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from src.api.clima import get_clima
 from src.services.news_service import get_news, format_news, get_news_safe
 from src.config import Config
+from src.api.meteo import get_weather_by_coords,get_clima_by_ip,get_clima_ciudad
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False  # ← AGREGA ESTA LÍNEA IMPORTANTE
@@ -63,12 +64,45 @@ def get_all_news():
     })
 
 
+@app.route('/api/meteo/ip', methods=['GET'])
+def clima_por_ip():
+    """
+    Endpoint que obtiene clima según la IP del cliente
+    """
+    result = get_clima_by_ip()
+    return jsonify(result)
+
+@app.route('/api/meteo/coords', methods=['GET'])
+def clima_por_coords():
+    """
+    Endpoint que obtiene clima según coordenadas (lat, lon)
+    Ejemplo: /api/meteo/coords?lat=-32.889&lon=-68.845
+    """
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+
+    if not lat or not lon:
+        return jsonify({"error": "Debes enviar lat y lon como parámetros"}), 400
+
+    result = get_weather_by_coords(float(lat), float(lon))
+    return jsonify(result)
+
+@app.route('/api/meteo/ciudad/<city_name>', methods=['GET'])
+def clima_por_ciudad(city_name):
+    """
+    Endpoint que obtiene clima de Open-Meteo según el nombre de la ciudad
+    """
+    result = get_clima_ciudad(city_name)
+    return jsonify(result)
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """
     Endpoint para verificar que la API está funcionando
     """
     return jsonify({"status": "healthy", "message": "Nimbus API is running!"})
+    
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

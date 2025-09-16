@@ -8,7 +8,6 @@ news_cache = {}
 cache_timeout = 300  # 5 minutos en segundos
 
 def get_news(category='general', limit=5):
-    # ... (El resto de la función get_news no cambia)
     """
     Obtiene noticias de forma eficiente respetando los límites de la API
     """
