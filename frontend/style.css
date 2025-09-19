@@ -1,0 +1,17 @@
+/*ID unico*/
+#titulo-principal{
+    color: darkblue;
+    text-align: center;
+}
+
+/*clases repetibles*/
+.parrafo{
+    font-size: 18px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+footer{
+    text-align: center;
+    margin-top: 80px;
+}
