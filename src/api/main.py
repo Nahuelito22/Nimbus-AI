@@ -44,7 +44,6 @@ class ForecastInput(BaseModel):
 
 # --- 4. Funciones Auxiliares ---
 def procesar_imagen_api(ruta_archivo_nc):
-    # ... (esta función es la misma que ya teníamos en la notebook 08) ...
     IMG_SIZE = 64
     ds = xr.open_dataset(ruta_archivo_nc)
     proj_info = ds.goes_imager_projection
@@ -57,7 +56,7 @@ def procesar_imagen_api(ruta_archivo_nc):
     recorte_normalizado = (recorte_redimensionado - np.nanmin(recorte_redimensionado)) / (np.nanmax(recorte_redimensionado) - np.nanmin(recorte_redimensionado) + 1e-6)
     return np.nan_to_num(recorte_normalizado)
 
-# --- 5. El Endpoint de Predicción REAL ---
+# --- 5. El Endpoint de Predicción REAL (con verificación de imagen) ---
 @app.post("/predict")
 def predict_hail(forecast_input: ForecastInput):
     if not model or not scaler:
@@ -70,56 +69,60 @@ def predict_hail(forecast_input: ForecastInput):
     df_input['mes'] = df_input['date'].dt.month
     df_input['dia_del_año'] = df_input['date'].dt.dayofyear
     df_input['rango_temp_diario'] = df_input['TMAX'] - df_input['TMIN']
+    
     expected_features = scaler.feature_names_in_
     for col in expected_features:
         if col not in df_input.columns:
-            df_input[col] = 0.0 # Valor por defecto para columnas no presentes en el input
+            df_input[col] = 0.0
+
     df_input = df_input[expected_features]
     X_tabular_scaled = scaler.transform(df_input)
 
     # --- B. Descargar y Procesar la Imagen Satelital más Reciente ---
+    key_archivo = None
     try:
         s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
         now_utc = datetime.now(timezone.utc)
         
-        # Buscamos la imagen más reciente (hasta 2 horas de antigüedad)
-        key_archivo = None
-        for i in range(3): # Revisa la hora actual y las 2 anteriores
+        # Buscamos la imagen más reciente (hasta 3 horas de antigüedad)
+        for i in range(4): # Revisa la hora actual y las 3 anteriores
             hora_a_buscar = now_utc - timedelta(hours=i)
             prefix = f"ABI-L2-CMIPF/{hora_a_buscar.year}/{hora_a_buscar.timetuple().tm_yday:03d}/{hora_a_buscar.hour:02d}/"
             response = s3.list_objects_v2(Bucket='noaa-goes16', Prefix=prefix)
+            
             if 'Contents' in response:
-                for file in reversed(response['Contents']): # Buscamos el más reciente
+                for file in reversed(response['Contents']):
                     if 'C13' in file['Key']:
                         key_archivo = file['Key']
+                        print(f"✅ Imagen más reciente encontrada: {key_archivo}")
                         break
             if key_archivo:
                 break
         
         if not key_archivo:
-            raise HTTPException(status_code=404, detail="No se encontró imagen satelital en las últimas 3 horas.")
+            raise HTTPException(status_code=404, detail="No se encontró imagen satelital en las últimas 4 horas.")
 
-        nombre_archivo_temp = "temp_image.nc" # Se guarda en el entorno del servidor
+        nombre_archivo_temp = "temp_image.nc"
         s3.download_file('noaa-goes16', key_archivo, nombre_archivo_temp)
         
         imagen_procesada = procesar_imagen_api(nombre_archivo_temp)
-        X_image_input = np.stack([imagen_procesada] * 5, axis=-1) # Creamos la secuencia
-        X_image_input = np.expand_dims(X_image_input, axis=0) # Añadimos dimensión de batch
+        X_image_input = np.stack([imagen_procesada] * 5, axis=-1)
+        X_image_input = np.expand_dims(X_image_input, axis=0)
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener/procesar imagen: {str(e)}")
 
     # --- C. Hacer la Predicción ---
-    try:
-        prediccion_prob = model.predict([X_tabular_scaled, X_image_input])[0][0]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en la predicción del modelo: {str(e)}")
+    prediccion_prob = model.predict([X_tabular_scaled, X_image_input])[0][0]
 
-    # --- D. Devolver el Resultado ---
+    # --- D. Devolver el Resultado (con la fuente de la imagen) ---
     UMBRAL_OPTIMO = 0.56
     return {
         "probabilidad_granizo": float(prediccion_prob),
         "umbral_aplicado": UMBRAL_OPTIMO,
+        # === CORRECCIÓN AQUÍ ===
+        # Añadimos 'else "No"' para completar la condición
         "alerta_sugerida": "Sí" if prediccion_prob > UMBRAL_OPTIMO else "No",
-        "timestamp_prediccion": now_utc.isoformat(),
-        "fuente_imagen": key_archivo
+        "timestamp_prediccion_utc": datetime.now(timezone.utc).isoformat(),
+        "fuente_imagen_utilizada": key_archivo
     }
