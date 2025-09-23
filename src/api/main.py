@@ -1,6 +1,6 @@
 # --- 1. Importaciones ---
 from fastapi import FastAPI, HTTPException
-from pantic import BaseModel
+from pydantic import BaseModel
 import tensorflow as tf
 import numpy as np
 import pickle
@@ -39,7 +39,6 @@ class ForecastInput(BaseModel):
     om_pressure_msl_mean: float
     latitude: float
     longitude: float
-    # Y cualquier otra de las features que el back-end obtenga de un pronóstico
 
 # --- 4. Funciones Auxiliares ---
 def procesar_imagen_api(ruta_archivo_nc):
@@ -55,7 +54,7 @@ def procesar_imagen_api(ruta_archivo_nc):
     recorte_normalizado = (recorte_redimensionado - np.nanmin(recorte_redimensionado)) / (np.nanmax(recorte_redimensionado) - np.nanmin(recorte_redimensionado) + 1e-6)
     return np.nan_to_num(recorte_normalizado)
 
-# --- 5. Endpoint de Predicción Definitivo ---
+# --- 5. El Endpoint de Predicción Definitivo ---
 @app.post("/predict")
 def predict_hail(forecast_input: ForecastInput):
     if not model or not scaler:
@@ -77,14 +76,12 @@ def predict_hail(forecast_input: ForecastInput):
 
     # B. Descargar y Procesar la Imagen Satelital más Reciente
     key_archivo_real = None
+    now_utc = datetime.now(timezone.utc)
     try:
         s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-        now_utc = datetime.now(timezone.utc)
-        
-        # === CAMBIO CLAVE: Apuntamos al satélite más nuevo ===
         bucket_name = 'noaa-goes19'
 
-        for i in range(4): # Revisa la hora actual y las 3 anteriores
+        for i in range(4):
             hora_a_buscar = now_utc - timedelta(hours=i)
             prefix = f"ABI-L2-CMIPF/{hora_a_buscar.year}/{hora_a_buscar.timetuple().tm_yday:03d}/{hora_a_buscar.hour:02d}/"
             response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
@@ -97,7 +94,7 @@ def predict_hail(forecast_input: ForecastInput):
                 break
         
         if not key_archivo_real:
-             raise HTTPException(status_code=404, detail=f"No se encontró imagen satelital en las últimas 4 horas en el satélite {bucket_name}.")
+            raise HTTPException(status_code=404, detail=f"No se encontró imagen satelital en las últimas 4 horas en el satélite {bucket_name}.")
 
         nombre_archivo_temp = "temp_image.nc"
         s3.download_file(bucket_name, key_archivo_real, nombre_archivo_temp)

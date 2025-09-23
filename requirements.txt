@@ -88,7 +88,8 @@ nest-asyncio==1.6.0
 netCDF4==1.7.2
 niquests==3.15.2
 notebook_shim==0.2.4
-numpy==2.3.2
+numpy==2.2.6
+opencv-python==4.12.0.88
 openmeteo_requests==1.7.2
 openmeteo_sdk==1.20.1
 opt_einsum==3.4.0
