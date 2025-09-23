@@ -1,5 +1,10 @@
-# Usamos la imagen base oficial de Python 3.12
+# Usamos una imagen base oficial de Python 3.12
 FROM python:3.12-slim
+
+# === PASO NUEVO: Instalar dependencias del sistema operativo para OpenCV ===
+# Actualizamos la lista de paquetes y luego instalamos la librería gráfica que falta
+RUN apt-get update && apt-get install -y libgl1-mesa-glx
+# =======================================================================
 
 # Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /code
@@ -7,11 +12,10 @@ WORKDIR /code
 # Copiamos nuestro archivo de requerimientos
 COPY ./requirements.txt /code/requirements.txt
 
-# Instalamos las librerías
+# Instalamos las librerías de Python
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # Copiamos todo el código de nuestro proyecto al contenedor
-# (src, data, models, etc.)
 COPY . /code/
 
 # Le decimos al servidor en qué puerto debe correr la aplicación
