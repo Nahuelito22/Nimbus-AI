@@ -33,14 +33,27 @@ except Exception as e:
 # Usamos Field(default=None) para que los campos sean opcionales.
 # Luego los manejaremos en el código.
 class ForecastInput(BaseModel):
-    TMAX: float | None = None
-    TMIN: float | None = None
-    PRCP: float | None = None
-    om_wind_gusts_10m_max: float | None = None
-    om_dew_point_2m_mean: float | None = None
-    om_pressure_msl_mean: float | None = None
+    PRCP: float
+    SNWD: float
+    TAVG: float
+    TMAX: float
+    TMIN: float
     latitude: float
     longitude: float
+    om_weather_code: float
+    om_rain_sum: float
+    om_snowfall_sum: float
+    om_precipitation_hours: float
+    om_wind_gusts_10m_max: float
+    om_wind_direction_10m_dominant: float
+    om_shortwave_radiation_sum: float
+    om_et0_fao_evapotranspiration: float
+    om_dew_point_2m_mean: float
+    om_relative_humidity_2m_mean: float
+    om_pressure_msl_mean: float
+    mes: int
+    dia_del_año: int
+    rango_temp_diario: float
 
 # --- 4. Funciones Auxiliares ---
 def procesar_imagen_api(ruta_archivo_nc):
