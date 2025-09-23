@@ -1,6 +1,6 @@
 # --- 1. Importaciones ---
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pantic import BaseModel
 import tensorflow as tf
 import numpy as np
 import pickle
@@ -17,7 +17,6 @@ from botocore.config import Config
 # --- 2. Crear la Aplicación y Cargar Artefactos ---
 app = FastAPI(title="API de Predicción de Granizo - Nimbus AI", version="3.1.0")
 
-# Rutas a los artefactos del modelo
 MODEL_PATH = os.path.join("..", "..", "models", "multimodal_v3.1_optimizado.keras")
 SCALER_PATH = os.path.join("..", "..", "data", "processed", "modelo_multimodal", "sets_finales", "scaler.pkl")
 model, scaler = None, None
@@ -40,7 +39,7 @@ class ForecastInput(BaseModel):
     om_pressure_msl_mean: float
     latitude: float
     longitude: float
-    # ... y cualquier otra variable que el back-end obtenga del pronóstico de Open-Meteo
+    # Y cualquier otra de las features que el back-end obtenga de un pronóstico
 
 # --- 4. Funciones Auxiliares ---
 def procesar_imagen_api(ruta_archivo_nc):
@@ -56,14 +55,13 @@ def procesar_imagen_api(ruta_archivo_nc):
     recorte_normalizado = (recorte_redimensionado - np.nanmin(recorte_redimensionado)) / (np.nanmax(recorte_redimensionado) - np.nanmin(recorte_redimensionado) + 1e-6)
     return np.nan_to_num(recorte_normalizado)
 
-# --- 5. El Endpoint de Predicción REAL (con verificación de imagen) ---
+# --- 5. Endpoint de Predicción Definitivo ---
 @app.post("/predict")
 def predict_hail(forecast_input: ForecastInput):
     if not model or not scaler:
         raise HTTPException(status_code=503, detail="Modelo no está disponible en este momento.")
 
-    # --- A. Preparar Datos Tabulares ---
-    # ... (esta parte no cambia) ...
+    # A. Preparar Datos Tabulares
     df_input = pd.DataFrame([forecast_input.dict()])
     now = datetime.now()
     df_input['date'] = pd.to_datetime(now)
@@ -77,17 +75,19 @@ def predict_hail(forecast_input: ForecastInput):
     df_input = df_input[expected_features]
     X_tabular_scaled = scaler.transform(df_input)
 
-    # --- B. Descargar y Procesar la Imagen Satelital (con Fallback) ---
+    # B. Descargar y Procesar la Imagen Satelital más Reciente
     key_archivo_real = None
-    ruta_imagen_a_procesar = ""
     try:
         s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
         now_utc = datetime.now(timezone.utc)
         
-        for i in range(4):
+        # === CAMBIO CLAVE: Apuntamos al satélite más nuevo ===
+        bucket_name = 'noaa-goes19'
+
+        for i in range(4): # Revisa la hora actual y las 3 anteriores
             hora_a_buscar = now_utc - timedelta(hours=i)
             prefix = f"ABI-L2-CMIPF/{hora_a_buscar.year}/{hora_a_buscar.timetuple().tm_yday:03d}/{hora_a_buscar.hour:02d}/"
-            response = s3.list_objects_v2(Bucket='noaa-goes16', Prefix=prefix)
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
             if 'Contents' in response:
                 for file in reversed(response['Contents']):
                     if 'C13' in file['Key']:
@@ -97,34 +97,25 @@ def predict_hail(forecast_input: ForecastInput):
                 break
         
         if not key_archivo_real:
-            # Si NO encontramos imagen en tiempo real, usamos una de muestra
-            print("AVISO: No se encontró imagen en tiempo real. Usando imagen de muestra.")
-            ruta_imagen_a_procesar = os.path.join("..", "..", "data", "raw", "imagenes_satelitales_muestra", "2021-02-17_granizo", "2021-02-17_2000_UTC_C13.nc")
-            if not os.path.exists(ruta_imagen_a_procesar):
-                raise HTTPException(status_code=500, detail="No se encontró ni imagen en tiempo real ni la de muestra.")
-        else:
-            # Si SÍ encontramos imagen, la descargamos
-            print(f"✅ Imagen en tiempo real encontrada: {key_archivo_real}")
-            nombre_archivo_temp = "temp_image.nc"
-            s3.download_file('noaa-goes16', key_archivo_real, nombre_archivo_temp)
-            ruta_imagen_a_procesar = nombre_archivo_temp
+             raise HTTPException(status_code=404, detail=f"No se encontró imagen satelital en las últimas 4 horas en el satélite {bucket_name}.")
 
-        imagen_procesada = procesar_imagen_api(ruta_imagen_a_procesar)
+        nombre_archivo_temp = "temp_image.nc"
+        s3.download_file(bucket_name, key_archivo_real, nombre_archivo_temp)
+        imagen_procesada = procesar_imagen_api(nombre_archivo_temp)
         X_image_input = np.stack([imagen_procesada] * 5, axis=-1)
         X_image_input = np.expand_dims(X_image_input, axis=0)
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener/procesar imagen: {str(e)}")
 
-    # --- C. Hacer la Predicción ---
+    # C. Hacer la Predicción
     prediccion_prob = model.predict([X_tabular_scaled, X_image_input])[0][0]
 
-    # --- D. Devolver el Resultado ---
+    # D. Devolver el Resultado
     UMBRAL_OPTIMO = 0.56
     return {
         "probabilidad_granizo": float(prediccion_prob),
         "umbral_aplicado": UMBRAL_OPTIMO,
         "alerta_sugerida": "Sí" if prediccion_prob > UMBRAL_OPTIMO else "No",
-        "timestamp_prediccion_utc": datetime.now(timezone.utc).isoformat(),
-        "fuente_imagen_utilizada": key_archivo_real if key_archivo_real else "Muestra local por falta de datos en tiempo real"
+        "timestamp_prediccion_utc": now_utc.isoformat(),
+        "fuente_imagen_utilizada": key_archivo_real
     }
