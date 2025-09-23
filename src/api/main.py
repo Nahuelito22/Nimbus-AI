@@ -63,49 +63,53 @@ def predict_hail(forecast_input: ForecastInput):
         raise HTTPException(status_code=503, detail="Modelo no está disponible en este momento.")
 
     # --- A. Preparar Datos Tabulares ---
+    # ... (esta parte no cambia) ...
     df_input = pd.DataFrame([forecast_input.dict()])
     now = datetime.now()
     df_input['date'] = pd.to_datetime(now)
     df_input['mes'] = df_input['date'].dt.month
     df_input['dia_del_año'] = df_input['date'].dt.dayofyear
     df_input['rango_temp_diario'] = df_input['TMAX'] - df_input['TMIN']
-    
     expected_features = scaler.feature_names_in_
     for col in expected_features:
         if col not in df_input.columns:
             df_input[col] = 0.0
-
     df_input = df_input[expected_features]
     X_tabular_scaled = scaler.transform(df_input)
 
-    # --- B. Descargar y Procesar la Imagen Satelital más Reciente ---
-    key_archivo = None
+    # --- B. Descargar y Procesar la Imagen Satelital (con Fallback) ---
+    key_archivo_real = None
+    ruta_imagen_a_procesar = ""
     try:
         s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
         now_utc = datetime.now(timezone.utc)
         
-        # Buscamos la imagen más reciente (hasta 3 horas de antigüedad)
-        for i in range(4): # Revisa la hora actual y las 3 anteriores
+        for i in range(4):
             hora_a_buscar = now_utc - timedelta(hours=i)
             prefix = f"ABI-L2-CMIPF/{hora_a_buscar.year}/{hora_a_buscar.timetuple().tm_yday:03d}/{hora_a_buscar.hour:02d}/"
             response = s3.list_objects_v2(Bucket='noaa-goes16', Prefix=prefix)
-            
             if 'Contents' in response:
                 for file in reversed(response['Contents']):
                     if 'C13' in file['Key']:
-                        key_archivo = file['Key']
-                        print(f"✅ Imagen más reciente encontrada: {key_archivo}")
+                        key_archivo_real = file['Key']
                         break
-            if key_archivo:
+            if key_archivo_real:
                 break
         
-        if not key_archivo:
-            raise HTTPException(status_code=404, detail="No se encontró imagen satelital en las últimas 4 horas.")
+        if not key_archivo_real:
+            # Si NO encontramos imagen en tiempo real, usamos una de muestra
+            print("AVISO: No se encontró imagen en tiempo real. Usando imagen de muestra.")
+            ruta_imagen_a_procesar = os.path.join("..", "..", "data", "raw", "imagenes_satelitales_muestra", "2021-02-17_granizo", "2021-02-17_2000_UTC_C13.nc")
+            if not os.path.exists(ruta_imagen_a_procesar):
+                raise HTTPException(status_code=500, detail="No se encontró ni imagen en tiempo real ni la de muestra.")
+        else:
+            # Si SÍ encontramos imagen, la descargamos
+            print(f"✅ Imagen en tiempo real encontrada: {key_archivo_real}")
+            nombre_archivo_temp = "temp_image.nc"
+            s3.download_file('noaa-goes16', key_archivo_real, nombre_archivo_temp)
+            ruta_imagen_a_procesar = nombre_archivo_temp
 
-        nombre_archivo_temp = "temp_image.nc"
-        s3.download_file('noaa-goes16', key_archivo, nombre_archivo_temp)
-        
-        imagen_procesada = procesar_imagen_api(nombre_archivo_temp)
+        imagen_procesada = procesar_imagen_api(ruta_imagen_a_procesar)
         X_image_input = np.stack([imagen_procesada] * 5, axis=-1)
         X_image_input = np.expand_dims(X_image_input, axis=0)
 
@@ -115,14 +119,12 @@ def predict_hail(forecast_input: ForecastInput):
     # --- C. Hacer la Predicción ---
     prediccion_prob = model.predict([X_tabular_scaled, X_image_input])[0][0]
 
-    # --- D. Devolver el Resultado (con la fuente de la imagen) ---
+    # --- D. Devolver el Resultado ---
     UMBRAL_OPTIMO = 0.56
     return {
         "probabilidad_granizo": float(prediccion_prob),
         "umbral_aplicado": UMBRAL_OPTIMO,
-        # === CORRECCIÓN AQUÍ ===
-        # Añadimos 'else "No"' para completar la condición
         "alerta_sugerida": "Sí" if prediccion_prob > UMBRAL_OPTIMO else "No",
         "timestamp_prediccion_utc": datetime.now(timezone.utc).isoformat(),
-        "fuente_imagen_utilizada": key_archivo
+        "fuente_imagen_utilizada": key_archivo_real if key_archivo_real else "Muestra local por falta de datos en tiempo real"
     }
