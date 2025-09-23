@@ -1,6 +1,15 @@
+---
+title: Nimbus AI - Predictor de Granizo
+emoji: ⛈️
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+---
+
 # Nimbus AI 🌩️
 
-![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellowgreen)
+![Estado](https://img.shields.io/badge/estado-Modelo%20V3.1%20Optimizado-brightgreen)
 
 ## Descripción del Proyecto
 
@@ -15,31 +24,26 @@ El granizo representa una amenaza significativa en regiones agrícolas como Mend
 ### La Solución
 
 Nimbus AI propone una solución proactiva:
-- **Modelo Multimodal:** Fusiona datos numéricos (temperatura, humedad, CAPE) con datos visuales (imágenes satelitales) para una predicción más robusta.
-- **Salida Probabilística:** En lugar de un simple "Sí/No", el sistema entrega una probabilidad de granizo, permitiendo a los usuarios tomar decisiones basadas en su propio nivel de riesgo.
-- **Plataforma Accesible:** La predicción se entregará a través de una aplicación móvil intuitiva.
+- **Modelo Multimodal:** Fusiona datos numéricos (temperatura, humedad, viento) con datos visuales (imágenes satelitales) para una predicción más robusta.
+- **Salida Probabilística:** Entrega una probabilidad de granizo, permitiendo a los usuarios tomar decisiones basadas en su propio nivel de riesgo.
+- **Plataforma Accesible:** La predicción está diseñada para ser consumida por una aplicación a través de esta API.
 
 ---
 
 ### Tech Stack
 
-- **Data Science:** Python, Pandas, TensorFlow/Keras, Scikit-learn, Plotly
-- **Backend:** (A definir, ej. FastAPI/Flask, PostgreSQL)
-- **Frontend:** (A definir, ej. React Native/Flutter)
+- **Data Science:** Python, Pandas, TensorFlow/Keras, Scikit-learn, Xarray, Plotly
+- **Despliegue:** FastAPI, Docker, Hugging Face Spaces
 
 ---
 
 ### Equipo y Roles
 
-- **Data Science & Model Lead:** Nahuel Ghilardi  
-- **Backend & Frontend Development:** Nahuel Ghilardi, Gustavo Garcia  
+- **Data Science & Model Lead:** Nahuel Ghilardi
+- **Backend Development:** Nahuel Ghilardi, Gustavo Garcia
 
 ---
 
 ### Estado Actual
 
-Actualmente, el proyecto se encuentra en la fase de **recolección de datos y desarrollo del modelo de predicción inicial (MVP)**.
-
----
-
-> Nota: Se actualizó la sección de equipo para reflejar los roles activos.  
+El proyecto ha completado el ciclo de desarrollo del **Modelo V3.1**, un modelo multimodal optimizado que está listo para ser desplegado a través de esta API. La fase actual es la de **despliegue en producción**.
