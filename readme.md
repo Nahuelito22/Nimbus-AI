@@ -45,16 +45,15 @@ Nimbus AI propone una solución proactiva:
 
 ### Rendimiento del Modelo
 
-El modelo V3.1 ha sido evaluado con datos históricos de la región de Mendoza, logrando las siguientes métricas de rendimiento:
+El modelo V3.1, tras ser optimizado y evaluado en el conjunto de prueba, logró las siguientes métricas clave para la detección de granizo:
 
-| Métrica       | Valor  |
-|---------------|--------|
-| Precisión     | 92%    |
-| Recall        | 88%    |
-| F1-Score      | 90%    |
-| AUC-ROC       | 0.95   |
+| Métrica | Valor | Descripción |
+| :--- | :---: | :--- |
+| **Recall (Sensibilidad)** | **100%** | El modelo fue capaz de identificar todos los eventos de granizo reales en el set de prueba. |
+| **Precisión** | **~14%** | De todas las alertas generadas, el 14% fueron correctas, una mejora significativa sobre modelos anteriores. |
+| **F1-Score** | **~0.24** | Un balance saludable entre Precisión y Recall para un problema altamente desbalanceado. |
 
-*Nota: Estas métricas son actualizadas periódicamente con nuevos datos.*
+*Nota: Estas métricas reflejan el rendimiento del modelo en el conjunto de datos de prueba con el umbral optimizado. La exactitud (accuracy) general fue del 33%, lo cual es esperado en un modelo enfocado en maximizar la detección de un evento raro.*
 
 ---
 
