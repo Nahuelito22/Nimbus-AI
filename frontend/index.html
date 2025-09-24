@@ -1,42 +1,264 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <title>Nimbus noticias</title>
-    <nav>
-        <a href="" data-cat="general">General</a>
-        <a href="" data-cat="deportes">Deportes</a>
-        <a href="" data-cat="clima">Clima</a>
-        <a href="" data-cat="politica">Politica</a>
-        <a href="" data-cat="economia">Economia</a>
-    </nav>
-
+    <title>Nimbus AI - Alerta de Granizo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="css/tailwind.min.css">
 </head>
-
-<body class="d-flex flex-column min-vh-100">
-
-    <header class="bg-light py-3 text-center">
-        <h1 id="titulo-principal" class="fw-bold text-primary">Hola, esto es el clima de nimbus AI</h1>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-blue-900 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="images/logo.png" alt="Logo" class="h-10 w-10">
+                <h1 class="text-xl font-bold">Nimbus AI</h1>
+            </div>
+            <nav id="nav-menu" class="hidden md:flex space-x-6">
+                <a href="#" class="hover:text-blue-300">Inicio</a>
+                <a href="#" class="hover:text-blue-300">Noticias</a>
+                <a href="#" class="hover:text-blue-300">Radar</a>
+                <a href="#" class="hover:text-blue-300">Perfil</a>
+                <button id="logout-btn" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Salir</button>
+            </nav>
+            <button id="mobile-menu-btn" class="md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
     </header>
 
-    <main class="flex-grow-1 container my-4">
-        <h2 class="mb-3">Noticias recientes</h2>
-        <div class="container-fluid px-3">
-            <div id="noticias-container" class="row g-3 mx-0">
-                <!-- Las noticias se insertan aquí desde app.js -->
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Login/Register Section -->
+        <section id="auth-section" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="email">Email</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="password">Contraseña</label>
+                    <input type="password" id="password" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="role">Rol</label>
+                    <select id="role" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="user">Usuario Común</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition">Iniciar Sesión</button>
+            </form>
+            <div class="mt-4 text-center">
+                <p>¿No tienes cuenta? <a href="#" id="register-link" class="text-blue-600 hover:underline">Regístrate</a></p>
             </div>
-        </div>
+        </section>
+
+        <!-- Dashboard Section (User) -->
+        <section id="user-dashboard" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Map Section -->
+                <div class="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Mapa de Mendoza</h2>
+                    <div id="map" class="h-96 rounded-lg"></div>
+                    <div class="mt-4 flex justify-center">
+                        <button id="predict-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition">
+                            Predecir Granizo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prediction Results -->
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Resultado de Predicción</h2>
+                    <div class="text-center">
+                        <div class="relative w-48 h-48 mx-auto mb-4">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <!-- Gauge background -->
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="10" />
+                                <!-- Gauge progress -->
+                                <circle id="gauge-progress" cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="10"
+                                    stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round"
+                                    transform="rotate(-90 50 50)" />
+                                <!-- Center circle -->
+                                <circle cx="50" cy="50" r="30" fill="#f9fafb" />
+                                <!-- Percentage text -->
+                                <text x="50" y="50" text-anchor="middle" dy="7" font-size="16" font-weight="bold" id="percentage-text">0%</text>
+                            </svg>
+                        </div>
+                        <div id="alert-box" class="p-3 rounded-md bg-gray-100">
+                            <p class="font-semibold">Alerta Sugerida: <span id="alert-status">Esperando predicción...</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Section -->
+            <div class="mt-6 bg-white p-4 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4">Noticias Meteorológicas</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- News Item 1 -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition">
+                        <h3 class="font-bold text-lg mb-2">Tormentas severas en el este de Mendoza</h3>
+                        <p class="text-gray-600 mb-3">Se esperan fuertes lluvias y posible granizo en las próximas horas...</p>
+                        <a href="#" class="text-blue-600 hover:underline">Leer más</a>
+                    </div>
+                    <!-- News Item 2 -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition">
+                        <h3 class="font-bold text-lg mb-2">Nueva tecnología en predicción de granizo</h3>
+                        <p class="text-gray-600 mb-3">Científicos desarrollan modelos más precisos para predecir granizo...</p>
+                        <a href="#" class="text-blue-600 hover:underline">Leer más</a>
+                    </div>
+                    <!-- News Item 3 -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition">
+                        <h3 class="font-bold text-lg mb-2">Recomendaciones para agricultores</h3>
+                        <p class="text-gray-600 mb-3">Medidas preventivas para proteger cultivos ante tormentas de granizo...</p>
+                        <a href="#" class="text-blue-600 hover:underline">Leer más</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radar Section -->
+            <div class="mt-6 bg-white p-4 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4">Radar Satelital GOES-19</h2>
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Banda:</label>
+                        <select id="band-select" class="px-3 py-2 border rounded-md">
+                            <option value="13">Banda 13 (Infrarroja)</option>
+                            <option value="2">Banda 2 (Visible)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Paleta de colores:</label>
+                        <select id="palette-select" class="px-3 py-2 border rounded-md">
+                            <option value="inferno">Inferno</option>
+                            <option value="viridis">Viridis</option>
+                            <option value="plasma">Plasma</option>
+                        </select>
+                    </div>
+                    <button id="refresh-radar" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                        Actualizar
+                    </button>
+                </div>
+                <div class="border rounded-lg overflow-hidden">
+                    <img id="radar-image" src="https://example.com/radar-image.jpg" alt="Radar GOES-19" class="w-full h-auto">
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard -->
+        <section id="admin-dashboard" class="hidden">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-6">Panel de Administración</h2>
+                
+                <!-- User Management -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4">Gestión de Usuarios</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-4 border-b">ID</th>
+                                    <th class="py-2 px-4 border-b">Nombre</th>
+                                    <th class="py-2 px-4 border-b">Email</th>
+                                    <th class="py-2 px-4 border-b">Rol</th>
+                                    <th class="py-2 px-4 border-b">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-2 px-4 border-b">1</td>
+                                    <td class="py-2 px-4 border-b">Juan Pérez</td>
+                                    <td class="py-2 px-4 border-b">juan@example.com</td>
+                                    <td class="py-2 px-4 border-b">Usuario Común</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <button class="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-4 border-b">2</td>
+                                    <td class="py-2 px-4 border-b">María García</td>
+                                    <td class="py-2 px-4 border-b">maria@example.com</td>
+                                    <td class="py-2 px-4 border-b">Agricultor</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <button class="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+                        + Agregar Usuario
+                    </button>
+                </div>
+
+                <!-- System Settings -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Configuración del Sistema</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Umbral de Alerta (%)</label>
+                            <input type="number" min="0" max="100" value="70" class="w-full px-3 py-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Frecuencia de Actualización (min)</label>
+                            <input type="number" min="5" max="60" value="15" class="w-full px-3 py-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Fuente de Datos</label>
+                            <select class="w-full px-3 py-2 border rounded-md">
+                                <option>NOAA + ERA5</option>
+                                <option>OpenWeather</option>
+                                <option>SMN Argentina</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Estado del Modelo</label>
+                            <div class="flex items-center">
+                                <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                <span>Activo y funcionando</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                        Guardar Configuración
+                    </button>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
-        <small>© 2025 Nimbus</small>
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white py-6 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-bold">Nimbus AI</h3>
+                    <p class="text-blue-200">Sistema de Alerta Temprana de Granizo</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-blue-300">Términos</a>
+                    <a href="#" class="hover:text-blue-300">Privacidad</a>
+                    <a href="#" class="hover:text-blue-300">Contacto</a>
+                </div>
+            </div>
+            <div class="mt-4 text-center text-blue-200 text-sm">
+                © 2023 Nimbus AI. Todos los derechos reservados.
+            </div>
+        </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="../frontend/main.js"></script>
+    <script src="../frontend/map.js"></script>
+    <script src="../frontend/auth.js"></script>
 </body>
-
 </html>
