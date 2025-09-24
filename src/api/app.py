@@ -3,8 +3,10 @@ from src.api.clima import get_clima
 from src.services.news_service import get_news, format_news, get_news_safe
 from src.config import Config
 from src.api.meteo import get_weather_by_coords,get_clima_by_ip,get_clima_ciudad
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config['JSON_AS_ASCII'] = False  # ← AGREGA ESTA LÍNEA IMPORTANTE
 
 @app.route('/api/clima/<city_name>', methods=['GET'])

@@ -1,0 +1,21 @@
+/* Reset útil */
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+body { overflow-x: hidden; }
+
+/* Estilos para las cards más compactas */
+.card-sm {
+  max-height: 220px;
+  overflow: hidden;
+}
+
+.card-sm .card-body {
+  padding: 0.75rem;
+}
+
+/* Asegurar quiebre de palabras largas */
+.card-title, .card-text {
+  word-wrap: break-word;
+  word-break: break-word;
+}
