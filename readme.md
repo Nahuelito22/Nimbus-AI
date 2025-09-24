@@ -9,11 +9,23 @@ app_port: 7860
 
 # Nimbus AI 🌩️
 
-![Estado](https://img.shields.io/badge/estado-Modelo%20V3.1%20Optimizado-brightgreen)
+![Estado](https://img.shields.io/badge/estado-Desplegado%20en%20Producción-success)
+![Versión](https://img.shields.io/badge/modelo-V3.1%20Multimodal-blue)
 
 ## Descripción del Proyecto
 
 **Nimbus AI** es un sistema de alerta temprana de granizo basado en un modelo de machine learning multimodal. El objetivo es predecir la probabilidad de eventos de granizo combinando datos meteorológicos tabulares con el análisis de imágenes satelitales, proveyendo a los usuarios una herramienta precisa para la prevención de daños.
+
+---
+
+### API Desplegada
+
+El modelo V3.1 está actualmente desplegado y accesible a través de los siguientes endpoints:
+
+- **Documentación Interactiva (Swagger UI):** [https://nahuelito22-nimbus-ai.hf.space/api/docs](https://nahuelito22-nimbus-ai.hf.space/api/docs)
+- **Documentación Alternativa (Redoc):** [https://nahuelito22-nimbus-ai.hf.space/api/redoc](https://nahuelito22-nimbus-ai.hf.space/api/redoc)
+- **Health Check (Estado del Servicio):** [https://nahuelito22-nimbus-ai.hf.space/api/health](https://nahuelito22-nimbus-ai.hf.space/api/health)
+- **OpenAPI Schema (JSON):** [https://nahuelito22-nimbus-ai.hf.space/api/openapi.json](https://nahuelito22-nimbus-ai.hf.space/api/openapi.json)
 
 ---
 
@@ -46,4 +58,4 @@ Nimbus AI propone una solución proactiva:
 
 ### Estado Actual
 
-El proyecto ha completado el ciclo de desarrollo del **Modelo V3.1**, un modelo multimodal optimizado que está listo para ser desplegado a través de esta API. La fase actual es la de **despliegue en producción**.
+El proyecto ha completado el ciclo de desarrollo y optimización del **Modelo V3.1**, y la API se encuentra **desplegada y operativa** en Hugging Face Spaces.
