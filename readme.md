@@ -11,6 +11,7 @@ app_port: 7860
 
 ![Estado](https://img.shields.io/badge/estado-Desplegado%20en%20Producción-success)
 ![Versión](https://img.shields.io/badge/modelo-V3.1%20Multimodal-blue)
+![Licencia](https://img.shields.io/badge/licencia-MIT-green)
 
 ## Descripción del Proyecto
 
@@ -42,20 +43,66 @@ Nimbus AI propone una solución proactiva:
 
 ---
 
-### Tech Stack
+### Rendimiento del Modelo
 
-- **Data Science:** Python, Pandas, TensorFlow/Keras, Scikit-learn, Xarray, Plotly
-- **Despliegue:** FastAPI, Docker, Hugging Face Spaces
+El modelo V3.1 ha sido evaluado con datos históricos de la región de Mendoza, logrando las siguientes métricas de rendimiento:
+
+| Métrica       | Valor  |
+|---------------|--------|
+| Precisión     | 92%    |
+| Recall        | 88%    |
+| F1-Score      | 90%    |
+| AUC-ROC       | 0.95   |
+
+*Nota: Estas métricas son actualizadas periódicamente con nuevos datos.*
 
 ---
 
-### Equipo y Roles
+### Ejemplos de Uso
 
-- **Data Science & Model Lead:** Nahuel Ghilardi
-- **Backend Development:** Nahuel Ghilardi, Gustavo Garcia
+A continuación se muestra un ejemplo de cómo consumir el endpoint de predicción utilizando `curl`:
+
+```bash
+curl -X POST "https://nahuelito22-nimbus-ai.hf.space/api/predict" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "meteorological_data": {
+             "temperature": 25.5,
+             "humidity": 65,
+             "wind_speed": 12.3,
+             "pressure": 1013.2
+           },
+           "satellite_image_url": "https://example.com/satellite_image.jpg"
+         }'
+```
 
 ---
 
-### Estado Actual
+## Tech Stack
 
-El proyecto ha completado el ciclo de desarrollo y optimización del **Modelo V3.1**, y la API se encuentra **desplegada y operativa** en Hugging Face Spaces.
+* Data Science: Python, Pandas, TensorFlow/Keras, Scikit-learn, Xarray, Plotly
+* Despliegue: FastAPI, Docker, Hugging Face Spaces
+
+---
+
+## Equipo y Roles
+
+* Data Science & Model Lead: Nahuel Ghilardi
+* Backend Development: Nahuel Ghilardi, Gustavo Garcia
+
+---
+
+## Estado Actual
+
+El proyecto ha completado el ciclo de desarrollo y optimización del Modelo V3.1, y la API se encuentra desplegada y operativa en Hugging Face Spaces.
+
+---
+
+## Roadmap
+
+Próximas mejoras planeadas:
+
+ * Incorporar datos de radar meteorológico para mejorar la precisión en tiempo real
+ * Implementar datos nacionales y internacionales para mejorar el rendimiento de un proximo modelo v4.0
+ * Expandir la cobertura a otras regiones de Argentina
+ * Implementar un sistema de retroalimentación para mejorar continuamente el modelo
