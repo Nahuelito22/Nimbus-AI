@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Importar Link
+import { Link } from 'react-router-dom';
+import { loginUser } from '../api/auth'; // Importar el nuevo servicio
 
 function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -9,29 +10,14 @@ function LoginPage({ onLogin }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError(null); // Limpiar errores previos
+    setError(null);
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      // Usar la función del servicio en lugar de fetch
+      const data = await loginUser({ email, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.msg || 'Error al iniciar sesión. Por favor, verifica tus credenciales.');
-      }
-
-      // Si el login es exitoso, el backend nos da un token.
-      // En un futuro, decodificaremos el token para obtener el rol.
-      // Por ahora, confiamos en el rol seleccionado en el formulario para la redirección.
       console.log("Token recibido del backend:", data.access_token);
       
-      // Llamamos a onLogin con los datos para que App.jsx actualice el estado.
       onLogin({ email, role, token: data.access_token });
 
     } catch (err) {

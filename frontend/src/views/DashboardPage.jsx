@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { getHailPrediction } from '../api/predictions';
+import { getSatelliteImage } from '../api/satellite';
 
 // --- Corrección del ícono de Leaflet ---
 delete L.Icon.Default.prototype._getIconUrl;
@@ -72,12 +74,7 @@ function DashboardPage() {
     setError(null);
     setPrediction(null);
     try {
-      const response = await fetch(`http://localhost:5000/api/main-prediction?lat=${coords.lat}&lon=${coords.lon}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Error del servidor: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await getHailPrediction(coords);
       setPrediction(data);
     } catch (err) {
       setError(err.message);
@@ -103,12 +100,7 @@ function DashboardPage() {
     setRadarIsLoading(true);
     setRadarError(null);
     try {
-      const response = await fetch(`http://localhost:5000/api/satellite-image?band=${band}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'No se pudo cargar la imagen del radar.');
-      }
-      const data = await response.json();
+      const data = await getSatelliteImage(band);
       setRadarImageUrl(data.url);
     } catch (err) {
       setRadarError(err.message);

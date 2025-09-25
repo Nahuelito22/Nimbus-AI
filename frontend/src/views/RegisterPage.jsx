@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { registerUser } from '../api/auth'; // Importar el nuevo servicio
 
 function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -14,23 +15,11 @@ function RegisterPage() {
     setSuccess(null);
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.msg || 'Error al registrar el usuario.');
-      }
+      // Usar la función del servicio en lugar de fetch
+      await registerUser({ email, password });
 
       setSuccess('¡Usuario creado exitosamente! Redirigiendo al login...');
       
-      // Espera 2 segundos y redirige al login
       setTimeout(() => {
         navigate('/login');
       }, 2000);
