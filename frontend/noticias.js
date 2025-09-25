@@ -97,7 +97,7 @@ async function cargarNoticias(categoria = 'general') {
     
     // 12. ACTUALIZAR TÍTULO PRINCIPAL DE LA PÁGINA
     const tituloCategoria = categoria.charAt(0).toUpperCase() + categoria.slice(1);
-    document.getElementById('titulo-principal').textContent = `Noticias de ${tituloCategoria}`;
+    document.getElementById('titulo-principal').textContent = `Noticias ${tituloCategoria}`;
     
     // 13. ACTUALIZAR ESTADO ACTIVO DE LOS BOTONES DEL NAV
     actualizarCategoriaActiva(categoria);
@@ -146,27 +146,23 @@ function actualizarCategoriaActiva(categoriaActiva) {
 document.addEventListener("DOMContentLoaded", () => {
   console.log("🚀 Nimbus News - Página cargada correctamente");
   
-  // 1. CARGAR NOTICIAS GENERALES AL INICIAR
   cargarNoticias('general');
   
-  // 2. CONFIGURAR EVENTOS PARA LOS ENLACES DEL NAVBAR
   const enlacesNav = document.querySelectorAll('nav a');
   
   enlacesNav.forEach(enlace => {
-    enlace.addEventListener('click', (event) => {
-      // 3. PREVENIR COMPORTAMIENTO POR DEFECTO DEL ENLACE
-      event.preventDefault();
-      
-      // 4. OBTENER CATEGORÍA DEL ATRIBUTO data-cat
-      const categoria = enlace.getAttribute('data-cat');
-      
-      // 5. CARGAR NOTICIAS DE LA CATEGORÍA SELECCIONADA
-      if (categoria) {
-        console.log(`📂 Cargando categoría: ${categoria}`);
-        cargarNoticias(categoria);
-      }
-    });
+      enlace.addEventListener('click', (event) => {
+          // SOLO prevenir enlaces de categorías (con data-cat)
+          if (enlace.hasAttribute('data-cat')) {
+              event.preventDefault();
+              const categoria = enlace.getAttribute('data-cat');
+              console.log(`📂 Cargando categoría: ${categoria}`);
+              cargarNoticias(categoria);
+          }
+          // Los enlaces normales (como "clima.html") navegan normalmente
+      });
   });
+
   
   // 6. MENSAJE DE CONFIRMACIÓN EN CONSOLA
   console.log("✅ Event listeners configurados correctamente");
