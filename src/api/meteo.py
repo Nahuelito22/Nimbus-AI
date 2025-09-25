@@ -41,35 +41,31 @@ def geocode_city(city_name):
 
 def get_weather_by_coords(lat, lon):
     """
-    Obtiene el pronóstico del tiempo para unas coordenadas específicas.
-    Args:
-        lat: Latitud
-        lon: Longitud
-    Returns:
-        Diccionario con información del clima o error si falla
+    Obtiene el pronóstico del tiempo para unas coordenadas específicas,
+    solicitando las variables diarias y horarias necesarias para el modelo de predicción.
     """
     params = {
         "latitude": lat,
         "longitude": lon,
-        "current_weather": True,  # Solicita datos del clima actual
-        "timezone": "auto"  # Detecta la zona horaria automáticamente
+        "daily": [
+            "weather_code", "temperature_2m_max", "temperature_2m_min",
+            "precipitation_sum", "rain_sum", "snowfall_sum", "precipitation_hours",
+            "wind_gusts_10m_max", "wind_direction_10m_dominant",
+            "shortwave_radiation_sum", "et0_fao_evapotranspiration"
+        ],
+        "hourly": [
+            "dew_point_2m", "relative_humidity_2m", "pressure_msl"
+        ],
+        "timezone": "auto",
+        "forecast_days": 1
     }
-    # ELIMINADO: parámetros hourly_fields ya que solo queremos datos actuales
     
-    j = _get_json(WEATHER_URL, params=params)  # Obtiene datos del clima
-    if "error" in j:  # Si hubo error
+    j = _get_json(WEATHER_URL, params=params)
+    if "error" in j:
         return {"error": j["error"]}
     
-    resp = {  # Construye respuesta con los datos más importantes
-        "latitude": j.get("latitude"),
-        "longitude": j.get("longitude"),
-        "timezone": j.get("timezone"),
-        "current_weather": j.get("current_weather")  # Datos del clima actual (temperatura, viento, etc.)
-    }
-    
-    # ELIMINADO: filtrado de datos horarios ya que no los solicitamos
-    
-    return resp
+    # La respuesta ahora contiene 'daily' y 'hourly' que serán procesados por el orquestador
+    return j
 
 def get_clima_ciudad(city_name):
     """

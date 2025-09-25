@@ -83,6 +83,37 @@ def login():
         return jsonify({"msg": "Email o contraseña incorrectos"}), 401
 
 
+# --- RUTA DE ORQUESTACIÓN PRINCIPAL ---
+
+from src.api.orchestration import get_hail_prediction
+
+@app.route('/api/main-prediction', methods=['GET'])
+def main_prediction():
+    """
+    Endpoint de orquestación principal.
+    Recibe lat y lon, obtiene datos de clima, llama al modelo de ML y devuelve la predicción.
+    """
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+
+    if not lat or not lon:
+        return jsonify({"error": "Se requieren los parámetros 'lat' y 'lon'"}), 400
+
+    try:
+        # Llama a la función orquestadora
+        result = get_hail_prediction(float(lat), float(lon))
+        
+        if "error" in result:
+            # Si el orquestador devuelve un error (ej: de la API de HF), lo pasamos al cliente
+            return jsonify(result), 500
+
+        return jsonify(result)
+
+    except Exception as e:
+        # Captura cualquier otro error inesperado durante el proceso
+        return jsonify({"error": f"Ocurrió un error interno en el servidor: {e}"}), 500
+
+
 # --- RUTAS EXISTENTES (se mantienen sin cambios) ---
 
 @app.route('/api/clima/<city_name>', methods=['GET'])
