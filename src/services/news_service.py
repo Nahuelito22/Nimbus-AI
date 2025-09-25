@@ -9,60 +9,48 @@ cache_timeout = 300  # 5 minutos en segundos
 
 def get_news(category='general', limit=5):
     """
-    Obtiene noticias de forma eficiente respetando los límites de la API
+    Obtiene noticias de NewsAPI.org de forma eficiente.
     """
-    # Verificar cache primero
     cache_key = f"{category}_{limit}"
     current_time = time.time()
     
     if cache_key in news_cache:
         cached_data, timestamp = news_cache[cache_key]
         if current_time - timestamp < cache_timeout:
-            print(f"✅ Usando cache para {category}")
+            print(f"✅ Usando cache para noticias de {category}")
             return cached_data
-    
-    # Parámetros optimizados para ahorrar créditos
-    params = {
-        'apikey': Config.NEWSDATA_API_KEY,
-        'language': 'es',
-        'country': 'ar',  # Solo Argentina
-        'size': min(limit, 5),  # Máximo 5 noticias por request
-        'prioritydomain': 'top'  # Noticias más importantes primero
-    }
-    
-    # Búsquedas específicas pero eficientes
+
+    # Mapeo de categorías a queries de búsqueda para NewsAPI
     search_queries = {
-        'general': 'Argentina OR Mendoza',
-        'deportes': 'fútbol OR deportes',
-        'clima': 'clima OR meteorología',
-        'politica': 'política OR gobierno',
-        'economia': 'economía OR negocios'
+        'clima': '(clima OR meteorología OR granizo) AND (Mendoza OR Argentina)',
+        'general': 'Argentina',
+        # Agrega otras categorías si es necesario
     }
-    
-    params['q'] = search_queries.get(category, 'Argentina')
+
+    params = {
+        'apiKey': Config.NEWSAPI_KEY,
+        'q': search_queries.get(category, 'Argentina'),
+        'language': 'es',
+        'pageSize': min(limit, 100), # NewsAPI usa pageSize, max 100
+        'sortBy': 'publishedAt', # Ordenar por más recientes
+    }
     
     try:
-        print(f"📡 Solicitando {min(limit, 5)} noticias de {category}...")
-        response = requests.get(Config.NEWSDATA_URL, params=params)
+        print(f"📡 Solicitando {params['pageSize']} noticias de '{params['q']}' a NewsAPI.org...")
+        response = requests.get(Config.NEWSAPI_URL, params=params)
+        response.raise_for_status()  # Lanza un error para respuestas 4xx/5xx
         
-        if response.status_code == 200:
-            data = response.json()
-            results = data.get('results', [])
-            
-            # Guardar en cache
-            news_cache[cache_key] = (results, current_time)
-            
-            return results[:limit]  # Limitar al número solicitado
-            
-        elif response.status_code == 429:
-            print("⚠️ Límite de requests alcanzado - Usando cache")
-            return []
-        else:
-            print(f"❌ Error API: {response.status_code}")
-            return []
+        data = response.json()
+        articles = data.get('articles', [])
+        
+        # Guardar en cache
+        news_cache[cache_key] = (articles, current_time)
+        
+        return articles
             
     except requests.exceptions.RequestException as e:
-        print(f"❌ Error de conexión: {str(e)}")
+        print(f"❌ Error de conexión o API: {str(e)}")
+        # En caso de error, podrías devolver un conjunto de noticias de ejemplo
         return []
 
 def format_news(news_data):
@@ -70,19 +58,18 @@ def format_news(news_data):
         return []
 
     formatted_news = []
-
-    for news in news_data:
+    for article in news_data:
         # Aplicamos la normalización para convertir caracteres combinantes a su forma simple
-        titulo = normalize_unicode(news.get('title', 'Sin título'))
-        descripcion = normalize_unicode(news.get('description', 'Sin descripción'))
+        titulo = normalize_unicode(article.get('title', 'Sin título'))
+        descripcion = normalize_unicode(article.get('description', 'Sin descripción'))
+        fuente = article.get('source', {}).get('name', 'Fuente desconocida')
 
         formatted_news.append({
             'titulo': titulo,
-            'descripcion': (descripcion[:100] + '...') if descripcion and descripcion != 'Sin descripción' else 'Sin descripción',
-            'fuente': news.get('source_id', 'Fuente desconocida'),
-            'fecha': news.get('pubDate', '').split('T')[0] if news.get('pubDate') else 'Fecha desconocida',
-            'url': news.get('link', '#'),
-            'categoria': news.get('category', ['general'])[0] if news.get('category') else 'general'
+            'descripcion': (descripcion[:150] + '...') if descripcion and descripcion != 'Sin descripción' else 'Sin descripción',
+            'fuente': fuente,
+            'fecha': article.get('publishedAt', '').split('T')[0] if article.get('publishedAt') else 'Fecha desconocida',
+            'url': article.get('url', '#'),
         })
 
     return formatted_news
@@ -90,16 +77,14 @@ def format_news(news_data):
 def normalize_unicode(text):
     """
     Normaliza el texto para convertir caracteres combinantes a su forma canónica.
-    Ejemplo: "o\u0301" -> "ó"
     """
     if not isinstance(text, str):
         return text
-    
-    # La forma NFKC es la más recomendada para compatibilidad
     return unicodedata.normalize('NFKC', text)
 
-def get_news_safe(category='general', limit=3):
+def get_news_safe(category='general', limit=5):
     """
-    Versión segura que siempre limita a máximo 3 noticias
+    Versión segura que obtiene noticias y las formatea.
     """
-    return get_news(category, min(limit, 3))
+    news_data = get_news(category, limit)
+    return format_news(news_data)

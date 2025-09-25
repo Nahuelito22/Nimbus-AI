@@ -7,7 +7,7 @@ load_dotenv()
 
 class Config:
     OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
-    NEWSDATA_API_KEY = os.getenv('NEWSDATA_API_KEY')
+    NEWSAPI_KEY = os.getenv('NEWSAPI_KEY')
     
     # Ciudades de Mendoza que vamos a monitorear
     CITIES = {
@@ -19,7 +19,7 @@ class Config:
         "rivadavia": {"id": 3838759, "name": "Rivadavia"} 
     }
     
-    NEWSDATA_URL = "https://newsdata.io/api/1/news"
+    NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
     # Clave secreta para firmar la sesión y los tokens JWT
     SECRET_KEY = os.getenv('SECRET_KEY', 'una-clave-secreta-muy-dificil-de-adivinar')
