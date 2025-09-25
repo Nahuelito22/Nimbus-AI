@@ -4,9 +4,8 @@ import numpy as np
 from src.api.meteo import get_weather_by_coords
 
 # =====================================================================================
-# !! IMPORTANTE !!
-# Reemplaza esta URL con la URL de tu API desplegada en Hugging Face Spaces.
-HUGGING_FACE_API_URL = "URL_DE_TU_API_EN_HUGGING_FACE_AQUI"
+# URL de la API de predicción en Hugging Face Spaces
+HUGGING_FACE_API_URL = "https://nahuelito22-nimbus-ai.hf.space/api/predict"
 # =====================================================================================
 
 def _transform_data_for_model(lat, lon, open_meteo_data):
