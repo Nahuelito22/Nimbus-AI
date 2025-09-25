@@ -22,3 +22,34 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Variables de entorno (muy importante para seguridad)
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+
+# Archivos de cobertura de pruebas
+coverage/
+.nyc_output/
+
+# Archivos de dependencias opcionales
+.eslintcache
+
+# Archivos de construcción
+build/
+
+# Archivos de configuración de herramientas
+.prettierrc
+.eslintrc.js
+
+# Archivos de caché
+.cache/
+.parcel-cache/
+
+# Archivos generados por TypeScript (si lo usas en el futuro)
+*.tsbuildinfo
