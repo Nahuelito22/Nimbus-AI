@@ -20,3 +20,12 @@ class Config:
     }
     
     NEWSDATA_URL = "https://newsdata.io/api/1/news"
+
+    # Clave secreta para firmar la sesión y los tokens JWT
+    SECRET_KEY = os.getenv('SECRET_KEY', 'una-clave-secreta-muy-dificil-de-adivinar')
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'otra-clave-secreta-para-jwt')
+
+    # Configuración de la base de datos
+    # Usa la variable de entorno DATABASE_URL si existe, si no, usa un archivo local sqlite.
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///nimbus.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

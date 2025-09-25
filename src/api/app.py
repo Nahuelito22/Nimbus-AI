@@ -1,13 +1,89 @@
+import sys
+import os
+
+# Añade el directorio raíz del proyecto al path de Python para que encuentre el módulo 'src'
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from flask import Flask, jsonify, request
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager, create_access_token
+
+# Se mantienen las importaciones de las rutas existentes
 from src.api.clima import get_clima
 from src.services.news_service import get_news, format_news, get_news_safe
-from src.config import Config
-from src.api.meteo import get_weather_by_coords,get_clima_by_ip,get_clima_ciudad
-from flask_cors import CORS
+from src.api.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
 
+# 1. Inicialización de la App y carga de configuración
 app = Flask(__name__)
+app.config.from_object('src.config.Config') # Carga la configuración desde config.py
+
+# 2. Inicialización de las extensiones
 CORS(app)
-app.config['JSON_AS_ASCII'] = False  # ← AGREGA ESTA LÍNEA IMPORTANTE
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
+
+# 3. Definición del Modelo de Datos (SQLAlchemy)
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(80), nullable=False, default='user')
+
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+# 4. Comando para inicializar la base de datos
+@app.cli.command("create-db")
+def create_db():
+    """Crea las tablas de la base de datos."""
+    db.create_all()
+    print("Base de datos y tablas creadas.")
+
+# 5. Rutas de Autenticación
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role', 'user')
+
+    if not email or not password:
+        return jsonify({"msg": "Email y contraseña son requeridos"}), 400
+
+    user_exists = User.query.filter_by(email=email).first()
+    if user_exists:
+        return jsonify({"msg": "El email ya está registrado"}), 400
+
+    password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+    new_user = User(email=email, password_hash=password_hash, role=role)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"msg": "Usuario creado exitosamente"}), 201
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({"msg": "Email y contraseña son requeridos"}), 400
+
+    user = User.query.filter_by(email=email).first()
+
+    if user and bcrypt.check_password_hash(user.password_hash, password):
+        additional_claims = {"role": user.role}
+        access_token = create_access_token(identity=user.email, additional_claims=additional_claims)
+        return jsonify(access_token=access_token), 200
+    else:
+        return jsonify({"msg": "Email o contraseña incorrectos"}), 401
+
+
+# --- RUTAS EXISTENTES (se mantienen sin cambios) ---
 
 @app.route('/api/clima/<city_name>', methods=['GET'])
 def get_weather(city_name):
@@ -23,8 +99,7 @@ def get_all_weather():
     Endpoint para obtener el clima de TODAS las ciudades configuradas
     """
     all_weather = {}
-    
-    for city_name in Config.CITIES:
+    for city_name in app.config['CITIES']:
         weather_data = get_clima(city_name)
         all_weather[city_name] = weather_data
     
@@ -57,7 +132,7 @@ def get_all_news():
     all_news = {}
     
     for category in categorias:
-        news_data = get_news_safe(category, limit=2)  # Solo 2 por categoría para no saturar
+        news_data = get_news_safe(category, limit=2)
         all_news[category] = format_news(news_data)
     
     return jsonify({
