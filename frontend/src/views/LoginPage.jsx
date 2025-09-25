@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Importar Link
 
 function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -90,7 +91,7 @@ function LoginPage({ onLogin }) {
           </button>
         </form>
         <div className="mt-4 text-center">
-          <p>¿No tienes cuenta? <a href="#" className="text-blue-600 hover:underline">Regístrate</a></p>
+          <p>¿No tienes cuenta? <Link to="/register" className="text-blue-600 hover:underline">Regístrate</Link></p>
         </div>
       </section>
     </div>

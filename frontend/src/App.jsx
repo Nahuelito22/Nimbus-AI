@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import DashboardPage from './views/DashboardPage';
 import LoginPage from './views/LoginPage';
+import RegisterPage from './views/RegisterPage'; // Importar la nueva página
 import AdminPage from './views/AdminPage';
 import Footer from './components/Footer';
 
@@ -33,6 +34,10 @@ function App() {
           <Route
             path="/"
             element={user ? <DashboardPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/register"
+            element={!user ? <RegisterPage /> : <Navigate to="/" />}
           />
           {/* AHORA, después de hacer login, en lugar de redirigir siempre a "/", usamos nuestro componente inteligente */}
           <Route
