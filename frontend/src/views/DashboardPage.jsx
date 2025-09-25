@@ -106,8 +106,54 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* El resto de la página (Noticias y Radar) se mantiene igual */}
-      {/* ... */}
+      {/* Grid para Noticias y Radar (Restaurado) */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Sección de Noticias */}
+        <div className="bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-xl font-bold mb-4">Noticias Meteorológicas</h2>
+            <div className="space-y-4">
+                <div className="border-b pb-4">
+                    <h3 className="font-bold text-lg mb-2">Tormentas severas en el este de Mendoza</h3>
+                    <p className="text-gray-600 mb-3 text-sm">Se esperan fuertes lluvias y posible granizo en las próximas horas...</p>
+                    <a href="#" className="text-blue-600 hover:underline text-sm font-semibold">Leer más</a>
+                </div>
+                <div>
+                    <h3 className="font-bold text-lg mb-2">Nueva tecnología en predicción de granizo</h3>
+                    <p className="text-gray-600 mb-3 text-sm">Científicos desarrollan modelos más precisos para predecir granizo...</p>
+                    <a href="#" className="text-blue-600 hover:underline text-sm font-semibold">Leer más</a>
+                </div>
+            </div>
+        </div>
+
+        {/* Sección de Radar */}
+        <div className="bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-xl font-bold mb-4">Radar Satelital GOES-19</h2>
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+                <div>
+                    <label className="block text-gray-700 mb-2 text-sm font-medium">Banda:</label>
+                    <select id="band-select" className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="13">Banda 13 (Infrarroja)</option>
+                        <option value="2">Banda 2 (Visible)</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-gray-700 mb-2 text-sm font-medium">Paleta:</label>
+                    <select id="palette-select" className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="inferno">Inferno</option>
+                        <option value="viridis">Viridis</option>
+                        <option value="plasma">Plasma</option>
+                    </select>
+                </div>
+                <button id="refresh-radar" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md self-end">
+                    Actualizar
+                </button>
+            </div>
+            <div className="border rounded-lg overflow-hidden bg-gray-800 flex items-center justify-center min-h-[200px]">
+                {/* Usamos un placeholder para la imagen del radar */}
+                <img id="radar-image" src="https://via.placeholder.com/600x400.png/111827/FFFFFF?text=Radar+GOES-19" alt="Radar GOES-19" className="w-full h-auto" />
+            </div>
+        </div>
+      </div>
     </div>
   );
 }
