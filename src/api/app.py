@@ -116,6 +116,22 @@ def main_prediction():
 
 # --- RUTAS EXISTENTES (se mantienen sin cambios) ---
 
+from src.api.goes_service import get_latest_goes_image_url
+
+@app.route('/api/satellite-image', methods=['GET'])
+def satellite_image():
+    """
+    Endpoint para obtener la URL de la imagen más reciente del satélite GOES-19.
+    """
+    band = request.args.get('band', default=13, type=int)
+    result = get_latest_goes_image_url(band)
+    
+    if "error" in result:
+        return jsonify(result), 500
+    
+    return jsonify(result)
+
+
 @app.route('/api/clima/<city_name>', methods=['GET'])
 def get_weather(city_name):
     """

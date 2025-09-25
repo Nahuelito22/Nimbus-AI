@@ -11,7 +11,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Componente para el velocímetro de riesgo (sin cambios)
+// --- Componente Gauge (velocímetro) ---
 const Gauge = ({ probability }) => {
   const percentage = Math.round(probability * 100);
   const offset = 283 - (283 * percentage) / 100;
@@ -40,7 +40,7 @@ const Gauge = ({ probability }) => {
   );
 };
 
-// Componente para manejar los eventos del mapa
+// --- Componente para eventos del mapa ---
 function MapEvents({ onMapClick }) {
   useMapEvents({
     click(e) {
@@ -50,12 +50,23 @@ function MapEvents({ onMapClick }) {
   return null;
 }
 
+// --- Componente Principal del Dashboard ---
 function DashboardPage() {
+  // Estados para la predicción de granizo
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Estados para el mapa
   const [coords, setCoords] = useState({ lat: -32.8895, lon: -68.8458 });
 
+  // Estados para el radar
+  const [band, setBand] = useState(13);
+  const [radarImageUrl, setRadarImageUrl] = useState('https://via.placeholder.com/600x400.png/111827/FFFFFF?text=Radar+GOES-19');
+  const [radarIsLoading, setRadarIsLoading] = useState(false);
+  const [radarError, setRadarError] = useState(null);
+
+  // Función para predicción de granizo
   const handlePredict = async () => {
     setIsLoading(true);
     setError(null);
@@ -75,19 +86,48 @@ function DashboardPage() {
     }
   };
 
+  // Función para actualizar coordenadas con clic en mapa
   const handleMapClick = (latlng) => {
     setCoords({ lat: latlng.lat, lon: latlng.lng });
   };
 
+  // Placeholder para el mapa mientras carga
   const MapPlaceholder = (
     <div className="h-full w-full bg-gray-200 flex items-center justify-center">
       <p>Cargando mapa...</p>
     </div>
   );
 
+  // Función para buscar imagen del radar
+  const handleFetchRadarImage = async () => {
+    setRadarIsLoading(true);
+    setRadarError(null);
+    try {
+      const response = await fetch(`http://localhost:5000/api/satellite-image?band=${band}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'No se pudo cargar la imagen del radar.');
+      }
+      const data = await response.json();
+      setRadarImageUrl(data.url);
+    } catch (err) {
+      setRadarError(err.message);
+      setRadarImageUrl('https://via.placeholder.com/600x400.png/111827/FFFFFF?text=Error+al+cargar+radar');
+    } finally {
+      setRadarIsLoading(false);
+    }
+  };
+
+  // Cargar imagen del radar al iniciar
+  useEffect(() => {
+    handleFetchRadarImage();
+  }, []);
+
   return (
     <div className="p-6 bg-gray-50">
+      {/* --- Grid Principal: Mapa y Predicción --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Columna del Mapa */}
         <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Mapa de Mendoza</h2>
           <div id="map-container" className="h-96 rounded-lg z-0">
@@ -119,6 +159,7 @@ function DashboardPage() {
           </div>
         </div>
 
+        {/* Panel de Resultados de Predicción */}
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Resultado de Predicción</h2>
           <div className="text-center">
@@ -138,7 +179,7 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Grid para Noticias y Radar (Restaurado) */}
+      {/* --- Grid Secundario: Noticias y Radar --- */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Sección de Noticias */}
         <div className="bg-white p-4 rounded-lg shadow-md">
@@ -163,7 +204,12 @@ function DashboardPage() {
             <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
                 <div>
                     <label className="block text-gray-700 mb-2 text-sm font-medium">Banda:</label>
-                    <select id="band-select" className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500">
+                    <select 
+                      id="band-select" 
+                      className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                      value={band}
+                      onChange={(e) => setBand(e.target.value)}
+                    >
                         <option value="13">Banda 13 (Infrarroja)</option>
                         <option value="2">Banda 2 (Visible)</option>
                     </select>
@@ -176,13 +222,22 @@ function DashboardPage() {
                         <option value="plasma">Plasma</option>
                     </select>
                 </div>
-                <button id="refresh-radar" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md self-end">
-                    Actualizar
+                <button 
+                  id="refresh-radar" 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md self-end disabled:bg-gray-400"
+                  onClick={handleFetchRadarImage}
+                  disabled={radarIsLoading}
+                >
+                  {radarIsLoading ? 'Cargando...' : 'Actualizar'}
                 </button>
             </div>
             <div className="border rounded-lg overflow-hidden bg-gray-800 flex items-center justify-center min-h-[200px]">
-                {/* Usamos un placeholder para la imagen del radar */}
-                <img id="radar-image" src="https://via.placeholder.com/600x400.png/111827/FFFFFF?text=Radar+GOES-19" alt="Radar GOES-19" className="w-full h-auto" />
+              {radarError && !radarIsLoading && <p className="text-red-400 p-4">{radarError}</p>}
+              {radarIsLoading ? (
+                <p className="text-white">Buscando imagen satelital más reciente...</p>
+              ) : (
+                <img id="radar-image" src={radarImageUrl} alt="Radar GOES-19" className="w-full h-auto" />
+              )}
             </div>
         </div>
       </div>
