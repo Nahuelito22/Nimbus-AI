@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-// Componente para el velocímetro de riesgo
+// --- Corrección del ícono de Leaflet ---
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+// Componente para el velocímetro de riesgo (sin cambios)
 const Gauge = ({ probability }) => {
   const percentage = Math.round(probability * 100);
-  // 283 es el perímetro del círculo (2 * pi * 45). El offset controla cuánto se "llena".
   const offset = 283 - (283 * percentage) / 100;
-
-  let strokeColor = '#3b82f6'; // Azul por defecto
-  if (percentage > 50) strokeColor = '#f97316'; // Naranja
-  if (percentage > 75) strokeColor = '#ef4444'; // Rojo
+  let strokeColor = '#3b82f6';
+  if (percentage > 50) strokeColor = '#f97316';
+  if (percentage > 75) strokeColor = '#ef4444';
 
   return (
     <div className="relative w-48 h-48 mx-auto mb-4">
@@ -16,20 +25,14 @@ const Gauge = ({ probability }) => {
         <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" strokeWidth="10" />
         <circle
           id="gauge-progress"
-          cx="50"
-          cy="50"
-          r="45"
-          fill="none"
-          stroke={strokeColor}
-          strokeWidth="10"
-          strokeDasharray="283"
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          transform="rotate(-90 50 50)"
+          cx="50" cy="50" r="45" fill="none"
+          stroke={strokeColor} strokeWidth="10"
+          strokeDasharray="283" strokeDashoffset={offset}
+          strokeLinecap="round" transform="rotate(-90 50 50)"
           style={{ transition: 'stroke-dashoffset 0.5s ease-in-out' }}
         />
         <circle cx="50" cy="50" r="30" fill="#f9fafb" />
-        <text x="50" y="50" textAnchor="middle" dy="7" fontSize="16" fontWeight="bold" id="percentage-text">
+        <text x="50" y="50" textAnchor="middle" dy="7" fontSize="16" fontWeight="bold">
           {percentage}%
         </text>
       </svg>
@@ -37,18 +40,26 @@ const Gauge = ({ probability }) => {
   );
 };
 
+// Componente para manejar los eventos del mapa
+function MapEvents({ onMapClick }) {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng);
+    },
+  });
+  return null;
+}
+
 function DashboardPage() {
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  // Coordenadas de ejemplo (Mendoza). Más adelante se tomarán del mapa.
   const [coords, setCoords] = useState({ lat: -32.8895, lon: -68.8458 });
 
   const handlePredict = async () => {
     setIsLoading(true);
     setError(null);
     setPrediction(null);
-
     try {
       const response = await fetch(`http://localhost:5000/api/main-prediction?lat=${coords.lat}&lon=${coords.lon}`);
       if (!response.ok) {
@@ -64,15 +75,37 @@ function DashboardPage() {
     }
   };
 
+  const handleMapClick = (latlng) => {
+    setCoords({ lat: latlng.lat, lon: latlng.lng });
+  };
+
+  const MapPlaceholder = (
+    <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+      <p>Cargando mapa...</p>
+    </div>
+  );
+
   return (
     <div className="p-6 bg-gray-50">
-      {/* Grid principal para Mapa y Resultados */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Columna del Mapa */}
         <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Mapa de Mendoza</h2>
-          <div id="map" className="h-96 rounded-lg bg-gray-200 flex items-center justify-center">
-            <p className="text-gray-500">Ubicación seleccionada: {coords.lat}, {coords.lon}</p>
+          <div id="map-container" className="h-96 rounded-lg z-0">
+            <MapContainer
+              center={[coords.lat, coords.lon]}
+              zoom={13}
+              style={{ height: '100%', width: '100%' }}
+              placeholder={MapPlaceholder}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[coords.lat, coords.lon]}>
+                <Popup>Ubicación seleccionada para la predicción.</Popup>
+              </Marker>
+              <MapEvents onMapClick={handleMapClick} />
+            </MapContainer>
           </div>
           <div className="mt-4 flex justify-center">
             <button
@@ -86,7 +119,6 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* Panel de Resultados de Predicción */}
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Resultado de Predicción</h2>
           <div className="text-center">
@@ -100,7 +132,7 @@ function DashboardPage() {
                 </div>
               </>
             ) : (
-              !isLoading && <p className="text-gray-500">Presiona "Predecir" para ver el resultado.</p>
+              !isLoading && <p className="text-gray-500">Haz clic en el mapa para seleccionar una ubicación y luego presiona "Predecir".</p>
             )}
           </div>
         </div>
