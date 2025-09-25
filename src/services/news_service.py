@@ -22,7 +22,7 @@ def get_news(category='general', limit=5):
 
     # Mapeo de categorías a queries de búsqueda para NewsAPI
     search_queries = {
-        'clima': '(clima OR meteorología OR granizo) AND (Mendoza OR Argentina)',
+        'clima': '(meteorología OR clima OR granizo OR tormenta OR "frente frío" OR "viento zonda") AND (Mendoza OR Cuyo)',
         'general': 'Argentina',
         # Agrega otras categorías si es necesario
     }

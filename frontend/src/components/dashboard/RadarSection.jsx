@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getSatelliteImage } from '../../api/satellite';
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 const RadarSection = () => {
   const [band, setBand] = useState(13);
-  const [radarImageUrl, setRadarImageUrl] = useState('https://placehold.co/600x400/111827/FFFFFF?text=Radar+GOES-19');
+  const [palette, setPalette] = useState('inferno'); // Nuevo estado para la paleta
+  const [radarImageUrl, setRadarImageUrl] = useState(''); // Inicialmente vacío
   const [radarIsLoading, setRadarIsLoading] = useState(false);
   const [radarError, setRadarError] = useState(null);
 
@@ -11,8 +14,13 @@ const RadarSection = () => {
     setRadarIsLoading(true);
     setRadarError(null);
     try {
-      const data = await getSatelliteImage(band);
-      setRadarImageUrl(data.url);
+      const data = await getSatelliteImage(band, palette); // Pasar la paleta
+      if (data.url) {
+        setRadarImageUrl(data.url);
+      } else {
+        setRadarError(data.error || 'No se pudo cargar la imagen del radar.');
+        setRadarImageUrl('https://placehold.co/600x400/111827/FFFFFF?text=Error+al+cargar+radar');
+      }
     } catch (err) {
       setRadarError(err.message);
       setRadarImageUrl('https://placehold.co/600x400/111827/FFFFFF?text=Error+al+cargar+radar');
@@ -23,7 +31,7 @@ const RadarSection = () => {
 
   useEffect(() => {
     handleFetchRadarImage();
-  }, []);
+  }, [band, palette]); // Volver a cargar cuando cambie la banda o la paleta
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
@@ -35,7 +43,7 @@ const RadarSection = () => {
                   id="band-select" 
                   className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
                   value={band}
-                  onChange={(e) => setBand(e.target.value)}
+                  onChange={(e) => setBand(parseInt(e.target.value))}
                 >
                     <option value="13">Banda 13 (Infrarroja)</option>
                     <option value="2">Banda 2 (Visible)</option>
@@ -43,10 +51,16 @@ const RadarSection = () => {
             </div>
             <div>
                 <label className="block text-gray-700 mb-2 text-sm font-medium">Paleta:</label>
-                <select id="palette-select" className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500">
+                <select 
+                  id="palette-select" 
+                  className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                  value={palette}
+                  onChange={(e) => setPalette(e.target.value)}
+                >
                     <option value="inferno">Inferno</option>
                     <option value="viridis">Viridis</option>
                     <option value="plasma">Plasma</option>
+                    <option value="gray">Normal (Escala de Grises)</option>
                 </select>
             </div>
             <button 
@@ -63,9 +77,16 @@ const RadarSection = () => {
           {radarIsLoading ? (
             <p className="text-white">Buscando imagen satelital más reciente...</p>
           ) : (
-            <img id="radar-image" src={radarImageUrl} alt="Radar GOES-19" className="w-full h-auto" />
+            <img id="radar-image" src={radarImageUrl ? BASE_URL + radarImageUrl : ''} alt="Radar GOES-19" className="w-full h-auto" />
           )}
         </div>
+        {palette === 'inferno' && (
+          <div className="mt-2 flex justify-center items-center text-white text-sm">
+            <span>Frío</span>
+            <img src={BASE_URL + '/static/radar_images/inferno_legend.png'} alt="Leyenda Inferno" className="h-12 mx-2" />
+            <span>Cálido</span>
+          </div>
+        )}
     </div>
   );
 };

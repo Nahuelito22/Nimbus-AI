@@ -12,7 +12,7 @@ from flask_jwt_extended import JWTManager, create_access_token
 
 # Se mantienen las importaciones de las rutas existentes
 from src.services.clima import get_clima
-from src.services.news_service import get_news, format_news, get_news_safe
+from src.services.news_service import get_news_safe
 from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
 
 # 1. Inicialización de la App y carga de configuración
@@ -124,7 +124,8 @@ def satellite_image():
     Endpoint para obtener la URL de la imagen más reciente del satélite GOES-19.
     """
     band = request.args.get('band', default=13, type=int)
-    result = get_latest_goes_image_url(band)
+    palette = request.args.get('palette', default='inferno', type=str) # Nuevo parámetro
+    result = get_latest_goes_image_url(band, palette) # Pasar la paleta
     
     if "error" in result:
         return jsonify(result), 500
@@ -178,8 +179,7 @@ def get_all_news():
     all_news = {}
     
     for category in categorias:
-        news_data = get_news_safe(category, limit=2)
-        all_news[category] = format_news(news_data)
+        all_news[category] = get_news_safe(category, limit=2)
     
     return jsonify({
         'total_categorias': len(categorias),
