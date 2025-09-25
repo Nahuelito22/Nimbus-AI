@@ -114,7 +114,8 @@ def main_prediction():
         # Captura cualquier otro error inesperado durante el proceso
         return jsonify({"error": f"Ocurrió un error interno en el servidor: {e}"}), 500
 
-# --- RUTA DE IMÁGENES SATELITALES (SOLUCIÓN DEFINITIVA) ---
+
+# Reemplaza todo el bloque de RUTA DE IMÁGENES SATELITALES por esto:
 @app.route('/api/satellite-image', methods=['GET'])
 def satellite_image():
     """
@@ -123,12 +124,12 @@ def satellite_image():
     try:
         band = request.args.get('band', default=13, type=int)
         palette = request.args.get('palette', default='inferno', type=str)
+        force_refresh = request.args.get('refresh', default='false').lower() == 'true'
         
-        # Imprimir información de depuración
-        print(f"Recibida solicitud: band={band}, palette={palette}")
+        print(f"Recibida solicitud: band={band}, palette={palette}, force_refresh={force_refresh}")
         
-        # Llamar al servicio para generar las imágenes
-        result = get_latest_goes_image_url(band, palette)
+        # Llamar al servicio para obtener las imágenes
+        result = get_latest_goes_image_url(band, palette, force_refresh)
         
         if "error" in result:
             print(f"Error en goes_service: {result['error']}")
@@ -191,7 +192,8 @@ def satellite_image():
         return jsonify({
             "image": f"data:image/png;base64,{image_data}",
             "legend": f"data:image/png;base64,{legend_data}",
-            "timestamp": result["timestamp"]
+            "timestamp": result["timestamp"],
+            "cached": result.get("cached", False)
         })
         
     except Exception as e:
@@ -272,6 +274,50 @@ def clima_por_ciudad(city_name):
 def health_check():
     """Endpoint para verificar que la API está funcionando"""
     return jsonify({"status": "healthy", "message": "Nimbus API is running!"})
+
+@app.route('/api/disk-usage', methods=['GET'])
+def disk_usage():
+    """Endpoint para monitorear el uso de disco de imágenes"""
+    try:
+        possible_paths = [
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static', 'radar_images')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'radar_images')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), 'static', 'radar_images')),
+        ]
+        
+        total_size = 0
+        file_count = 0
+        oldest_file = None
+        newest_file = None
+        
+        for path_dir in possible_paths:
+            if os.path.exists(path_dir):
+                for root, dirs, files in os.walk(path_dir):
+                    for file in files:
+                        if file.endswith('.png'):
+                            file_path = os.path.join(root, file)
+                            file_size = os.path.getsize(file_path)
+                            file_time = os.path.getmtime(file_path)
+                            
+                            total_size += file_size
+                            file_count += 1
+                            
+                            if oldest_file is None or file_time < oldest_file['time']:
+                                oldest_file = {'name': file, 'time': file_time}
+                            if newest_file is None or file_time > newest_file['time']:
+                                newest_file = {'name': file, 'time': file_time}
+        
+        return jsonify({
+            "total_size_mb": round(total_size / (1024 * 1024), 2),
+            "file_count": file_count,
+            "oldest_file": oldest_file['name'] if oldest_file else None,
+            "newest_file": newest_file['name'] if newest_file else None,
+            "max_age_hours": MAX_AGE_HOURS,
+            "max_images_per_config": MAX_IMAGES_PER_CONFIG,
+            "cache_duration_minutes": CACHE_DURATION_MINUTES
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # --- BLOQUE PRINCIPAL ---
 if __name__ == '__main__':
