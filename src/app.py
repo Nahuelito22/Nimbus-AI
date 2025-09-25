@@ -1,23 +1,28 @@
 import sys
 import os
+from flask import send_from_directory
 
-# Añade el directorio raíz del proyecto al path de Python para que encuentre el módulo 'src'
+# Añade el directorio raíz del proyecto al path de Python
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token
 
-# Se mantienen las importaciones de las rutas existentes
+# Importaciones existentes
 from src.services.clima import get_clima
 from src.services.news_service import get_news_safe
 from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
+from src.services.orchestration import get_hail_prediction
+from src.services.goes_service import get_latest_goes_image_url
 
-# 1. Inicialización de la App y carga de configuración
-app = Flask(__name__)
-app.config.from_object('src.config.Config') # Carga la configuración desde config.py
+# 1. Inicialización de la App con configuración de archivos estáticos
+app = Flask(__name__, 
+            static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static')),
+            static_url_path='/static')
+app.config.from_object('src.config.Config')
 
 # 2. Inicialización de las extensiones
 CORS(app)
@@ -82,11 +87,7 @@ def login():
     else:
         return jsonify({"msg": "Email o contraseña incorrectos"}), 401
 
-
 # --- RUTA DE ORQUESTACIÓN PRINCIPAL ---
-
-from src.services.orchestration import get_hail_prediction
-
 @app.route('/api/main-prediction', methods=['GET'])
 def main_prediction():
     """
@@ -113,46 +114,106 @@ def main_prediction():
         # Captura cualquier otro error inesperado durante el proceso
         return jsonify({"error": f"Ocurrió un error interno en el servidor: {e}"}), 500
 
-
-# --- RUTAS EXISTENTES (se mantienen sin cambios) ---
-
-from src.services.goes_service import get_latest_goes_image_url
-
+# --- RUTA DE IMÁGENES SATELITALES (SOLUCIÓN DEFINITIVA) ---
 @app.route('/api/satellite-image', methods=['GET'])
 def satellite_image():
     """
-    Endpoint para obtener la URL de la imagen más reciente del satélite GOES-19.
+    Endpoint para obtener la imagen más reciente del satélite GOES-19 en formato base64.
     """
-    band = request.args.get('band', default=13, type=int)
-    palette = request.args.get('palette', default='inferno', type=str) # Nuevo parámetro
-    result = get_latest_goes_image_url(band, palette) # Pasar la paleta
-    
-    if "error" in result:
-        return jsonify(result), 500
-    
-    return jsonify(result)
+    try:
+        band = request.args.get('band', default=13, type=int)
+        palette = request.args.get('palette', default='inferno', type=str)
+        
+        # Imprimir información de depuración
+        print(f"Recibida solicitud: band={band}, palette={palette}")
+        
+        # Llamar al servicio para generar las imágenes
+        result = get_latest_goes_image_url(band, palette)
+        
+        if "error" in result:
+            print(f"Error en goes_service: {result['error']}")
+            return jsonify(result), 500
+        
+        print(f"Resultado de goes_service: {result}")
+        
+        # Importar base64
+        import base64
+        
+        # DEFINITIVO: Probar ambas posibles rutas para encontrar las imágenes
+        possible_paths = [
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static', 'radar_images')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'radar_images')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), 'static', 'radar_images')),
+        ]
+        
+        image_filename = result["url"].split('/')[-1]
+        legend_filename = result["legend_url"].split('/')[-1]
+        
+        print(f"Buscando imagen: {image_filename}")
+        print(f"Buscando leyenda: {legend_filename}")
+        
+        image_path = None
+        legend_path = None
+        
+        # Buscar las imágenes en todas las posibles rutas
+        for path_dir in possible_paths:
+            img_path = os.path.join(path_dir, image_filename)
+            leg_path = os.path.join(path_dir, legend_filename)
+            
+            print(f"Verificando ruta: {path_dir}")
+            print(f"  - Imagen: {img_path} - Existe: {os.path.exists(img_path)}")
+            print(f"  - Leyenda: {leg_path} - Existe: {os.path.exists(leg_path)}")
+            
+            if os.path.exists(img_path) and image_path is None:
+                image_path = img_path
+                print(f"  -> Encontrada imagen en: {img_path}")
+                
+            if os.path.exists(leg_path) and legend_path is None:
+                legend_path = leg_path
+                print(f"  -> Encontrada leyenda en: {leg_path}")
+        
+        # Verificar si se encontraron las imágenes
+        if image_path is None:
+            return jsonify({"error": f"No se encontró la imagen: {image_filename} en ninguna de las rutas probadas"}), 500
+        
+        if legend_path is None:
+            return jsonify({"error": f"No se encontró la leyenda: {legend_filename} en ninguna de las rutas probadas"}), 500
+        
+        # Convertir imágenes a base64
+        with open(image_path, "rb") as image_file:
+            image_data = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        with open(legend_path, "rb") as legend_file:
+            legend_data = base64.b64encode(legend_file.read()).decode('utf-8')
+        
+        print("Imágenes convertidas a base64 correctamente")
+        
+        return jsonify({
+            "image": f"data:image/png;base64,{image_data}",
+            "legend": f"data:image/png;base64,{legend_data}",
+            "timestamp": result["timestamp"]
+        })
+        
+    except Exception as e:
+        print(f"Error general en satellite_image: {str(e)}")
+        return jsonify({"error": f"Error general: {str(e)}"}), 500
 
-
+# --- RUTAS EXISTENTES ---
 @app.route('/api/clima/<city_name>', methods=['GET'])
 def get_weather(city_name):
-    """
-    Endpoint para obtener el clima de una ciudad específica
-    """
+    """Endpoint para obtener el clima de una ciudad específica"""
     result = get_clima(city_name)
     return jsonify(result)
 
 @app.route('/api/clima', methods=['GET'])
 def get_all_weather():
-    """
-    Endpoint para obtener el clima de TODAS las ciudades configuradas
-    """
+    """Endpoint para obtener el clima de TODAS las ciudades configuradas"""
     all_weather = {}
     for city_name in app.config['CITIES']:
         weather_data = get_clima(city_name)
         all_weather[city_name] = weather_data
     
     return jsonify(all_weather)
-
 
 @app.route('/api/noticias/<category>', methods=['GET'])
 def get_news_by_category(category):
@@ -169,12 +230,9 @@ def get_news_by_category(category):
         'noticias':formatted_news
     })
 
-
 @app.route('/api/noticias', methods=['GET'])
 def get_all_news():
-    """
-    Obtiene noticias de todas las categorías
-    """
+    """Obtiene noticias de todas las categorías"""
     categorias = ['general', 'deportes', 'clima']
     all_news = {}
     
@@ -186,21 +244,15 @@ def get_all_news():
         'noticias': all_news
     })
 
-
 @app.route('/api/meteo/ip', methods=['GET'])
 def clima_por_ip():
-    """
-    Endpoint que obtiene clima según la IP del cliente
-    """
+    """Endpoint que obtiene clima según la IP del cliente"""
     result = get_clima_by_ip()
     return jsonify(result)
 
 @app.route('/api/meteo/coords', methods=['GET'])
 def clima_por_coords():
-    """
-    Endpoint que obtiene clima según coordenadas (lat, lon)
-    Ejemplo: /api/meteo/coords?lat=-32.889&lon=-68.845
-    """
+    """Endpoint que obtiene clima según coordenadas (lat, lon)"""
     lat = request.args.get("lat")
     lon = request.args.get("lon")
 
@@ -212,20 +264,15 @@ def clima_por_coords():
 
 @app.route('/api/meteo/ciudad/<city_name>', methods=['GET'])
 def clima_por_ciudad(city_name):
-    """
-    Endpoint que obtiene clima de Open-Meteo según el nombre de la ciudad
-    """
+    """Endpoint que obtiene clima de Open-Meteo según el nombre de la ciudad"""
     result = get_clima_ciudad(city_name)
     return jsonify(result)
 
-
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """
-    Endpoint para verificar que la API está funcionando
-    """
+    """Endpoint para verificar que la API está funcionando"""
     return jsonify({"status": "healthy", "message": "Nimbus API is running!"})
-    
 
+# --- BLOQUE PRINCIPAL ---
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
