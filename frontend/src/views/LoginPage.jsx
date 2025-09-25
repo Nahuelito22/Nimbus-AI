@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 
-function LoginPage() {
-  // Estado para cada campo del formulario
+// 1. Recibimos la función onLogin como un "prop" desde App.jsx
+function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('user');
 
-  // Manejador para cuando se envía el formulario
   const handleSubmit = (event) => {
-    event.preventDefault(); // Previene que la página se recargue
-    console.log('Intento de login con:', { email, password, role });
-    // Aquí es donde en el futuro llamarías a tu API de backend para autenticar
-    alert(`Login con: ${email}, Rol: ${role}`);
+    event.preventDefault();
+    // 2. En lugar de un alert, llamamos a la función onLogin
+    //    y le pasamos los datos del usuario.
+    onLogin({ email, role });
   };
 
   return (
-    // Centramos el formulario en la página para que se vea mejor
     <div className="flex justify-center items-center pt-10">
       <section className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
@@ -26,8 +24,8 @@ function LoginPage() {
               type="email"
               id="email"
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={email} // El valor del input está ligado al estado
-              onChange={(e) => setEmail(e.target.value)} // El estado se actualiza cuando el usuario escribe
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
