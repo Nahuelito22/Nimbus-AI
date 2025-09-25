@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import { loginUser as apiLogin } from '../api/auth';
-import jwt_decode from 'jwt-decode'; // Necesitaremos una librería para decodificar el token
+import { jwtDecode } from 'jwt-decode'; // Necesitaremos una librería para decodificar el token
 
 // 1. Crear el Contexto
 const AuthContext = createContext();
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const data = await apiLogin(credentials);
-      const decodedToken = jwt_decode(data.access_token);
+      const decodedToken = jwtDecode(data.access_token);
       
       const userData = {
         email: decodedToken.sub,

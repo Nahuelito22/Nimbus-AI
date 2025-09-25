@@ -1,10 +1,13 @@
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom'; // Importar el router
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext'; // La extensión .jsx se resuelve automáticamente
 import './index.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter> {/* Envolver la App con el router */}
-    <App />
+  <BrowserRouter>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </BrowserRouter>
 );
