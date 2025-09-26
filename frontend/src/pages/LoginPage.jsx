@@ -1,16 +1,31 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Importar el hook
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function LoginPage() {
-  const { login, loading, error } = useAuth(); // Usar el contexto
+  const { login, loading, error, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [formError, setFormError] = useState(null);
+  const navigate = useNavigate();
+
+  // Redirigir si ya está autenticado
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // El try-catch ya no es necesario aquí, el contexto lo maneja.
-    await login({ email, password });
+    setFormError(null);
+    
+    try {
+      await login({ email, password });
+      // La redirección se manejará en el useEffect cuando isAuthenticated cambie
+    } catch (err) {
+      setFormError(err.message);
+    }
   };
 
   return (
@@ -18,9 +33,9 @@ function LoginPage() {
       <section className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
         <form onSubmit={handleSubmit}>
-          {error && (
+          {(error || formError) && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-              <span>{error}</span>
+              <span>{error || formError}</span>
             </div>
           )}
 

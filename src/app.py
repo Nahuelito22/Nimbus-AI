@@ -1,13 +1,14 @@
 import sys
 import os
 from flask import send_from_directory
+import random
+import string
 
 # Añade el directorio raíz del proyecto al path de Python
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token
 
@@ -17,6 +18,7 @@ from src.services.news_service import get_news_safe
 from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
 from src.services.orchestration import get_hail_prediction
 from src.services.goes_service import get_latest_goes_image_url
+from src.database import db  # Importar db desde nuestro archivo database.py
 
 # 1. Inicialización de la App con configuración de archivos estáticos
 app = Flask(__name__, 
@@ -25,67 +27,114 @@ app = Flask(__name__,
 app.config.from_object('src.config.Config')
 
 # 2. Inicialización de las extensiones
-CORS(app)
-db = SQLAlchemy(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Configurar CORS explícitamente
+db.init_app(app)  # Inicializar db con la app
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
-# 3. Definición del Modelo de Datos (SQLAlchemy)
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(80), nullable=False, default='user')
+# Importar el modelo de usuario DESPUÉS de inicializar db
+from src.models.user import User
 
-    def __repr__(self):
-        return f'<User {self.email}>'
-
-# 4. Comando para inicializar la base de datos
+# 3. Comando para inicializar la base de datos
 @app.cli.command("create-db")
 def create_db():
     """Crea las tablas de la base de datos."""
-    db.create_all()
-    print("Base de datos y tablas creadas.")
+    try:
+        print(f"Creando base de datos en: {app.config['SQLALCHEMY_DATABASE_URI']}")
+        with app.app_context():
+            db.create_all()
+        print("Base de datos y tablas creadas exitosamente.")
+    except Exception as e:
+        print(f"Error al crear la base de datos: {e}")
+
+# 4. Manejadores de errores
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Recurso no encontrado"}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({"error": "Error interno del servidor"}), 500
 
 # 5. Rutas de Autenticación
 @app.route('/api/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-    role = data.get('role', 'user')
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        name = data.get('name')
+        role = data.get('role', 'user')
 
-    if not email or not password:
-        return jsonify({"msg": "Email y contraseña son requeridos"}), 400
+        if not email or not password or not name:
+            return jsonify({"msg": "Email, contraseña y nombre son requeridos"}), 400
 
-    user_exists = User.query.filter_by(email=email).first()
-    if user_exists:
-        return jsonify({"msg": "El email ya está registrado"}), 400
+        user_exists = User.query.filter_by(email=email).first()
+        if user_exists:
+            return jsonify({"msg": "El email ya está registrado"}), 400
 
-    password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = User(email=email, password_hash=password_hash, role=role)
-    db.session.add(new_user)
-    db.session.commit()
+        # Crear nuevo usuario con campos básicos
+        new_user = User(
+            email=email,
+            name=name,
+            role=role
+        )
+        
+        # Usar el método del modelo para establecer la contraseña
+        new_user.set_password(password)
+        
+        # Agregar campos adicionales según el rol
+        if role == 'defensa_civil':
+            new_user.institution = data.get('institution', '')
+            new_user.employee_id = data.get('employeeId', '')
+            new_user.institutional_email = data.get('institutionalEmail', '')
+        elif role == 'meteorologo':
+            new_user.license_number = data.get('licenseNumber', '')
+            new_user.workplace = data.get('workplace', '')
+            new_user.linkedin_profile = data.get('linkedinProfile', '')
+        elif role == 'cientifico_datos':
+            new_user.organization = data.get('organization', '')
+            new_user.github_profile = data.get('githubProfile', '')
+            new_user.interest_description = data.get('interestDescription', '')
+        
+        # Generar código de verificación para roles profesionales
+        if role != 'user':
+            new_user.verification_code = ''.join(random.choices(string.digits, k=6))
+        
+        db.session.add(new_user)
+        db.session.commit()
 
-    return jsonify({"msg": "Usuario creado exitosamente"}), 201
+        # Preparar respuesta
+        response_data = {"msg": "Usuario creado exitosamente"}
+        
+        if role != 'user':
+            response_data["verification_code"] = new_user.verification_code
+            response_data["msg"] = "Usuario creado exitosamente. Se ha enviado un código de verificación a tu correo."
+
+        return jsonify(response_data), 201
+    except Exception as e:
+        return jsonify({"msg": f"Error en el registro: {str(e)}"}), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
 
-    if not email or not password:
-        return jsonify({"msg": "Email y contraseña son requeridos"}), 400
+        if not email or not password:
+            return jsonify({"msg": "Email y contraseña son requeridos"}), 400
 
-    user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email).first()
 
-    if user and bcrypt.check_password_hash(user.password_hash, password):
-        additional_claims = {"role": user.role}
-        access_token = create_access_token(identity=user.email, additional_claims=additional_claims)
-        return jsonify(access_token=access_token), 200
-    else:
-        return jsonify({"msg": "Email o contraseña incorrectos"}), 401
+        if user and user.check_password(password):  # Usar el método del modelo
+            additional_claims = {"role": user.role}
+            access_token = create_access_token(identity=user.email, additional_claims=additional_claims)
+            return jsonify(access_token=access_token), 200
+        else:
+            return jsonify({"msg": "Email o contraseña incorrectos"}), 401
+    except Exception as e:
+        return jsonify({"msg": f"Error en el login: {str(e)}"}), 500
 
 # --- RUTA DE ORQUESTACIÓN PRINCIPAL ---
 @app.route('/api/main-prediction', methods=['GET'])
@@ -204,18 +253,24 @@ def satellite_image():
 @app.route('/api/clima/<city_name>', methods=['GET'])
 def get_weather(city_name):
     """Endpoint para obtener el clima de una ciudad específica"""
-    result = get_clima(city_name)
-    return jsonify(result)
+    try:
+        result = get_clima(city_name)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/clima', methods=['GET'])
 def get_all_weather():
     """Endpoint para obtener el clima de TODAS las ciudades configuradas"""
-    all_weather = {}
-    for city_name in app.config['CITIES']:
-        weather_data = get_clima(city_name)
-        all_weather[city_name] = weather_data
-    
-    return jsonify(all_weather)
+    try:
+        all_weather = {}
+        for city_name in app.config['CITIES']:
+            weather_data = get_clima(city_name)
+            all_weather[city_name] = weather_data
+        
+        return jsonify(all_weather)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/noticias/<category>', methods=['GET'])
 def get_news_by_category(category):
@@ -224,33 +279,42 @@ def get_news_by_category(category):
     if category not in categorias_permitidas:
         return jsonify({"error": f"Categoría no válida. Use: {', '.join(categorias_permitidas)}"}), 400
     
-    formatted_news = get_news_safe(category, limit=3)
+    try:
+        formatted_news = get_news_safe(category, limit=3)
 
-    return jsonify({
-        'categoria':category,
-        'total_noticias':len(formatted_news),
-        'noticias':formatted_news
-    })
+        return jsonify({
+            'categoria':category,
+            'total_noticias':len(formatted_news),
+            'noticias':formatted_news
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/noticias', methods=['GET'])
 def get_all_news():
     """Obtiene noticias de todas las categorías"""
-    categorias = ['general', 'deportes', 'clima']
-    all_news = {}
-    
-    for category in categorias:
-        all_news[category] = get_news_safe(category, limit=2)
-    
-    return jsonify({
-        'total_categorias': len(categorias),
-        'noticias': all_news
-    })
+    try:
+        categorias = ['general', 'deportes', 'clima']
+        all_news = {}
+        
+        for category in categorias:
+            all_news[category] = get_news_safe(category, limit=2)
+        
+        return jsonify({
+            'total_categorias': len(categorias),
+            'noticias': all_news
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/meteo/ip', methods=['GET'])
 def clima_por_ip():
     """Endpoint que obtiene clima según la IP del cliente"""
-    result = get_clima_by_ip()
-    return jsonify(result)
+    try:
+        result = get_clima_by_ip()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/meteo/coords', methods=['GET'])
 def clima_por_coords():
@@ -261,14 +325,20 @@ def clima_por_coords():
     if not lat or not lon:
         return jsonify({"error": "Debes enviar lat y lon como parámetros"}), 400
 
-    result = get_weather_by_coords(float(lat), float(lon))
-    return jsonify(result)
+    try:
+        result = get_weather_by_coords(float(lat), float(lon))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/meteo/ciudad/<city_name>', methods=['GET'])
 def clima_por_ciudad(city_name):
     """Endpoint que obtiene clima de Open-Meteo según el nombre de la ciudad"""
-    result = get_clima_ciudad(city_name)
-    return jsonify(result)
+    try:
+        result = get_clima_ciudad(city_name)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -312,9 +382,9 @@ def disk_usage():
             "file_count": file_count,
             "oldest_file": oldest_file['name'] if oldest_file else None,
             "newest_file": newest_file['name'] if newest_file else None,
-            "max_age_hours": MAX_AGE_HOURS,
-            "max_images_per_config": MAX_IMAGES_PER_CONFIG,
-            "cache_duration_minutes": CACHE_DURATION_MINUTES
+            "max_age_hours": 24,  # Valor por defecto
+            "max_images_per_config": 4,  # Valor por defecto
+            "cache_duration_minutes": 30  # Valor por defecto
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
