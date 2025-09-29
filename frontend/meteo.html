@@ -15,7 +15,8 @@
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="#">Nimbus Clima</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -44,39 +45,50 @@
 
     <header class="bg-body-secondary py-3 text-center">
         <h1 id="titulo-principal" class="fw-bold text-black mb-3">Clima en Mendoza - Nimbus AI</h1>
-        
-        </div>
     </header>
-
+    
     <main class="flex-grow-1 container-fluid my-4 px-4">
-        <!-- Card Fija de Mi Ubicación (Siempre Visible) -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h3 class="mb-3">📍 Mi Ubicación Actual</h3>
-                <div id="ubicacion-container">
-                    <!-- La card de clima por IP se insertará aquí -->
-                    <div class="text-center py-3">
-                        <div class="spinner-border text-info" role="status">
-                            <span class="visually-hidden">Detectando ubicación...</span>
+        <!-- Contenedor principal reorganizado: una fila para título y luego una fila
+             donde la columna izquierda es la ubicación y la derecha contiene las cards -->
+        <div class="row g-3 mx-0">      
+          <!-- FILA QUE CONTIENE (IZQ) UBICACIÓN y (DER) ZONA + CARDS -->
+          <div class="col-12">
+            <div class="row g-3">
+              <!-- Columna izquierda: ubicación (1/3 en md+) -->
+              <div id="ubicacion-wrapper" class="col-12 col-md-4">
+                <div id="ubicacion-container" class="h-100">
+                  <!-- NUEVA CARD COMPACTA Y ESTILIZADA -->
+                  <div class="card shadow-sm border-0 h-100" style="max-height: 300px;">
+                    <div class="card-header bg-primary text-white py-2">
+                      <h5 class="card-title mb-0 fs-6">📍 Mi Ubicación</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column p-3">
+                      <!-- CONTENIDO DINÁMICO -->
+                      <div class="text-center py-2 flex-grow-1 d-flex align-items-center justify-content-center">
+                        <div>
+                          <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;"></div>
+                          <p class="mt-2 text-muted small mb-0">Detectando tu ubicación...</p>
                         </div>
-                        <p class="mt-2 text-muted">Cargando clima de tu ubicación...</p>
+                      </div>
                     </div>
+                  </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Contenedor de Cards de Clima por Zona -->
-        <div class="row">
-            <div class="col-12">
+              </div>
+      
+              <!-- Columna derecha: zona + cards (ocupa 2/3 en md+) -->
+              <div class="col-12 col-md-8">
                 <h3 id="subtitulo-zona" class="mb-3">Clima en Zona Norte</h3>
+      
+                <!-- CONTENEDOR DE CARDS DE CIUDADES -->
                 <div id="clima-container" class="row g-3 mx-0">
-                    <!-- Las cards de clima se insertarán aquí desde clima.js -->
-                    <div class="col-12 text-center py-4">
-                        <p class="text-muted">Selecciona una zona para ver el clima</p>
-                    </div>
+                  <div class="col-12 text-center py-4">
+                    <p class="text-muted">Selecciona una zona para ver el clima</p>
+                  </div>
                 </div>
-            </div>
-        </div>
+              </div>
+            </div> <!-- row interna -->
+          </div> <!-- col-12 contenedor -->
+        </div> <!-- row principal -->
     </main>
 
     <footer class="bg-dark text-white text-center py-3 mt-auto">

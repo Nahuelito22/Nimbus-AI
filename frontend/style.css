@@ -19,3 +19,13 @@ body { overflow-x: hidden; }
   word-wrap: break-word;
   word-break: break-word;
 }
+
+/* En tu style.css */
+#ubicacion-wrapper, 
+#clima-container {
+    align-items: start; /* Alinea todo desde arriba */
+}
+
+.card {
+    min-height: 200px; /* Altura mínima consistente */
+}
