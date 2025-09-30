@@ -3,6 +3,8 @@ import os
 from flask import send_from_directory
 import random
 import string
+import click
+from functools import wraps
 
 # Añade el directorio raíz del proyecto al path de Python
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -10,7 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
 
 # Importaciones existentes
 from src.services.clima import get_clima
@@ -35,6 +37,20 @@ jwt = JWTManager(app)
 # Importar el modelo de usuario DESPUÉS de inicializar db
 from src.models.user import User
 
+# Decorador para proteger rutas y requerir rol de 'admin'
+def admin_required():
+    def wrapper(fn):
+        @wraps(fn)
+        @jwt_required()
+        def decorator(*args, **kwargs):
+            claims = get_jwt()
+            if claims.get("role") == "admin":
+                return fn(*args, **kwargs)
+            else:
+                return jsonify(msg="¡Acceso denegado! Se requiere rol de administrador."), 403
+        return decorator
+    return wrapper
+
 # 3. Comando para inicializar la base de datos
 @app.cli.command("create-db")
 def create_db():
@@ -47,6 +63,19 @@ def create_db():
     except Exception as e:
         print(f"Error al crear la base de datos: {e}")
 
+
+@app.cli.command("set-admin")
+@click.argument("email")
+def set_admin(email):
+    """Otorga privilegios de administrador a un usuario."""
+    with app.app_context():
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.role = 'admin'
+            db.session.commit()
+            print(f"El usuario {user.email} ahora es administrador.")
+        else:
+            print(f"Error: No se encontró ningún usuario con el email '{email}'.")
 # 4. Manejadores de errores
 @app.errorhandler(404)
 def not_found(error):
@@ -136,6 +165,47 @@ def login():
     except Exception as e:
         return jsonify({"msg": f"Error en el login: {str(e)}"}), 500
 
+# --- RUTAS DE ADMINISTRACIÓN ---
+    @app.route('/api/admin/users', methods=['GET'])
+    @admin_required()
+    def get_all_users():
+        """Endpoint para que los administradores obtengan todos los usuarios."""
+        try:
+            users = User.query.all()
+            users_data = [
+                {
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email,
+                    'role': user.role,
+                    'is_verified': user.is_verified,
+                    'institution': user.institution,
+                    'employee_id': user.employee_id,
+                    'license_number': user.license_number,
+                    'workplace': user.workplace,
+                    'organization': user.organization,
+                    'github_profile': user.github_profile
+                } for user in users
+            ]
+            return jsonify(users_data), 200
+        except Exception as e:
+            return jsonify({"error": f"Error al obtener los usuarios: {str(e)}"}), 500
+
+    @app.route('/api/admin/approve/<int:user_id>', methods=['POST'])
+    @admin_required()
+    def approve_user(user_id):
+        """Endpoint para que un administrador apruebe a un usuario."""
+        try:
+            user = User.query.get(user_id)
+            if not user:
+                return jsonify({"error": "Usuario no encontrado"}), 404
+            
+            user.is_verified = True
+            db.session.commit()
+            
+            return jsonify({"msg": f"Usuario {user.email} ha sido aprobado."}), 200
+        except Exception as e:
+            return jsonify({"error": f"Error al aprobar el usuario: {str(e)}"}), 500
 # --- RUTA DE ORQUESTACIÓN PRINCIPAL ---
 @app.route('/api/main-prediction', methods=['GET'])
 def main_prediction():
