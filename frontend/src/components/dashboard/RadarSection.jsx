@@ -29,14 +29,13 @@ const RadarSection = () => {
         forceRefresh: force
       });
 
-      // Ahora esperamos la estructura del backend: { url, legend_url, cached, ... }
-      if (data && data.url) {
-        setRadarImage(data.url);
-        setLegendImage(data.legend_url || '');
+      // Ahora esperamos la estructura del backend: { image, legend, cached, ... }
+      if (data && data.image) {
+        setRadarImage(data.image);
+        setLegendImage(data.legend || '');
         setIsCached(Boolean(data.cached));
         setRadarError(null);
-        console.log('Imagen recibida (url):', data.url);
-        console.log('Leyenda recibida (url):', data.legend_url);
+        console.log('Imagen recibida (data URI)');
         console.log('¿Usando caché?:', data.cached);
       } else {
         setRadarError(data.error || 'No se pudo cargar la imagen del radar.');

@@ -1,6 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-// Base del backend (quita el /api si está presente)
-const BACKEND_BASE = API_URL.replace(/\/api\/?$/, '');
+const API_URL = '/api';
 
 export const getSatelliteImage = async (band, palette, opts = {}) => {
   try {
@@ -20,7 +18,7 @@ export const getSatelliteImage = async (band, palette, opts = {}) => {
       params.append('show_marker', 'false');
     }
 
-    const url = `${API_URL.replace(/\/$/, '')}/satellite-image?${params.toString()}`;
+    const url = `${API_URL}/satellite-image?${params.toString()}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -33,52 +31,10 @@ export const getSatelliteImage = async (band, palette, opts = {}) => {
       throw new Error(errorData.error || 'No se pudo cargar la imagen del radar.');
     }
 
-    const data = await response.json();
-    console.log('Respuesta de la API (satellite):', data);
+    // La respuesta del backend ya debería ser un JSON con las URLs en base64
+    // o rutas relativas que el proxy manejará.
+    return response.json();
 
-    // Normalizar la respuesta para que el frontend siempre reciba:
-    // { url, legend_url, cached, timestamp, error }
-    const normalized = {
-      url: null,
-      legend_url: null,
-      cached: Boolean(data.cached),
-      timestamp: data.timestamp || null,
-      error: data.error || null
-    };
-
-    // 1) si el backend ya nos devolvió `url`, úsala
-    if (data.url) {
-      normalized.url = data.url;
-    }
-
-    // 2) si el backend devolvió `image` como data-uri (base64), úsala
-    if (!normalized.url && data.image) {
-      normalized.url = data.image;
-    }
-
-    // 3) si el backend devolvió una ruta relativa (ej. "/static/..."), convertirla a absoluta hacia el backend
-    //    (evita que el navegador la pida al dev server del frontend)
-    if (normalized.url && typeof normalized.url === 'string' && normalized.url.startsWith('/')) {
-      normalized.url = BACKEND_BASE + normalized.url;
-    }
-
-    // 4) leyenda: puede llegar en legend_url o legend (o legend como datauri)
-    if (data.legend_url) {
-      normalized.legend_url = data.legend_url;
-    } else if (data.legend) {
-      normalized.legend_url = data.legend;
-    }
-
-    if (normalized.legend_url && typeof normalized.legend_url === 'string' && normalized.legend_url.startsWith('/')) {
-      normalized.legend_url = BACKEND_BASE + normalized.legend_url;
-    }
-
-    // Si por algún motivo no hay url pero sí error, pasarlo
-    if (!normalized.url && data.error) {
-      normalized.error = data.error;
-    }
-
-    return normalized;
   } catch (err) {
     console.error('Error en getSatelliteImage:', err);
     throw err;

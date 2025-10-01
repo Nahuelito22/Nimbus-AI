@@ -1,6 +1,5 @@
-// La URL debe apuntar al backend de Flask, no directamente a Hugging Face.
-// Asumimos que el backend corre localmente en el puerto 5000.
-const BACKEND_API_URL = 'http://127.0.0.1:5000/api/main-prediction';
+// La URL debe apuntar al endpoint relativo que será manejado por el proxy de Vite.
+const BACKEND_API_URL = '/api/main-prediction';
 
 export const getHailPrediction = async (coords) => {
   const { lat, lon } = coords;
@@ -9,7 +8,6 @@ export const getHailPrediction = async (coords) => {
   const url = `${BACKEND_API_URL}?lat=${lat}&lon=${lon}`;
 
   // La petición al backend es un GET, no un POST.
-  // El backend se encargará de construir el body para el modelo.
   const response = await fetch(url, {
     method: 'GET',
     headers: {

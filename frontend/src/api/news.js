@@ -1,9 +1,9 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+const API_URL = '/api';
 
 export const fetchNews = async (category = 'clima') => {
   try {
     // El endpoint en Flask es /api/noticias/<categoria>
-    const response = await fetch(`${API_URL}/api/noticias/${category}`);
+    const response = await fetch(`${API_URL}/noticias/${category}`);
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
