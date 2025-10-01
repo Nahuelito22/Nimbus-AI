@@ -17,7 +17,7 @@ def get_news(category='general', limit=5):
     if cache_key in news_cache:
         cached_data, timestamp = news_cache[cache_key]
         if current_time - timestamp < cache_timeout:
-            print(f"✅ Usando cache para noticias de {category}")
+            print(f"INFO: Usando cache para noticias de {category}")
             return cached_data
 
     # Mapeo de categorías a queries de búsqueda para NewsAPI
@@ -36,7 +36,7 @@ def get_news(category='general', limit=5):
     }
     
     try:
-        print(f"📡 Solicitando {params['pageSize']} noticias de '{params['q']}' a NewsAPI.org...")
+        print(f"INFO: Solicitando {params['pageSize']} noticias de '{params['q']}' a NewsAPI.org...")
         response = requests.get(Config.NEWSAPI_URL, params=params)
         response.raise_for_status()  # Lanza un error para respuestas 4xx/5xx
         
@@ -49,7 +49,7 @@ def get_news(category='general', limit=5):
         return articles
             
     except requests.exceptions.RequestException as e:
-        print(f"❌ Error de conexión o API: {str(e)}")
+        print(f"ERROR: Error de conexión o API: {str(e)}")
         # En caso de error, podrías devolver un conjunto de noticias de ejemplo
         return []
 

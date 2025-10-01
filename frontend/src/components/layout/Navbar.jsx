@@ -17,12 +17,15 @@ function Navbar() {
                 <>
                   <span className="text-sm">Hola, {user.email}</span>
                   <Link to="/" className="hover:text-blue-300">Dashboard</Link>
+                  {user.role === 'admin' && (
+                    <Link to="/admin" className="hover:text-blue-300">Panel Admin</Link>
+                  )}
                   <button onClick={logout} className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Salir</button>
                 </>
               ) : (
                 <>
                   <Link to="/login" className="hover:text-blue-300">Iniciar Sesión</Link>
-                  <Link to="/register" className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">Regístrate</Link>
+                  <Link to="/register" className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">Regístra</Link>
                 </>
               )}
             </nav>

@@ -36,6 +36,6 @@ class Config:
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*').split(',')
 
     # Configuración de la base de datos
-    # Usa la variable de entorno DATABASE_URL si existe, si no, usa un archivo local sqlite.
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///nimbus_v2.db')
+    db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'instance', 'nimbus_v2.db'))
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', f'sqlite:///{db_path}')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

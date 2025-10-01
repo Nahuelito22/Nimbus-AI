@@ -1,5 +1,16 @@
 import sys
 import os
+
+# Forzar codificación UTF-8 para evitar errores 'charmap' en Windows
+if sys.platform == 'win32':
+    try:
+        os.environ['PYTHONUTF8'] = '1'
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+        print("INFO: Codificación UTF-8 forzada para stdout/stderr.")
+    except Exception as e:
+        print(f"WARNING: No se pudo forzar la codificación UTF-8: {e}")
+
 from flask import send_from_directory
 import random
 import string
@@ -21,6 +32,13 @@ from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima
 from src.services.orchestration import get_hail_prediction
 from src.services.goes_service import get_latest_goes_image_url
 from src.database import db  # Importar db desde nuestro archivo database.py
+from src.services.logger import app_logger
+from src.services.admin_services import (
+    get_all_users_service,
+    approve_user_service,
+    reject_user_service,
+    change_user_role_service
+)
 
 # 1. Inicialización de la App con configuración de archivos estáticos
 app = Flask(__name__, 
@@ -165,47 +183,93 @@ def login():
     except Exception as e:
         return jsonify({"msg": f"Error en el login: {str(e)}"}), 500
 
-# --- RUTAS DE ADMINISTRACIÓN ---
-    @app.route('/api/admin/users', methods=['GET'])
-    @admin_required()
-    def get_all_users():
-        """Endpoint para que los administradores obtengan todos los usuarios."""
-        try:
-            users = User.query.all()
-            users_data = [
-                {
-                    'id': user.id,
-                    'name': user.name,
-                    'email': user.email,
-                    'role': user.role,
-                    'is_verified': user.is_verified,
-                    'institution': user.institution,
-                    'employee_id': user.employee_id,
-                    'license_number': user.license_number,
-                    'workplace': user.workplace,
-                    'organization': user.organization,
-                    'github_profile': user.github_profile
-                } for user in users
-            ]
-            return jsonify(users_data), 200
-        except Exception as e:
-            return jsonify({"error": f"Error al obtener los usuarios: {str(e)}"}), 500
 
-    @app.route('/api/admin/approve/<int:user_id>', methods=['POST'])
-    @admin_required()
-    def approve_user(user_id):
-        """Endpoint para que un administrador apruebe a un usuario."""
-        try:
-            user = User.query.get(user_id)
-            if not user:
-                return jsonify({"error": "Usuario no encontrado"}), 404
-            
-            user.is_verified = True
-            db.session.commit()
-            
-            return jsonify({"msg": f"Usuario {user.email} ha sido aprobado."}), 200
-        except Exception as e:
-            return jsonify({"error": f"Error al aprobar el usuario: {str(e)}"}), 500
+# --- RUTAS DE ADMINISTRACIÓN ---
+@app.route('/api/admin/users', methods=['GET'])
+@admin_required()
+def get_all_users():
+    """Endpoint para que los administradores obtengan todos los usuarios."""
+    result = get_all_users_service()
+    if result["success"]:
+        return jsonify(result["users"])
+    else:
+        return jsonify({"error": result["error"]}), 500
+
+@app.route('/api/admin/approve/<int:user_id>', methods=['POST'])
+@admin_required()
+def approve_user(user_id):
+    """Endpoint para que un administrador apruebe a un usuario."""
+    result = approve_user_service(user_id)
+    if result["success"]:
+        return jsonify({"msg": result["msg"]})
+    else:
+        return jsonify({"error": result["error"]}), 404 if "no encontrado" in result["error"] else 500
+
+@app.route('/api/admin/reject/<int:user_id>', methods=['POST'])
+@admin_required()
+def reject_user(user_id):
+    """Endpoint para que un administrador rechace (elimine) a un usuario."""
+    result = reject_user_service(user_id)
+    if result["success"]:
+        return jsonify({"msg": result["msg"]})
+    else:
+        return jsonify({"error": result["error"]}), 404 if "no encontrado" in result["error"] else 500
+
+@app.route('/api/admin/role/<int:user_id>', methods=['PUT'])
+@admin_required()
+def change_user_role(user_id):
+    """Endpoint para cambiar el rol de un usuario."""
+    data = request.get_json()
+    new_role = data.get('role')
+    if not new_role:
+        return jsonify({"error": "El nuevo rol es requerido"}), 400
+    
+    result = change_user_role_service(user_id, new_role)
+    if result["success"]:
+        return jsonify({"msg": result["msg"]})
+    else:
+        return jsonify({"error": result["error"]}), 400 if "Rol no válido" in result["error"] else (404 if "no encontrado" in result["error"] else 500)
+
+@app.route('/api/admin/logs', methods=['GET'])
+@admin_required()
+def get_logs():
+    """Endpoint para ver los logs de la aplicación."""
+    try:
+        log_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs', 'app.log'))
+        if not os.path.exists(log_file_path):
+            return jsonify({"error": "El archivo de logs no se ha creado todavía."}), 404
+        
+        # Leer las últimas N líneas del log (ej. 100)
+        with open(log_file_path, 'r') as f:
+            lines = f.readlines()[-100:]
+        
+        return jsonify({"logs": '\n'.join(lines)})
+    except Exception as e:
+        app_logger.error(f"Error al leer el archivo de logs: {str(e)}")
+        return jsonify({"error": "No se pudo leer el archivo de logs."}), 500
+
+@app.route('/api/admin/test/open-meteo', methods=['GET'])
+@admin_required()
+def test_open_meteo():
+    """Endpoint de prueba para el servicio Open-Meteo."""
+    try:
+        # Usar una ubicación de prueba, por ejemplo, Mendoza
+        result = get_clima_ciudad("Mendoza")
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/admin/test/goes-satellite', methods=['GET'])
+@admin_required()
+def test_goes_satellite():
+    """Endpoint de prueba para el servicio de imágenes GOES."""
+    try:
+        # Forzar una actualización de la imagen de prueba
+        result = get_latest_goes_image_url(band=13, palette='inferno', force_refresh=True)
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # --- RUTA DE ORQUESTACIÓN PRINCIPAL ---
 @app.route('/api/main-prediction', methods=['GET'])
 def main_prediction():
@@ -235,6 +299,7 @@ def main_prediction():
 
 
 # Reemplaza todo el bloque de RUTA DE IMÁGENES SATELITALES por esto:
+# Reemplaza el endpoint de imagen satelital actual por este:
 @app.route('/api/satellite-image', methods=['GET'])
 def satellite_image():
     """
@@ -244,17 +309,15 @@ def satellite_image():
         band = request.args.get('band', default=13, type=int)
         palette = request.args.get('palette', default='inferno', type=str)
         force_refresh = request.args.get('refresh', default='false').lower() == 'true'
-        
-        print(f"Recibida solicitud: band={band}, palette={palette}, force_refresh={force_refresh}")
-        
+        user_lat = request.args.get('lat', type=float)
+        user_lon = request.args.get('lon', type=float)
+
         # Llamar al servicio para obtener las imágenes
-        result = get_latest_goes_image_url(band, palette, force_refresh)
+        result = get_latest_goes_image_url(band, palette, force_refresh, user_lat, user_lon)
         
         if "error" in result:
-            print(f"Error en goes_service: {result['error']}")
+            app_logger.error(f"Error en goes_service: {result['error']}")
             return jsonify(result), 500
-        
-        print(f"Resultado de goes_service: {result}")
         
         # Importar base64
         import base64
@@ -269,9 +332,6 @@ def satellite_image():
         image_filename = result["url"].split('/')[-1]
         legend_filename = result["legend_url"].split('/')[-1]
         
-        print(f"Buscando imagen: {image_filename}")
-        print(f"Buscando leyenda: {legend_filename}")
-        
         image_path = None
         legend_path = None
         
@@ -280,17 +340,11 @@ def satellite_image():
             img_path = os.path.join(path_dir, image_filename)
             leg_path = os.path.join(path_dir, legend_filename)
             
-            print(f"Verificando ruta: {path_dir}")
-            print(f"  - Imagen: {img_path} - Existe: {os.path.exists(img_path)}")
-            print(f"  - Leyenda: {leg_path} - Existe: {os.path.exists(leg_path)}")
-            
             if os.path.exists(img_path) and image_path is None:
                 image_path = img_path
-                print(f"  -> Encontrada imagen en: {img_path}")
                 
             if os.path.exists(leg_path) and legend_path is None:
                 legend_path = leg_path
-                print(f"  -> Encontrada leyenda en: {leg_path}")
         
         # Verificar si se encontraron las imágenes
         if image_path is None:
@@ -306,8 +360,6 @@ def satellite_image():
         with open(legend_path, "rb") as legend_file:
             legend_data = base64.b64encode(legend_file.read()).decode('utf-8')
         
-        print("Imágenes convertidas a base64 correctamente")
-        
         return jsonify({
             "image": f"data:image/png;base64,{image_data}",
             "legend": f"data:image/png;base64,{legend_data}",
@@ -316,7 +368,7 @@ def satellite_image():
         })
         
     except Exception as e:
-        print(f"Error general en satellite_image: {str(e)}")
+        app_logger.error(f"Error general en satellite_image: {str(e)}")
         return jsonify({"error": f"Error general: {str(e)}"}), 500
 
 # --- RUTAS EXISTENTES ---
@@ -344,12 +396,13 @@ def get_all_weather():
 
 @app.route('/api/noticias/<category>', methods=['GET'])
 def get_news_by_category(category):
-    categorias_permitidas=['general','deportes','clima','politica','economia']
-
-    if category not in categorias_permitidas:
-        return jsonify({"error": f"Categoría no válida. Use: {', '.join(categorias_permitidas)}"}), 400
-    
+    """Endpoint para obtener noticias por categoría"""
     try:
+        categorias_permitidas=['general','deportes','clima','politica','economia']
+
+        if category not in categorias_permitidas:
+            return jsonify({"error": f"Categoría no válida. Use: {', '.join(categorias_permitidas)}"}), 400
+        
         formatted_news = get_news_safe(category, limit=3)
 
         return jsonify({
@@ -358,7 +411,8 @@ def get_news_by_category(category):
             'noticias':formatted_news
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app_logger.error(f"Error en get_news_by_category: {str(e)}")
+        return jsonify({"error": f"Error al obtener noticias: {str(e)}"}), 500
 
 @app.route('/api/noticias', methods=['GET'])
 def get_all_news():

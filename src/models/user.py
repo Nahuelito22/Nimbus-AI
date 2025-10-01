@@ -1,5 +1,6 @@
 from src.database import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime  # Agregar esta importación
 
 class User(db.Model):
     __tablename__ = 'user'  # Forzar el nombre de la tabla
@@ -11,6 +12,7 @@ class User(db.Model):
     role = db.Column(db.String(80), nullable=False, default='user')
     is_verified = db.Column(db.Boolean, default=False)
     verification_code = db.Column(db.String(6), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Agregar esta línea
     
     # Campos para Defensa Civil
     institution = db.Column(db.String(200), nullable=True)
