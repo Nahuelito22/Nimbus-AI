@@ -13,6 +13,7 @@ import time
 import uuid
 import hashlib
 import glob
+import re
 
 BUCKET_NAME = 'noaa-goes19'
 PRODUCT_NAME = 'ABI-L2-CMIPF'
@@ -38,17 +39,21 @@ def cleanup_old_images():
                 png_files = glob.glob(os.path.join(path_dir, "*.png"))
                 if not png_files:
                     continue
+
+                # Agrupar por band_palette usando regex robusto
                 config_groups = {}
+                pattern = re.compile(r'latest_band_(\d+)_(\w+)_')  # captura band y palette
                 for file_path in png_files:
                     filename = os.path.basename(file_path)
-                    parts = filename.split('_')
-                    if len(parts) >= 4 and parts[0] == 'latest':
-                        band = parts[2]
-                        palette = parts[3]
+                    m = pattern.search(filename)
+                    if m:
+                        band = m.group(1)
+                        palette = m.group(2)
                         config_key = f"{band}_{palette}"
                         if config_key not in config_groups:
                             config_groups[config_key] = []
                         config_groups[config_key].append({'path': file_path, 'mtime': os.path.getmtime(file_path)})
+
                 for config_key, files in config_groups.items():
                     files.sort(key=lambda x: x['mtime'], reverse=True)
                     if len(files) > MAX_IMAGES_PER_CONFIG:
@@ -59,6 +64,7 @@ def cleanup_old_images():
                                 print(f"INFO: Eliminada: {os.path.basename(file_info['path'])}")
                             except Exception as e:
                                 print(f"WARNING: Error al eliminar {file_info['path']}: {e}")
+
                 now = time.time()
                 max_age_seconds = MAX_AGE_HOURS * 3600
                 for file_path in png_files:
@@ -74,8 +80,8 @@ def cleanup_old_images():
     except Exception as e:
         print(f"ERROR: Error en limpieza: {e}")
 
-def get_cache_key(band, palette):
-    """Genera una clave de caché única"""
+def get_cache_key(band, palette, user_lat=None, user_lon=None, show_marker=False):
+    """Genera una clave de caché única que incluye opcionalmente la info del marcador."""
     now = datetime.utcnow()
     rounded_time = now.replace(
         minute=(now.minute // CACHE_DURATION_MINUTES) * CACHE_DURATION_MINUTES,
@@ -83,10 +89,20 @@ def get_cache_key(band, palette):
         microsecond=0
     )
     time_str = rounded_time.strftime("%Y%m%d_%H%M")
-    return f"{band}_{palette}_{time_str}"
+
+    marker_suffix = ""
+    if show_marker and (user_lat is not None) and (user_lon is not None):
+        # redondear a 4 decimales para evitar demasiadas versiones
+        lat_s = f"{round(float(user_lat), 4):.4f}"
+        lon_s = f"{round(float(user_lon), 4):.4f}"
+        # se agrega prefijo marker para identificar fácilmente
+        marker_suffix = f"_marker_{lat_s}_{lon_s}"
+
+    # Mantener el formato que esperaba el resto del código (band_palette_time+marker)
+    return f"{band}_{palette}_{time_str}{marker_suffix}"
 
 def get_cached_image(cache_key):
-    """Busca una imagen en caché válida"""
+    """Busca una imagen en caché válida (imagen + leyenda)."""
     possible_paths = [
         os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static', 'radar_images')),
         os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'radar_images')),
@@ -98,8 +114,19 @@ def get_cached_image(cache_key):
             for filename in os.listdir(path_dir):
                 if cache_key in filename:
                     image_path = os.path.join(path_dir, filename)
-                    legend_path = os.path.join(path_dir, filename.replace('latest_band', 'legend'))
-                    
+                    # construir legend path coherente con el nombre que generamos más abajo
+                    # la leyenda se genera como legend_{palette}_{cache_key}.png en este módulo,
+                    # por lo que intentamos reconstruirla:
+                    # extraer palette del cache_key (cache_key = band_palette_time[_marker...])
+                    try:
+                        parts = cache_key.split('_')
+                        # parts[1] es palette según get_cache_key
+                        palette = parts[1]
+                        legend_name = f"legend_{palette}_{cache_key}.png"
+                        legend_path = os.path.join(path_dir, legend_name)
+                    except Exception:
+                        legend_path = os.path.join(path_dir, filename.replace('latest_band', 'legend'))
+
                     if os.path.exists(image_path) and os.path.exists(legend_path):
                         # Verificar si aún es válida
                         file_time = datetime.fromtimestamp(os.path.getmtime(image_path))
@@ -108,7 +135,7 @@ def get_cached_image(cache_key):
     
     return None, None
 
-def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh: bool = False, user_lat: float = None, user_lon: float = None):
+def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh: bool = False, user_lat: float = None, user_lon: float = None, show_marker: bool = False):
     """Obtiene la imagen más reciente de GOES-19, con opción para marcar la ubicación del usuario."""
     try:
         # Validar paleta
@@ -124,8 +151,8 @@ def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh
         
         cmap_name = VALID_PALETTES[palette]
         
-        # Generar clave de caché
-        cache_key = get_cache_key(band, palette)
+        # Generar clave de caché (ahora puede incluir marker)
+        cache_key = get_cache_key(band, palette, user_lat=user_lat, user_lon=user_lon, show_marker=show_marker)
         
         # Verificar caché si no se fuerza actualización
         if not force_refresh:
@@ -184,7 +211,7 @@ def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh
             h_sat, lon_cen = proj_info.perspective_point_height, proj_info.longitude_of_projection_origin
             p = Proj(proj='geos', h=h_sat, lon_0=lon_cen)
             
-            # Convertir coordenadas de Mendoza
+            # Convertir coordenadas de Mendoza (bbox usado para recorte)
             x1, y1 = p(-70.5, -37.5)
             x2, y2 = p(-66.5, -32.0)
             
@@ -211,7 +238,7 @@ def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh
             im = ax.imshow(recorte_limpio, cmap=cmap_name, vmin=vmin, vmax=vmax, origin='upper')
             
             # Agregar marcador de ubicación del usuario si se proporciona
-            if user_lat and user_lon:
+            if show_marker and (user_lat is not None) and (user_lon is not None):
                 try:
                     # Convertir coordenadas del usuario a la proyección del satélite
                     user_x, user_y = p(user_lon, user_lat)
@@ -220,14 +247,18 @@ def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh
                     if (min(x1, x2) <= user_x <= max(x1, x2) and 
                         min(y1, y2) <= user_y <= max(y1, y2)):
                         
-                        # Convertir a coordenadas de píxeles
-                        pixel_x = np.interp(user_x, [min(x1, x2), max(x1, x2)], [0, recorte_limpio.shape[1]])
-                        pixel_y = np.interp(user_y, [min(y1, y2), max(y1, y2)], [0, recorte_limpio.shape[0]])
-                        
-                        # Dibujar el marcador
-                        ax.plot(pixel_x, recorte_limpio.shape[0] - pixel_y, 'x', 
-                               color='red', markersize=10, markeredgewidth=2)
-                        print(f"Ubicación del usuario marcada en ({user_lat}, {user_lon})")
+                        # Convertir a coordenadas de píxeles (x horizontal, y vertical)
+                        width = recorte_limpio.shape[1]
+                        height = recorte_limpio.shape[0]
+                        pixel_x = np.interp(user_x, [min(x1, x2), max(x1, x2)], [0, width - 1])
+                        pixel_y = np.interp(user_y, [min(y1, y2), max(y1, y2)], [0, height - 1])
+
+                        # DEBUG: imprimir info para verificar coordenadas (revisa logs del servidor)
+                        print(f"[DEBUG MARKER] user_lat={user_lat}, user_lon={user_lon} -> proj({user_x:.2f},{user_y:.2f}) -> px={pixel_x:.1f}, py={pixel_y:.1f}, w={width}, h={height}", flush=True)
+
+                        # Dibujar marcador visible: punto verde con borde negro
+                        ax.scatter([pixel_x], [pixel_y],marker='o', s=600, facecolors='green', edgecolors='black', linewidths=1.8, zorder=5, alpha=0.95)
+                        print(f"Ubicación del usuario marcada en ({user_lat}, {user_lon}) -> (px: {pixel_x:.1f}, py: {pixel_y:.1f})")
                     else:
                         print(f"La ubicación del usuario ({user_lat}, {user_lon}) está fuera del área recortada")
                         

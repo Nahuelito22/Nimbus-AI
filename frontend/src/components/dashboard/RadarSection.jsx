@@ -12,38 +12,62 @@ const RadarSection = () => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [showZoomControls, setShowZoomControls] = useState(false);
 
-  const handleFetchRadarImage = async (forceRefresh = false) => {
+  // Nueva state para marcador y geolocalización
+  const [showMarker, setShowMarker] = useState(false);
+  const [coords, setCoords] = useState(null);
+  const [loadingGeo, setLoadingGeo] = useState(false);
+
+  // fetchImage ahora acepta opciones (marker, lat, lon, force)
+  const handleFetchRadarImage = async ({ marker = false, lat = null, lon = null, force = false } = {}) => {
     setRadarIsLoading(true);
     setRadarError(null);
     try {
-      const data = await getSatelliteImage(band, palette, forceRefresh);
-      if (data.image) {
-        setRadarImage(data.image);
-        setLegendImage(data.legend || '');
-        setIsCached(data.cached || false);
-        console.log('Imagen recibida (base64):', data.image ? 'Sí' : 'No');
-        console.log('Leyenda recibida (base64):', data.legend ? 'Sí' : 'No');
-        console.log('¿Usando caché?:', data.cached ? 'Sí' : 'No');
+      const data = await getSatelliteImage(band, palette, {
+        showMarker: marker,
+        lat,
+        lon,
+        forceRefresh: force
+      });
+
+      // Ahora esperamos la estructura del backend: { url, legend_url, cached, ... }
+      if (data && data.url) {
+        setRadarImage(data.url);
+        setLegendImage(data.legend_url || '');
+        setIsCached(Boolean(data.cached));
+        setRadarError(null);
+        console.log('Imagen recibida (url):', data.url);
+        console.log('Leyenda recibida (url):', data.legend_url);
+        console.log('¿Usando caché?:', data.cached);
       } else {
         setRadarError(data.error || 'No se pudo cargar la imagen del radar.');
         setRadarImage('');
         setLegendImage('');
+        setIsCached(false);
       }
     } catch (err) {
-      setRadarError(err.message);
+      setRadarError(err.message || 'Error al obtener la imagen satelital.');
       setRadarImage('');
       setLegendImage('');
+      setIsCached(false);
     } finally {
       setRadarIsLoading(false);
     }
   };
 
+  // Cargar imagen inicial (sin marker)
   useEffect(() => {
-    handleFetchRadarImage();
+    handleFetchRadarImage({ marker: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [band, palette]);
 
   const handleRefresh = () => {
-    handleFetchRadarImage(true);
+    // respetar si actualmente se muestra el marker: refrescar manteniendo su estado
+    handleFetchRadarImage({
+      marker: showMarker,
+      lat: coords ? coords.latitude : null,
+      lon: coords ? coords.longitude : null,
+      force: true
+    });
   };
 
   const handleZoomIn = () => {
@@ -52,6 +76,39 @@ const RadarSection = () => {
 
   const handleZoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
+  };
+
+  // Manejo del toggle de ubicación
+  const handleToggleMarker = () => {
+    if (!showMarker) {
+      // activar -> pedir geolocalización
+      if (!navigator.geolocation) {
+        alert('Geolocalización no soportada por este navegador.');
+        return;
+      }
+      setLoadingGeo(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setCoords({ latitude, longitude });
+          setShowMarker(true);
+          setLoadingGeo(false);
+          // pedir imagen con marker
+          handleFetchRadarImage({ marker: true, lat: latitude, lon: longitude });
+        },
+        (err) => {
+          console.error('Error geolocalización:', err);
+          setLoadingGeo(false);
+          alert('No se pudo obtener la ubicación (permiso denegado o error).');
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      // desactivar -> pedir versión sin marker
+      setShowMarker(false);
+      setCoords(null);
+      handleFetchRadarImage({ marker: false });
+    }
   };
 
   // Explicación de colores según la paleta
@@ -121,6 +178,17 @@ const RadarSection = () => {
               Imagen en caché
             </span>
           )}
+        </div>
+
+        {/* Nuevo control: mostrar ubicación */}
+        <div className="flex flex-col gap-2">
+          <button
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400"
+            onClick={handleToggleMarker}
+            disabled={radarIsLoading || loadingGeo}
+          >
+            {loadingGeo ? 'Obteniendo ubicación...' : (showMarker ? 'Ocultar mi ubicación' : 'Mostrar mi ubicación')}
+          </button>
         </div>
       </div>
       
