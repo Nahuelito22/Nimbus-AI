@@ -1,48 +1,32 @@
-const PREDICTION_API_URL = 'https://nahuelito22-nimbus-ai.hf.space/api/predict';
+// La URL debe apuntar al backend de Flask, no directamente a Hugging Face.
+// Asumimos que el backend corre localmente en el puerto 5000.
+const BACKEND_API_URL = 'http://127.0.0.1:5000/api/main-prediction';
 
 export const getHailPrediction = async (coords) => {
   const { lat, lon } = coords;
 
-  // Usar el cuerpo de la petición que proporcionaste
-  const body = {
-    "PRCP": 0,
-    "SNWD": 0,
-    "TAVG": 0,
-    "TMAX": 0,
-    "TMIN": 0,
-    "latitude": lat,
-    "longitude": lon,
-    "om_weather_code": 0,
-    "om_rain_sum": 0,
-    "om_snowfall_sum": 0,
-    "om_precipitation_hours": 0,
-    "om_wind_gusts_10m_max": 0,
-    "om_wind_direction_10m_dominant": 0,
-    "om_shortwave_radiation_sum": 0,
-    "om_et0_fao_evapotranspiration": 0,
-    "om_dew_point_2m_mean": 0,
-    "om_relative_humidity_2m_mean": 0,
-    "om_pressure_msl_mean": 0,
-    "mes": new Date().getMonth() + 1, // Usar mes y día actuales
-    "dia_del_año": Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)),
-    "rango_temp_diario": 0
-  };
+  // El backend espera las coordenadas como parámetros en la URL.
+  const url = `${BACKEND_API_URL}?lat=${lat}&lon=${lon}`;
 
-  const response = await fetch(PREDICTION_API_URL, {
-    method: 'POST',
+  // La petición al backend es un GET, no un POST.
+  // El backend se encargará de construir el body para el modelo.
+  const response = await fetch(url, {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      // Si el endpoint requiriera autenticación, se añadiría el token aquí.
+      // Ejemplo: 'Authorization': `Bearer ${localStorage.getItem('token')}`
     },
-    body: JSON.stringify(body),
   });
 
   const data = await response.json();
 
   if (!response.ok) {
-    // La API de Hugging Face puede devolver el error en `detail`
-    const errorMessage = data.detail || 'Error al obtener la predicción.';
+    // El backend devuelve el error en una clave "error".
+    const errorMessage = data.error || 'Error al obtener la predicción desde el backend.';
     throw new Error(errorMessage);
   }
 
+  // La respuesta del backend ya es la respuesta final del modelo.
   return data;
 };

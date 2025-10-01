@@ -251,13 +251,13 @@ def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh
                         width = recorte_limpio.shape[1]
                         height = recorte_limpio.shape[0]
                         pixel_x = np.interp(user_x, [min(x1, x2), max(x1, x2)], [0, width - 1])
-                        pixel_y = np.interp(user_y, [min(y1, y2), max(y1, y2)], [0, height - 1])
+                        pixel_y = np.interp(user_y, [min(y1, y2), max(y1, y2)], [height - 1, 0]) # Corrección: Eje Y invertido
 
                         # DEBUG: imprimir info para verificar coordenadas (revisa logs del servidor)
                         print(f"[DEBUG MARKER] user_lat={user_lat}, user_lon={user_lon} -> proj({user_x:.2f},{user_y:.2f}) -> px={pixel_x:.1f}, py={pixel_y:.1f}, w={width}, h={height}", flush=True)
 
                         # Dibujar marcador visible: punto verde con borde negro
-                        ax.scatter([pixel_x], [pixel_y],marker='o', s=600, facecolors='green', edgecolors='black', linewidths=1.8, zorder=5, alpha=0.95)
+                        ax.scatter([pixel_x], [pixel_y],marker='o', s=100, facecolors='green', edgecolors='black', linewidths=1, zorder=5, alpha=0.85)
                         print(f"Ubicación del usuario marcada en ({user_lat}, {user_lon}) -> (px: {pixel_x:.1f}, py: {pixel_y:.1f})")
                     else:
                         print(f"La ubicación del usuario ({user_lat}, {user_lon}) está fuera del área recortada")

@@ -311,9 +311,18 @@ def satellite_image():
         force_refresh = request.args.get('refresh', default='false').lower() == 'true'
         user_lat = request.args.get('lat', type=float)
         user_lon = request.args.get('lon', type=float)
+        # El frontend envía 'marker' como 'true' o 'false' en la URL
+        show_marker = request.args.get('marker', default='true').lower() == 'true'
 
-        # Llamar al servicio para obtener las imágenes
-        result = get_latest_goes_image_url(band, palette, force_refresh, user_lat, user_lon)
+        # Llamar al servicio para obtener las imágenes, pasando el nuevo parámetro
+        result = get_latest_goes_image_url(
+            band=band, 
+            palette=palette, 
+            force_refresh=force_refresh, 
+            user_lat=user_lat, 
+            user_lon=user_lon,
+            show_marker=show_marker
+        )
         
         if "error" in result:
             app_logger.error(f"Error en goes_service: {result['error']}")
