@@ -11,6 +11,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(80), nullable=False, default='user')
     is_verified = db.Column(db.Boolean, default=False)
+    is_suspended = db.Column(db.Boolean, default=False, nullable=False)
     verification_code = db.Column(db.String(6), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Agregar esta línea
     

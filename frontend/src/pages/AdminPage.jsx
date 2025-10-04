@@ -7,10 +7,14 @@ import {
     changeUserRole,
     getLogs,
     testOpenMeteo,
-    testGoesSatellite
+    testGoesSatellite,
+    suspendUser,
+    unbanUser
 } from '../api/admin';
+import { useAuth } from '../context/AuthContext';
 
 function AdminPage() {
+    const { user: currentUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,6 +23,7 @@ function AdminPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedRole, setSelectedRole] = useState('');
+    const [roleFilter, setRoleFilter] = useState('all');
 
     const fetchUsers = async () => {
         try {
@@ -47,13 +52,33 @@ function AdminPage() {
     };
 
     const handleReject = async (userId) => {
-        if (window.confirm('¿Estás seguro de que quieres rechazar y eliminar a este usuario?')) {
+        if (window.confirm('¿Estás seguro de que quieres rechazar esta solicitud y degradar al usuario a rol normal?')) {
             try {
                 await rejectUser(userId);
                 fetchUsers(); // Refresh users after action
             } catch (err) {
                 setError(err.message);
             }
+        }
+    };
+
+    const handleSuspend = async (userId) => {
+        if (window.confirm('¿Estás seguro de que quieres suspender a este usuario? No podrá iniciar sesión.')) {
+            try {
+                await suspendUser(userId);
+                fetchUsers();
+            } catch (err) {
+                setError(err.message);
+            }
+        }
+    };
+
+    const handleUnban = async (userId) => {
+        try {
+            await unbanUser(userId);
+            fetchUsers();
+        } catch (err) {
+            setError(err.message);
         }
     };
 
@@ -103,6 +128,9 @@ function AdminPage() {
     };
 
     const renderUserStatus = (user) => {
+        if (user.is_suspended) {
+            return <span className="bg-red-200 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Suspendido</span>;
+        }
         if (user.is_verified) {
             return <span className="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Aprobado</span>;
         } else {
@@ -111,16 +139,34 @@ function AdminPage() {
     };
 
     const renderUserActions = (user) => {
+        if (currentUser && currentUser.email === user.email) {
+            return <span className="text-xs text-gray-500">No se puede modificar a sí mismo</span>;
+        }
+
         return (
             <>
-                {!user.is_verified && (
+                {!user.is_verified && user.role !== 'user' && (
                     <button onClick={() => handleApprove(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Aprobar</button>
                 )}
-                <button onClick={() => handleReject(user.id)} className="text-red-600 hover:text-red-800 text-sm">Rechazar</button>
+                {user.role !== 'user' && (
+                    <button onClick={() => handleReject(user.id)} className="text-gray-600 hover:text-gray-800 mr-2 text-sm">Rechazar</button>
+                )}
+                {user.is_suspended ? (
+                    <button onClick={() => handleUnban(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Quitar Suspensión</button>
+                ) : (
+                    <button onClick={() => handleSuspend(user.id)} className="text-red-600 hover:text-red-800 text-sm">Suspender</button>
+                )}
                 <button onClick={() => openChangeRoleModal(user)} className="text-blue-600 hover:text-blue-800 ml-2 text-sm">Editar Rol</button>
             </>
         );
     };
+
+    const filteredUsers = users.filter(user => {
+        if (roleFilter === 'all') {
+            return true;
+        }
+        return user.role === roleFilter;
+    });
 
     return (
         <div className="p-6 bg-gray-50">
@@ -129,7 +175,25 @@ function AdminPage() {
 
                 {/* User Management Section */}
                 <div className="mb-8">
-                    <h3 className="text-xl font-semibold mb-4">Gestión de Usuarios</h3>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-semibold">Gestión de Usuarios</h3>
+                        <div>
+                            <label htmlFor="role-filter" className="mr-2 font-medium text-sm">Filtrar por rol:</label>
+                            <select
+                                id="role-filter"
+                                value={roleFilter}
+                                onChange={(e) => setRoleFilter(e.target.value)}
+                                className="px-3 py-1 border rounded-md text-sm"
+                            >
+                                <option value="all">Todos</option>
+                                <option value="user">Usuario</option>
+                                <option value="admin">Administrador</option>
+                                <option value="defensa_civil">Defensa Civil</option>
+                                <option value="meteorologo">Meteorólogo</option>
+                                <option value="cientifico_datos">Científico de Datos</option>
+                            </select>
+                        </div>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full bg-white border border-gray-200">
                             <thead>
@@ -152,7 +216,7 @@ function AdminPage() {
                                         <td colSpan="5" className="text-center py-4 text-red-600">Error: {error}</td>
                                     </tr>
                                 )}
-                                {!loading && !error && users.map(user => (
+                                {!loading && !error && filteredUsers.map(user => (
                                     <tr key={user.id}>
                                         <td className="py-2 px-4 border-b">{user.name}</td>
                                         <td className="py-2 px-4 border-b">{user.email}</td>

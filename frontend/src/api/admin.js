@@ -40,6 +40,14 @@ export const rejectUser = async (userId) => {
     return await apiRequest(`${API_URL}/admin/reject/${userId}`, 'POST');
 };
 
+export const suspendUser = async (userId) => {
+    return await apiRequest(`${API_URL}/admin/suspend/${userId}`, 'POST');
+};
+
+export const unbanUser = async (userId) => {
+    return await apiRequest(`${API_URL}/admin/unban/${userId}`, 'POST');
+};
+
 export const changeUserRole = async (userId, newRole) => {
     return await apiRequest(`${API_URL}/admin/role/${userId}`, 'PUT', { role: newRole });
 };

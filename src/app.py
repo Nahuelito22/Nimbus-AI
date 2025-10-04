@@ -37,7 +37,9 @@ from src.services.admin_services import (
     get_all_users_service,
     approve_user_service,
     reject_user_service,
-    change_user_role_service
+    change_user_role_service,
+    suspend_user_service,
+    unban_user_service
 )
 
 # 1. Inicialización de la App con configuración de archivos estáticos
@@ -174,6 +176,9 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
+        if user and user.is_suspended:
+            return jsonify({"msg": "Tu cuenta ha sido suspendida. Contacta al administrador."}), 403
+
         if user and user.check_password(password):  # Usar el método del modelo
             additional_claims = {"role": user.role}
             access_token = create_access_token(identity=user.email, additional_claims=additional_claims)
@@ -210,6 +215,26 @@ def approve_user(user_id):
 def reject_user(user_id):
     """Endpoint para que un administrador rechace (elimine) a un usuario."""
     result = reject_user_service(user_id)
+    if result["success"]:
+        return jsonify({"msg": result["msg"]})
+    else:
+        return jsonify({"error": result["error"]}), 404 if "no encontrado" in result["error"] else 500
+
+@app.route('/api/admin/suspend/<int:user_id>', methods=['POST'])
+@admin_required()
+def suspend_user(user_id):
+    """Endpoint para suspender a un usuario."""
+    result = suspend_user_service(user_id)
+    if result["success"]:
+        return jsonify({"msg": result["msg"]})
+    else:
+        return jsonify({"error": result["error"]}), 404 if "no encontrado" in result["error"] else 500
+
+@app.route('/api/admin/unban/<int:user_id>', methods=['POST'])
+@admin_required()
+def unban_user(user_id):
+    """Endpoint para levantar la suspensión de un usuario."""
+    result = unban_user_service(user_id)
     if result["success"]:
         return jsonify({"msg": result["msg"]})
     else:
