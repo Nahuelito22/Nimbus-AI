@@ -10,7 +10,8 @@ function AppRoutes() {
 
   const PostLoginRedirect = () => {
     if (!user) return <Navigate to="/login" />;
-    return user.role === 'admin' ? <Navigate to="/admin" /> : <Navigate to="/" />;
+    // Redirigir a admin si es admin o superadmin
+    return ['admin', 'superadmin'].includes(user.role) ? <Navigate to="/admin" /> : <Navigate to="/" />;
   };
 
   return (
@@ -29,7 +30,7 @@ function AppRoutes() {
       />
       <Route
         path="/admin"
-        element={user && user.role === 'admin' ? <AdminPage /> : <Navigate to="/" />}
+        element={user && ['admin', 'superadmin'].includes(user.role) ? <AdminPage /> : <Navigate to="/" />}
       />
     </Routes>
   );

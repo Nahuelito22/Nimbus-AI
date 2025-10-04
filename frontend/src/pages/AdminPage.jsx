@@ -139,27 +139,33 @@ function AdminPage() {
     };
 
     const renderUserActions = (user) => {
-        if (currentUser && currentUser.email === user.email) {
-            return <span className="text-xs text-gray-500">No se puede modificar a sí mismo</span>;
-        }
+    // Nadie puede modificarse a sí mismo
+    if (currentUser && currentUser.id === user.id) {
+        return <span className="text-xs text-gray-500">No se puede modificar a sí mismo</span>;
+    }
 
-        return (
-            <>
-                {!user.is_verified && user.role !== 'user' && (
-                    <button onClick={() => handleApprove(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Aprobar</button>
-                )}
-                {user.role !== 'user' && (
-                    <button onClick={() => handleReject(user.id)} className="text-gray-600 hover:text-gray-800 mr-2 text-sm">Rechazar</button>
-                )}
-                {user.is_suspended ? (
-                    <button onClick={() => handleUnban(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Quitar Suspensión</button>
-                ) : (
-                    <button onClick={() => handleSuspend(user.id)} className="text-red-600 hover:text-red-800 text-sm">Suspender</button>
-                )}
-                <button onClick={() => openChangeRoleModal(user)} className="text-blue-600 hover:text-blue-800 ml-2 text-sm">Editar Rol</button>
-            </>
-        );
-    };
+    // Un admin no puede modificar a otro admin
+    if (user.role === 'admin' && currentUser.role !== 'superadmin') {
+        return <span className="text-xs text-gray-500">Solo un Superadmin puede modificar a un Admin</span>;
+    }
+
+    return (
+        <>
+            {!user.is_verified && user.role !== 'user' && (
+                <button onClick={() => handleApprove(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Aprobar</button>
+            )}
+            {user.role !== 'user' && (
+                <button onClick={() => handleReject(user.id)} className="text-gray-600 hover:text-gray-800 mr-2 text-sm">Rechazar</button>
+            )}
+            {user.is_suspended ? (
+                <button onClick={() => handleUnban(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Quitar Suspensión</button>
+            ) : (
+                <button onClick={() => handleSuspend(user.id)} className="text-red-600 hover:text-red-800 text-sm">Suspender</button>
+            )}
+            <button onClick={() => openChangeRoleModal(user)} className="text-blue-600 hover:text-blue-800 ml-2 text-sm">Editar Rol</button>
+        </>
+    );
+};
 
     const filteredUsers = users.filter(user => {
         if (roleFilter === 'all') {

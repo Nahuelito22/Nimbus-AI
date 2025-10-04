@@ -64,7 +64,8 @@ def admin_required():
         @jwt_required()
         def decorator(*args, **kwargs):
             claims = get_jwt()
-            if claims.get("role") == "admin":
+            # Permitir acceso si el rol es 'admin' o 'superadmin'
+            if claims.get("role") in ["admin", "superadmin"]:
                 return fn(*args, **kwargs)
             else:
                 return jsonify(msg="¡Acceso denegado! Se requiere rol de administrador."), 403
@@ -86,14 +87,18 @@ def create_db():
 
 @app.cli.command("set-admin")
 @click.argument("email")
-def set_admin(email):
-    """Otorga privilegios de administrador a un usuario."""
+@click.option('--role', default='admin', help='Rol a asignar (admin, superadmin).')
+def set_admin(email, role):
+    """Otorga privilegios de administrador o superadministrador a un usuario."""
     with app.app_context():
         user = User.query.filter_by(email=email).first()
         if user:
-            user.role = 'admin'
+            if role not in ['admin', 'superadmin']:
+                print(f"Error: Rol '{role}' no es válido. Use 'admin' o 'superadmin'.")
+                return
+            user.role = role
             db.session.commit()
-            print(f"El usuario {user.email} ahora es administrador.")
+            print(f"El usuario {user.email} ahora tiene el rol de '{role}'.")
         else:
             print(f"Error: No se encontró ningún usuario con el email '{email}'.")
 # 4. Manejadores de errores
