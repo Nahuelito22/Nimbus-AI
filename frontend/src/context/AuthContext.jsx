@@ -20,25 +20,24 @@ export const AuthProvider = ({ children }) => {
       try {
         const decodedToken = jwtDecode(storedToken);
         
-        // Verificar si el token ha expirado
         const currentTime = Date.now() / 1000;
         if (decodedToken.exp < currentTime) {
-          // Token expirado, limpiar almacenamiento
           localStorage.removeItem('authToken');
           setToken(null);
           setUser(null);
           setIsAuthenticated(false);
         } else {
-          // Token válido, establecer usuario
           setToken(storedToken);
+          // Incluir id, nombre y rol del token
           setUser({
+            id: decodedToken.id,
+            name: decodedToken.name,
             email: decodedToken.sub,
             role: decodedToken.role
           });
           setIsAuthenticated(true);
         }
       } catch (err) {
-        // Error al decodificar el token, limpiar almacenamiento
         localStorage.removeItem('authToken');
         setToken(null);
         setUser(null);
@@ -55,13 +54,14 @@ export const AuthProvider = ({ children }) => {
       const data = await apiLogin(credentials);
       const { access_token } = data;
       
-      // Guardar token en localStorage
       localStorage.setItem('authToken', access_token);
       setToken(access_token);
       
-      // Decodificar token para obtener información del usuario
       const decodedToken = jwtDecode(access_token);
+      // Incluir id, nombre y rol del token
       const userData = {
+        id: decodedToken.id,
+        name: decodedToken.name,
         email: decodedToken.sub,
         role: decodedToken.role
       };
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       setIsAuthenticated(false);
-      throw err; // Lanzar el error para que el formulario de login lo pueda atrapar
+      throw err;
     } finally {
       setLoading(false);
     }

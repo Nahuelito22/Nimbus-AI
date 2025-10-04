@@ -144,24 +144,29 @@ function AdminPage() {
         return <span className="text-xs text-gray-500">No se puede modificar a sí mismo</span>;
     }
 
-    // Un admin no puede modificar a otro admin
-    if (user.role === 'admin' && currentUser.role !== 'superadmin') {
+    // Un admin no puede modificar a otro admin o a un superadmin
+    if ([ 'admin', 'superadmin' ].includes(user.role) && currentUser.role !== 'superadmin') {
         return <span className="text-xs text-gray-500">Solo un Superadmin puede modificar a un Admin</span>;
     }
 
     return (
         <>
-            {!user.is_verified && user.role !== 'user' && (
+            {/* El botón de aprobar solo aparece si el usuario no está verificado */}
+            {!user.is_verified && (
                 <button onClick={() => handleApprove(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Aprobar</button>
             )}
-            {user.role !== 'user' && (
+
+            {/* El botón de rechazar solo aparece para roles que no son ni user, ni admin, ni superadmin */}
+            {![ 'user', 'admin', 'superadmin' ].includes(user.role) && (
                 <button onClick={() => handleReject(user.id)} className="text-gray-600 hover:text-gray-800 mr-2 text-sm">Rechazar</button>
             )}
+
             {user.is_suspended ? (
                 <button onClick={() => handleUnban(user.id)} className="text-green-600 hover:text-green-800 mr-2 text-sm font-semibold">Quitar Suspensión</button>
             ) : (
                 <button onClick={() => handleSuspend(user.id)} className="text-red-600 hover:text-red-800 text-sm">Suspender</button>
             )}
+            
             <button onClick={() => openChangeRoleModal(user)} className="text-blue-600 hover:text-blue-800 ml-2 text-sm">Editar Rol</button>
         </>
     );

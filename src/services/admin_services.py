@@ -39,17 +39,22 @@ def approve_user_service(user_id):
         if admin_user and admin_user.id == user_id:
             return {"success": False, "error": "Un administrador no puede aprobarse a sí mismo."}
 
-        app_logger.info(f"Servicio de aprobación de usuario invocado para user_id: {user_id}")
-        user = User.query.get(user_id)
-        if not user:
+        user_to_approve = User.query.get(user_id)
+        if not user_to_approve:
             app_logger.warning(f"Intento de aprobar usuario no encontrado con id: {user_id}")
             return {"success": False, "error": "Usuario no encontrado"}
-        
-        user.is_verified = True
+
+        # Lógica de Superadmin: Un admin no puede aprobar a otro admin/superadmin
+        if user_to_approve.role in ['admin', 'superadmin'] and admin_user.role != 'superadmin':
+            app_logger.warning(f"El admin '{admin_user.email}' intentó aprobar al admin '{user_to_approve.email}' sin ser superadmin.")
+            return {"success": False, "error": "Los administradores no pueden modificar a otros administradores."}
+
+        app_logger.info(f"Servicio de aprobación de usuario invocado para user_id: {user_id}")
+        user_to_approve.is_verified = True
         db.session.commit()
         
-        app_logger.info(f"Usuario {user.email} (ID: {user_id}) ha sido aprobado exitosamente.")
-        return {"success": True, "msg": f"Usuario {user.email} ha sido aprobado."}
+        app_logger.info(f"Usuario {user_to_approve.email} (ID: {user_id}) ha sido aprobado exitosamente.")
+        return {"success": True, "msg": f"Usuario {user_to_approve.email} ha sido aprobado."}
     except Exception as e:
         app_logger.error(f"Error en approve_user_service para user_id {user_id}: {str(e)}")
         db.session.rollback()
@@ -63,15 +68,20 @@ def reject_user_service(user_id):
         if admin_user and admin_user.id == user_id:
             return {"success": False, "error": "Un administrador no puede rechazarse a sí mismo."}
 
-        app_logger.info(f"Servicio de rechazo de rol invocado para user_id: {user_id}")
-        user = User.query.get(user_id)
-        if not user:
+        user_to_reject = User.query.get(user_id)
+        if not user_to_reject:
             app_logger.warning(f"Intento de rechazar rol a usuario no encontrado con id: {user_id}")
             return {"success": False, "error": "Usuario no encontrado"}
-        
-        email = user.email
-        user.role = 'user'
-        user.is_verified = False # Se revoca la verificación si la tuvo
+
+        # Lógica de Superadmin: Un admin no puede rechazar a otro admin/superadmin
+        if user_to_reject.role in ['admin', 'superadmin'] and admin_user.role != 'superadmin':
+            app_logger.warning(f"El admin '{admin_user.email}' intentó rechazar al admin '{user_to_reject.email}' sin ser superadmin.")
+            return {"success": False, "error": "Los administradores no pueden modificar a otros administradores."}
+
+        app_logger.info(f"Servicio de rechazo de rol invocado para user_id: {user_id}")
+        email = user_to_reject.email
+        user_to_reject.role = 'user'
+        user_to_reject.is_verified = False # Se revoca la verificación si la tuvo
         db.session.commit()
         
         app_logger.info(f"Usuario {email} (ID: {user_id}) ha sido degradado a rol 'user'.")

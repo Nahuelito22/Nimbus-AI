@@ -185,7 +185,12 @@ def login():
             return jsonify({"msg": "Tu cuenta ha sido suspendida. Contacta al administrador."}), 403
 
         if user and user.check_password(password):  # Usar el método del modelo
-            additional_claims = {"role": user.role}
+            # Añadir ID y nombre al token para uso en el frontend
+            additional_claims = {
+                "role": user.role,
+                "id": user.id,
+                "name": user.name
+            }
             access_token = create_access_token(identity=user.email, additional_claims=additional_claims)
             return jsonify(access_token=access_token), 200
         else:

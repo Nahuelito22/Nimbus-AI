@@ -17,7 +17,7 @@ function Navbar() {
                 <>
                   <span className="text-sm">Hola, {user.email}</span>
                   <Link to="/" className="hover:text-blue-300">Dashboard</Link>
-                  {user.role === 'admin' && (
+                  {['admin', 'superadmin'].includes(user.role) && (
                     <Link to="/admin" className="hover:text-blue-300">Panel Admin</Link>
                   )}
                   <button onClick={logout} className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Salir</button>
