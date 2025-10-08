@@ -17,6 +17,7 @@ def get_all_users_service():
                 'role': user.role,
                 'is_verified': user.is_verified,
                 'is_suspended': user.is_suspended,
+                'role_status': user.role_status,  # Añadir el nuevo campo
                 'institution': user.institution,
                 'employee_id': user.employee_id,
                 'license_number': user.license_number,
@@ -32,7 +33,7 @@ def get_all_users_service():
         return {"success": False, "error": str(e)}
 
 def approve_user_service(user_id):
-    """Aprueba a un usuario estableciendo is_verified a True."""
+    """Aprueba el rol profesional de un usuario estableciendo role_status a 'approved'."""
     try:
         current_admin_email = get_jwt_identity()
         admin_user = User.query.filter_by(email=current_admin_email).first()
@@ -41,27 +42,26 @@ def approve_user_service(user_id):
 
         user_to_approve = User.query.get(user_id)
         if not user_to_approve:
-            app_logger.warning(f"Intento de aprobar usuario no encontrado con id: {user_id}")
+            app_logger.warning(f"Intento de aprobar rol a usuario no encontrado con id: {user_id}")
             return {"success": False, "error": "Usuario no encontrado"}
 
-        # Lógica de Superadmin: Un admin no puede aprobar a otro admin/superadmin
         if user_to_approve.role in ['admin', 'superadmin'] and admin_user.role != 'superadmin':
             app_logger.warning(f"El admin '{admin_user.email}' intentó aprobar al admin '{user_to_approve.email}' sin ser superadmin.")
             return {"success": False, "error": "Los administradores no pueden modificar a otros administradores."}
 
-        app_logger.info(f"Servicio de aprobación de usuario invocado para user_id: {user_id}")
-        user_to_approve.is_verified = True
+        app_logger.info(f"Servicio de aprobación de rol invocado para user_id: {user_id}")
+        user_to_approve.role_status = 'approved'
         db.session.commit()
         
-        app_logger.info(f"Usuario {user_to_approve.email} (ID: {user_id}) ha sido aprobado exitosamente.")
-        return {"success": True, "msg": f"Usuario {user_to_approve.email} ha sido aprobado."}
+        app_logger.info(f"El rol profesional del usuario {user_to_approve.email} (ID: {user_id}) ha sido aprobado.")
+        return {"success": True, "msg": f"El rol de {user_to_approve.email} ha sido aprobado."}
     except Exception as e:
         app_logger.error(f"Error en approve_user_service para user_id {user_id}: {str(e)}")
         db.session.rollback()
         return {"success": False, "error": str(e)}
 
 def reject_user_service(user_id):
-    """Rechaza la solicitud de un rol profesional, degradando al usuario a rol 'user'."""
+    """Rechaza la solicitud de un rol profesional, degradando al usuario a rol 'user' y marcando el estado como 'rejected'."""
     try:
         current_admin_email = get_jwt_identity()
         admin_user = User.query.filter_by(email=current_admin_email).first()
@@ -73,7 +73,6 @@ def reject_user_service(user_id):
             app_logger.warning(f"Intento de rechazar rol a usuario no encontrado con id: {user_id}")
             return {"success": False, "error": "Usuario no encontrado"}
 
-        # Lógica de Superadmin: Un admin no puede rechazar a otro admin/superadmin
         if user_to_reject.role in ['admin', 'superadmin'] and admin_user.role != 'superadmin':
             app_logger.warning(f"El admin '{admin_user.email}' intentó rechazar al admin '{user_to_reject.email}' sin ser superadmin.")
             return {"success": False, "error": "Los administradores no pueden modificar a otros administradores."}
@@ -81,10 +80,10 @@ def reject_user_service(user_id):
         app_logger.info(f"Servicio de rechazo de rol invocado para user_id: {user_id}")
         email = user_to_reject.email
         user_to_reject.role = 'user'
-        user_to_reject.is_verified = False # Se revoca la verificación si la tuvo
+        user_to_reject.role_status = 'rejected'
         db.session.commit()
         
-        app_logger.info(f"Usuario {email} (ID: {user_id}) ha sido degradado a rol 'user'.")
+        app_logger.info(f"Usuario {email} (ID: {user_id}) ha sido degradado a rol 'user' y su solicitud rechazada.")
         return {"success": True, "msg": f"La solicitud del usuario {email} ha sido rechazada y su rol ha sido establecido como 'user'."}
     except Exception as e:
         app_logger.error(f"Error en reject_user_service para user_id {user_id}: {str(e)}")
@@ -105,18 +104,18 @@ def change_user_role_service(user_id, new_role):
             app_logger.warning(f"Intento de cambiar rol a usuario no encontrado con id: {user_id}")
             return {"success": False, "error": "Usuario no encontrado"}
 
-        # Lógica de Superadmin: Un admin no puede modificar a otro admin
         if user_to_modify.role == 'admin' and admin_user.role != 'superadmin':
             app_logger.warning(f"El admin '{admin_user.email}' intentó modificar al admin '{user_to_modify.email}' sin ser superadmin.")
             return {"success": False, "error": "Los administradores no pueden modificar a otros administradores."}
 
-        # Aquí podrías añadir validación para los roles permitidos
         allowed_roles = ['user', 'admin', 'defensa_civil', 'meteorologo', 'cientifico_datos']
         if new_role not in allowed_roles:
             app_logger.warning(f"Intento de asignar un rol no válido '{new_role}' al usuario {user_to_modify.email}")
             return {"success": False, "error": "Rol no válido"}
 
         user_to_modify.role = new_role
+        # Al cambiar de rol, el estado de aprobación del rol vuelve a pendiente
+        user_to_modify.role_status = 'pending' 
         db.session.commit()
         
         app_logger.info(f"El rol del usuario {user_to_modify.email} (ID: {user_id}) ha sido cambiado a '{new_role}'.")
@@ -139,7 +138,6 @@ def suspend_user_service(user_id):
             app_logger.warning(f"Intento de suspender usuario no encontrado con id: {user_id}")
             return {"success": False, "error": "Usuario no encontrado"}
 
-        # Lógica de Superadmin: Un admin no puede suspender a otro admin
         if user_to_suspend.role == 'admin' and admin_user.role != 'superadmin':
             app_logger.warning(f"El admin '{admin_user.email}' intentó suspender al admin '{user_to_suspend.email}' sin ser superadmin.")
             return {"success": False, "error": "Los administradores no pueden suspender a otros administradores."}
@@ -168,7 +166,6 @@ def unban_user_service(user_id):
             app_logger.warning(f"Intento de anular suspensión a usuario no encontrado con id: {user_id}")
             return {"success": False, "error": "Usuario no encontrado"}
 
-        # Lógica de Superadmin: Un admin no puede quitar suspensión a otro admin
         if user_to_unban.role == 'admin' and admin_user.role != 'superadmin':
             app_logger.warning(f"El admin '{admin_user.email}' intentó quitar la suspensión al admin '{user_to_unban.email}' sin ser superadmin.")
             return {"success": False, "error": "Los administradores no pueden modificar a otros administradores."}

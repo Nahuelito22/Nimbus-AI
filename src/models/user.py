@@ -12,6 +12,7 @@ class User(db.Model):
     role = db.Column(db.String(80), nullable=False, default='user')
     is_verified = db.Column(db.Boolean, default=False)
     is_suspended = db.Column(db.Boolean, default=False, nullable=False)
+    role_status = db.Column(db.String(20), nullable=False, default='pending') # Estados: pending, approved, rejected
     verification_code = db.Column(db.String(6), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Agregar esta línea
     
