@@ -24,6 +24,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
+from flask_mail import Mail
 
 # Importaciones existentes
 from src.services.clima import get_clima
@@ -31,6 +32,7 @@ from src.services.news_service import get_news_safe
 from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
 from src.services.orchestration import get_hail_prediction
 from src.services.goes_service import get_latest_goes_image_url
+from src.services.email_service import send_verification_email
 from src.database import db  # Importar db desde nuestro archivo database.py
 from src.services.logger import app_logger
 from src.services.admin_services import (
@@ -53,6 +55,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})  # Configurar CORS explícita
 db.init_app(app)  # Inicializar db con la app
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+mail = Mail(app)
 
 # Importar el modelo de usuario DESPUÉS de inicializar db
 from src.models.user import User
@@ -151,22 +154,21 @@ def register():
             new_user.github_profile = data.get('githubProfile', '')
             new_user.interest_description = data.get('interestDescription', '')
         
-        # Generar código de verificación para roles profesionales
-        if role != 'user':
-            new_user.verification_code = ''.join(random.choices(string.digits, k=6))
+        # Generar código de verificación para TODOS los usuarios
+        new_user.verification_code = ''.join(random.choices(string.digits, k=6))
         
         db.session.add(new_user)
         db.session.commit()
 
-        # Preparar respuesta
-        response_data = {"msg": "Usuario creado exitosamente"}
-        
-        if role != 'user':
-            response_data["verification_code"] = new_user.verification_code
-            response_data["msg"] = "Usuario creado exitosamente. Se ha enviado un código de verificación a tu correo."
+        # Enviar correo de verificación
+        send_verification_email(mail, new_user.email, new_user.verification_code)
+
+        # Preparar respuesta segura
+        response_data = {"msg": "Usuario creado exitosamente. Revisa tu correo para verificar tu cuenta."}
 
         return jsonify(response_data), 201
     except Exception as e:
+        app_logger.error(f"Error en el registro de {email}: {str(e)}")
         return jsonify({"msg": f"Error en el registro: {str(e)}"}), 500
 
 @app.route('/api/login', methods=['POST'])
@@ -184,6 +186,11 @@ def login():
         if user and user.is_suspended:
             return jsonify({"msg": "Tu cuenta ha sido suspendida. Contacta al administrador."}), 403
 
+        # Añadir comprobación de verificación de email
+        if user and not user.is_verified:
+            # Opcional: Podríamos reenviar el correo de verificación aquí
+            return jsonify({"msg": "Tu cuenta no ha sido verificada. Por favor, revisa tu correo electrónico."}), 401
+
         if user and user.check_password(password):  # Usar el método del modelo
             # Añadir ID y nombre al token para uso en el frontend
             additional_claims = {
@@ -197,6 +204,36 @@ def login():
             return jsonify({"msg": "Email o contraseña incorrectos"}), 401
     except Exception as e:
         return jsonify({"msg": f"Error en el login: {str(e)}"}), 500
+
+@app.route('/api/verify-email', methods=['POST'])
+def verify_email():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        code = data.get('code')
+
+        if not email or not code:
+            return jsonify({"msg": "Email y código son requeridos"}), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({"msg": "Usuario no encontrado"}), 404
+
+        if user.is_verified:
+            return jsonify({"msg": "Esta cuenta ya ha sido verificada"}), 400
+
+        if user.verification_code == code:
+            user.is_verified = True
+            user.verification_code = None  # Limpiar el código después de usarlo
+            db.session.commit()
+            return jsonify({"msg": "Tu cuenta ha sido verificada exitosamente"}), 200
+        else:
+            return jsonify({"msg": "Código de verificación inválido"}), 400
+    
+    except Exception as e:
+        app_logger.error(f"Error en la verificación de email para {email}: {str(e)}")
+        return jsonify({"msg": f"Error en el proceso de verificación: {str(e)}"}), 500
 
 
 # --- RUTAS DE ADMINISTRACIÓN ---

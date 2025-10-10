@@ -4,6 +4,7 @@ import DashboardPage from '../pages/DashboardPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import AdminPage from '../pages/AdminPage';
+import VerifyEmailPage from '../pages/VerifyEmailPage';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -27,6 +28,10 @@ function AppRoutes() {
       <Route 
         path="/login" 
         element={!user ? <LoginPage /> : <PostLoginRedirect />}
+      />
+      <Route 
+        path="/verify-email" 
+        element={!user ? <VerifyEmailPage /> : <Navigate to="/" />}
       />
       <Route
         path="/admin"

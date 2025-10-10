@@ -65,10 +65,10 @@ function RegisterPage() {
 
       await registerUser(dataToSend);
 
-      setSuccess('¡Usuario creado exitosamente! Redirigiendo al login...');
+      setSuccess('Registro exitoso. Revisa tu correo para verificar tu cuenta.');
       
       setTimeout(() => {
-        navigate('/login');
+        navigate('/verify-email', { state: { email: formData.email } });
       }, 2000);
 
     } catch (err) {

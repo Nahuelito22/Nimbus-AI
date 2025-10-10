@@ -34,7 +34,6 @@ docker-compose.yml
 # Excluye carpetas que contienen grandes volúmenes de datos, modelos de ML,
 # logs y reportes que no son código fuente.
 /data/
-/models/
 /logs/
 /reports/
 /coverage/
