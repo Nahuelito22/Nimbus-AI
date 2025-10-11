@@ -91,12 +91,58 @@
         </div> <!-- row principal -->
     </main>
 
-    <section id="alertas" class="mt-4">
-      <h3>⚠️ Riesgo de Granizo</h3>
-      <div id="alerta-card" class="card p-3 text-center">
-        <p>Esperando datos...</p>
+    <<!-- 🚨 Sección de Alertas - Bootstrap Puro -->
+<section id="alertas" class="container mt-5">
+  <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8">
+          <!-- Header -->
+          <div class="d-flex align-items-center mb-4">
+              <div class="bg-dark-subtle rounded-circle d-flex align-items-center justify-content-center me-3" 
+                   style="width: 45px; height: 45px;">
+                  <span class="fw-bold fs-10">⚠️</span>
+              </div>
+              <div>
+                  <h3 class="mb-1 fw-bold text-dark">Alerta de Granizo</h3>
+                  <p class="text-muted mb-0 small">Sistema de monitoreo en tiempo real</p>
+              </div>
+          </div>
+
+          <!-- Card Principal -->
+          <div id="alerta-card" class="card border-warning shadow">
+              <div class="card-header bg-warning bg-opacity-25 border-warning">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="card-title mb-0 text-dark fw-bold">
+                          Estado de Alerta
+                      </h5>
+                      <span class="badge bg-warning text-dark">ACTIVO</span>
+                  </div>
+              </div>
+              
+              <div class="card-body text-center py-4">
+                  <!-- Contenido dinámico -->
+                  <div class="py-2">
+                      <div class="spinner-border text-warning mb-3" role="status">
+                          <span class="visually-hidden">Cargando...</span>
+                      </div>
+                      <h6 class="text-warning mb-2">Analizando datos meteorológicos</h6>
+                      <p class="text-muted">Esperando datos...</p>
+                  </div>
+              </div>
+              
+              <div class="card-footer bg-light border-warning">
+                  <div class="row">
+                      <div class="col-12 text-center">
+                          <small class="text-muted">
+                              Actualizado: <span class="fw-bold">--:--</span> | 
+                              Nimbus AI
+                          </small>
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
-    </section>
+  </div>
+</section>
     
 
     <footer class="bg-dark text-white text-center py-3 mt-auto">

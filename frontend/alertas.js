@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   
     // Seleccionamos el elemento donde mostraremos la alerta
     const alertaCard = document.getElementById("alerta-card");
-    
+    const cardBody = alertaCard.querySelector(".card-body"); // ✅ NUEVO
+    cardBody.innerHTML = `<p>Consultando Pronóstico...</p>`; // ✅ CAMBIO
+
     try {
         // 🌍 PASO 1: Obtener coordenadas del usuario
         const coords = await getCoordinates();
@@ -61,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // 🎯 PASO 6: Mostrar resultados en pantalla
         if (data.probabilidad_granizo !== undefined) {
             const probabilidad = (data.probabilidad_granizo * 100).toFixed(1);
-            alertaCard.innerHTML = `
+            cardBody.innerHTML = `
                 <h4>⚠️ Alerta Meteorológica</h4>
                 <p class="fs-5">Probabilidad de Granizo: <strong>${probabilidad}%</strong></p>
                 <p class="text-muted">${data.alerta || "Sin alerta activa"}</p>
