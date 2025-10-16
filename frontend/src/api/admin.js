@@ -71,3 +71,7 @@ export const testNewsApi = async () => {
 export const testHuggingFace = async () => {
     return await apiRequest(`${API_URL}/admin/test/huggingface`);
 };
+
+export const getDiskUsage = async () => {
+    return await apiRequest(`${API_URL}/disk-usage`);
+};

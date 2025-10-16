@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
     getAllUsers,
@@ -10,6 +9,8 @@ import {
 } from '../api/admin';
 import { useAuth } from '../context/AuthContext';
 import ServiceStatusDashboard from '../components/ServiceStatusDashboard';
+import DiskUsageMonitor from '../components/DiskUsageMonitor';
+import SiteStats from '../components/SiteStats'; // 1. Importar SiteStats
 
 function AdminPage() {
     const { user: currentUser } = useAuth();
@@ -164,83 +165,80 @@ function AdminPage() {
     });
 
     return (
-        <div className="p-6 bg-gray-50">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold mb-6">Panel de Administración</h2>
+        <div className="p-6 bg-gray-50 min-h-screen">
+            <h1 className="text-3xl font-bold mb-8 text-gray-800">Panel de Administración</h1>
 
-                {/* User Management Section */}
-                <div className="mb-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-semibold">Gestión de Usuarios</h3>
-                        <div>
-                            <label htmlFor="role-filter" className="mr-2 font-medium text-sm">Filtrar por rol:</label>
-                            <select
-                                id="role-filter"
-                                value={roleFilter}
-                                onChange={(e) => setRoleFilter(e.target.value)}
-                                className="px-3 py-1 border rounded-md text-sm"
-                            >
-                                <option value="all">Todos</option>
-                                <option value="user">Usuario</option>
-                                <option value="admin">Administrador</option>
-                                <option value="defensa_civil">Defensa Civil</option>
-                                <option value="meteorologo">Meteorólogo</option>
-                                <option value="cientifico_datos">Científico de Datos</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full bg-white border border-gray-200">
-                            <thead>
-                                <tr className="w-full bg-gray-100 text-left text-sm font-semibold text-gray-600">
-                                    <th className="py-2 px-4 border-b">Nombre</th>
-                                    <th className="py-2 px-4 border-b">Email</th>
-                                    <th className="py-2 px-4 border-b">Rol</th>
-                                    <th className="py-2 px-4 border-b">Estado</th>
-                                    <th className="py-2 px-4 border-b">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading && (
-                                    <tr>
-                                        <td colSpan="5" className="text-center py-4">Cargando usuarios...</td>
-                                    </tr>
-                                )}
-                                {error && (
-                                    <tr>
-                                        <td colSpan="5" className="text-center py-4 text-red-600">Error: {error}</td>
-                                    </tr>
-                                )}
-                                {!loading && !error && filteredUsers.map(user => (
-                                    <tr key={user.id}>
-                                        <td className="py-2 px-4 border-b">{user.name}</td>
-                                        <td className="py-2 px-4 border-b">{user.email}</td>
-                                        <td className="py-2 px-4 border-b">{user.role}</td>
-                                        <td className="py-2 px-4 border-b">
-                                            {renderUserStatus(user)}
-                                        </td>
-                                        <td className="py-2 px-4 border-b">
-                                            {renderUserActions(user)}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            {/* 2. Renderizar SiteStats y pasarle los usuarios */}
+            <SiteStats users={users} />
+
+            {/* User Management Section */}
+            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">Gestión de Usuarios</h2>
+                    <div>
+                        <label htmlFor="role-filter" className="mr-2 font-medium text-sm">Filtrar por rol:</label>
+                        <select
+                            id="role-filter"
+                            value={roleFilter}
+                            onChange={(e) => setRoleFilter(e.target.value)}
+                            className="px-3 py-1 border rounded-md text-sm"
+                        >
+                            <option value="all">Todos</option>
+                            <option value="user">Usuario</option>
+                            <option value="admin">Administrador</option>
+                            <option value="superadmin">Superadmin</option>
+                            <option value="defensa_civil">Defensa Civil</option>
+                            <option value="meteorologo">Meteorólogo</option>
+                            <option value="cientifico_datos">Científico de Datos</option>
+                        </select>
                     </div>
                 </div>
-
-                <ServiceStatusDashboard />
-
+                <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr className="w-full bg-gray-100 text-left text-sm font-semibold text-gray-600">
+                                <th className="py-2 px-4 border-b">Nombre</th>
+                                <th className="py-2 px-4 border-b">Email</th>
+                                <th className="py-2 px-4 border-b">Rol</th>
+                                <th className="py-2 px-4 border-b">Estado</th>
+                                <th className="py-2 px-4 border-b">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-4">Cargando usuarios...</td>
+                                </tr>
+                            ) : error ? (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-4 text-red-600">Error: {error}</td>
+                                </tr>
+                            ) : filteredUsers.map(user => (
+                                <tr key={user.id} className="hover:bg-gray-50">
+                                    <td className="py-2 px-4 border-b">{user.name}</td>
+                                    <td className="py-2 px-4 border-b">{user.email}</td>
+                                    <td className="py-2 px-4 border-b">{user.role}</td>
+                                    <td className="py-2 px-4 border-b">{renderUserStatus(user)}</td>
+                                    <td className="py-2 px-4 border-b">{renderUserActions(user)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            {/* Change Role Modal */}
+            <DiskUsageMonitor />
+            <ServiceStatusDashboard />
+
+            {/* Modales (sin cambios) */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Cambiar Rol de {selectedUser?.name}</h3>
                         <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full px-3 py-2 border rounded-md mb-4">
                             <option value="user">Usuario</option>
                             <option value="admin">Administrador</option>
+                            <option value="superadmin">Superadmin</option>
                             <option value="defensa_civil">Defensa Civil</option>
                             <option value="meteorologo">Meteorólogo</option>
                             <option value="cientifico_datos">Científico de Datos</option>
@@ -253,7 +251,6 @@ function AdminPage() {
                 </div>
             )}
 
-            {/* User Details Modal */}
             {isDetailsModalOpen && selectedUserForDetails && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
