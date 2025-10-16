@@ -63,3 +63,11 @@ export const testOpenMeteo = async () => {
 export const testGoesSatellite = async () => {
     return await apiRequest(`${API_URL}/admin/test/goes-satellite`);
 };
+
+export const testNewsApi = async () => {
+    return await apiRequest(`${API_URL}/admin/test/news`);
+};
+
+export const testHuggingFace = async () => {
+    return await apiRequest(`${API_URL}/admin/test/huggingface`);
+};

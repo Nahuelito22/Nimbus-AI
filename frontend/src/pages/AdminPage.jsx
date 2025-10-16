@@ -5,21 +5,17 @@ import {
     approveUser,
     rejectUser,
     changeUserRole,
-    getLogs,
-    testOpenMeteo,
-    testGoesSatellite,
     suspendUser,
     unbanUser
 } from '../api/admin';
 import { useAuth } from '../context/AuthContext';
+import ServiceStatusDashboard from '../components/ServiceStatusDashboard';
 
 function AdminPage() {
     const { user: currentUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [logs, setLogs] = useState('');
-    const [systemStatus, setSystemStatus] = useState({ openMeteo: null, goesSatellite: null });
     
     // State for role change modal
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,33 +111,6 @@ function AdminPage() {
     const closeDetailsModal = () => {
         setIsDetailsModalOpen(false);
         setSelectedUserForDetails(null);
-    };
-
-    const handleFetchLogs = async () => {
-        try {
-            const logsData = await getLogs();
-            setLogs(logsData.logs);
-        } catch (err) {
-            setError(err.message);
-        }
-    };
-
-    const handleTestOpenMeteo = async () => {
-        try {
-            const result = await testOpenMeteo();
-            setSystemStatus(prev => ({ ...prev, openMeteo: result }));
-        } catch (err) {
-            setSystemStatus(prev => ({ ...prev, openMeteo: { status: 'error', message: err.message } }));
-        }
-    };
-
-    const handleTestGoesSatellite = async () => {
-        try {
-            const result = await testGoesSatellite();
-            setSystemStatus(prev => ({ ...prev, goesSatellite: result }));
-        } catch (err) {
-            setSystemStatus(prev => ({ ...prev, goesSatellite: { status: 'error', message: err.message } }));
-        }
     };
 
     const renderUserStatus = (user) => {
@@ -260,15 +229,8 @@ function AdminPage() {
                     </div>
                 </div>
 
-                {/* System Status Section */}
-                <div className="mb-8">
-                    {/* ... system status content ... */}
-                </div>
+                <ServiceStatusDashboard />
 
-                {/* System Logs Section */}
-                <div>
-                    {/* ... system logs content ... */}
-                </div>
             </div>
 
             {/* Change Role Modal */}

@@ -372,6 +372,35 @@ def test_goes_satellite():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+@app.route('/api/admin/test/news', methods=['GET'])
+@admin_required()
+def test_news_api():
+    """Endpoint de prueba para el servicio de Noticias (NewsAPI)."""
+    try:
+        # Probar con una categoría general y un límite bajo
+        result = get_news_safe(category='general', limit=1)
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/admin/test/huggingface', methods=['GET'])
+@admin_required()
+def test_huggingface_model():
+    """Endpoint de prueba para el modelo de IA en Hugging Face."""
+    try:
+        # Usar coordenadas de prueba (ej. Mendoza, Argentina)
+        lat, lon = -32.89, -68.84 
+        result = get_hail_prediction(lat, lon)
+        
+        if "error" in result:
+            # Si el servicio de orquestación devuelve un error, lo reflejamos
+            return jsonify({"status": "error", "message": result["error"]}), 500
+            
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # --- RUTA DE ORQUESTACIÓN PRINCIPAL ---
 @app.route('/api/main-prediction', methods=['GET'])
 def main_prediction():
