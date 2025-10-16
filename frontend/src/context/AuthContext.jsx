@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { loginUser as apiLogin } from '../api/auth';
+import { loginUser as apiLogin, resendVerificationEmail } from '../api/auth'; // Importar la nueva función
 import { jwtDecode } from 'jwt-decode';
 
 // 1. Crear el Contexto
@@ -70,6 +70,14 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       
     } catch (err) {
+      // Comprobar si el error es por cuenta no verificada
+      if (err.response && err.response.error === 'ACCOUNT_NOT_VERIFIED') {
+        // Lanzar un error específico para que la UI lo maneje
+        const specificError = new Error('Tu cuenta no ha sido verificada.');
+        specificError.code = 'ACCOUNT_NOT_VERIFIED';
+        setError(specificError.message); // También actualizamos el estado de error
+        throw specificError;
+      }
       setError(err.message);
       setIsAuthenticated(false);
       throw err;
@@ -94,6 +102,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
+    resendVerificationEmail // Exponer la nueva función
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

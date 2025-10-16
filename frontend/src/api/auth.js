@@ -13,7 +13,10 @@ export const loginUser = async (credentials) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.msg || 'Error al iniciar sesión.');
+      // Lanzar un objeto de error con más detalles
+      const error = new Error(data.msg || 'Error al iniciar sesión.');
+      error.response = data; // Adjuntar toda la respuesta de error
+      throw error;
     }
 
     return data;
@@ -49,12 +52,6 @@ export const registerUser = async (userData) => {
       }
     }
 
-    // Si el registro es exitoso y se generó un código de verificación (para roles profesionales)
-    if (data.verification_code) {
-      console.log('Código de verificación:', data.verification_code);
-      // Aquí podrías mostrar el código en la interfaz o enviarlo por email (aún no implementado)
-    }
-
     return data;
   } catch (error) {
     // Si el error es de red o el servidor no responde
@@ -62,6 +59,31 @@ export const registerUser = async (userData) => {
       throw new Error('No se pudo conectar con el servidor. Por favor, verifica tu conexión.');
     }
     // Re-lanzar otros errores
+    throw error;
+  }
+};
+
+export const resendVerificationEmail = async (email) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.msg || 'Error al reenviar el correo de verificación.');
+    }
+
+    return data;
+  } catch (error) {
+    if (error.message === 'Failed to fetch') {
+      throw new Error('No se pudo conectar con el servidor.');
+    }
     throw error;
   }
 };

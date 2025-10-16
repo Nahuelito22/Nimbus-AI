@@ -188,8 +188,8 @@ def login():
 
         # Añadir comprobación de verificación de email
         if user and not user.is_verified:
-            # Opcional: Podríamos reenviar el correo de verificación aquí
-            return jsonify({"msg": "Tu cuenta no ha sido verificada. Por favor, revisa tu correo electrónico."}), 401
+            # Devolvemos un error específico para que el frontend pueda manejarlo
+            return jsonify({"error": "ACCOUNT_NOT_VERIFIED", "msg": "Tu cuenta no ha sido verificada."}), 401
 
         if user and user.check_password(password):  # Usar el método del modelo
             # Añadir ID y nombre al token para uso en el frontend
@@ -234,6 +234,36 @@ def verify_email():
     except Exception as e:
         app_logger.error(f"Error en la verificación de email para {email}: {str(e)}")
         return jsonify({"msg": f"Error en el proceso de verificación: {str(e)}"}), 500
+
+@app.route('/api/auth/resend-verification', methods=['POST'])
+def resend_verification():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+
+        if not email:
+            return jsonify({"msg": "Email es requerido"}), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            # No revelamos si el usuario existe o no por seguridad
+            return jsonify({"msg": "Si existe una cuenta con este email, se ha enviado un nuevo código de verificación."}), 200
+
+        if user.is_verified:
+            return jsonify({"msg": "Esta cuenta ya ha sido verificada."}), 400
+
+        # Generar un nuevo código y reenviar
+        user.verification_code = ''.join(random.choices(string.digits, k=6))
+        db.session.commit()
+        
+        send_verification_email(mail, user.email, user.verification_code)
+
+        return jsonify({"msg": "Se ha enviado un nuevo código de verificación a tu correo."}), 200
+
+    except Exception as e:
+        app_logger.error(f"Error en resend_verification para {email}: {str(e)}")
+        return jsonify({"msg": f"Error al reenviar la verificación: {str(e)}"}), 500
 
 
 # --- RUTAS DE ADMINISTRACIÓN ---
