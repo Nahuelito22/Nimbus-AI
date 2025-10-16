@@ -25,6 +25,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
 from flask_mail import Mail
+from flask_migrate import Migrate
 
 # Importaciones existentes
 from src.services.clima import get_clima
@@ -53,6 +54,7 @@ app.config.from_object('src.config.Config')
 # 2. Inicialización de las extensiones
 CORS(app, resources={r"/api/*": {"origins": "*"}})  # Configurar CORS explícitamente
 db.init_app(app)  # Inicializar db con la app
+migrate = Migrate(app, db) # Inicializar Flask-Migrate
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 mail = Mail(app)
