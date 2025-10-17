@@ -54,7 +54,8 @@ def get_weather_by_coords(lat, lon):
             "shortwave_radiation_sum", "et0_fao_evapotranspiration"
         ],
         "hourly": [
-            "temperature_2m", "dew_point_2m", "relative_humidity_2m", "pressure_msl"
+            "temperature_2m", "dew_point_2m", "relative_humidity_2m", "pressure_msl",
+            "cape", "lifted_index"
         ],
         "current_weather": True,
         "timezone": "auto",

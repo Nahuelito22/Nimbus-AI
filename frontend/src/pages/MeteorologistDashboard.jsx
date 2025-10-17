@@ -1,6 +1,7 @@
 import React from 'react';
 import SatelliteViewer from '../components/dashboard/SatelliteViewer';
 import WeatherDisplay from '../components/dashboard/WeatherDisplay';
+import InstabilityIndices from '../components/dashboard/InstabilityIndices';
 
 function MeteorologistDashboard() {
     return (
@@ -8,10 +9,13 @@ function MeteorologistDashboard() {
             <h1 className="text-3xl font-bold mb-8 text-gray-800">Dashboard del Meteorólogo</h1>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Columna Izquierda: Visor de Satélite y Datos Climáticos */}
+                {/* Columna Izquierda: Datos Climáticos y Satélite */}
                 <div className="lg:col-span-2 space-y-8">
-                    <SatelliteViewer />
-                    <WeatherDisplay /> 
+                    <WeatherDisplay />
+                    
+                    <InstabilityIndices />
+
+                    <SatelliteViewer /> 
                 </div>
 
                 {/* Columna Derecha: Generación de Reportes y Herramientas */}

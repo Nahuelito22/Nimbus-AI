@@ -31,7 +31,7 @@ from flask_migrate import Migrate
 from src.services.clima import get_clima
 from src.services.news_service import get_news_safe
 from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
-from src.services.orchestration import get_hail_prediction
+from src.services.orchestration import get_hail_prediction, get_dashboard_weather
 from src.services.goes_service import get_latest_goes_image_url, get_latest_goes_product
 from src.services.email_service import send_verification_email
 from src.database import db  # Importar db desde nuestro archivo database.py
@@ -593,6 +593,32 @@ def satellite_product():
     except Exception as e:
         app_logger.error(f"Error general en satellite_product: {str(e)}")
         return jsonify({"error": f"Error general: {str(e)}"}), 500
+
+@app.route('/api/dashboard/weather-data', methods=['GET'])
+@professional_required()
+def dashboard_weather_data():
+    """
+    Endpoint para que los dashboards profesionales obtengan datos meteorológicos completos.
+    """
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+
+    if not lat or not lon:
+        return jsonify({"error": "Se requieren los parámetros 'lat' y 'lon'"}), 400
+
+    try:
+        # Llama a la función orquestadora que devuelve los datos crudos
+        result = get_dashboard_weather(float(lat), float(lon))
+        
+        if "error" in result:
+            app_logger.error(f"Error en get_dashboard_weather: {result['error']}")
+            return jsonify(result), 500
+
+        return jsonify(result)
+
+    except Exception as e:
+        app_logger.error(f"Error general en dashboard_weather_data: {str(e)}")
+        return jsonify({"error": f"Ocurrió un error interno en el servidor: {e}"}), 500
 
 
 # --- RUTAS EXISTENTES ---

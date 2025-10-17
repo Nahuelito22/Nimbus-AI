@@ -88,3 +88,12 @@ def get_hail_prediction(lat, lon):
         return response.json()
     except requests.RequestException as e:
         return {"error": f"Error al contactar el modelo de predicción: {e}"}
+
+def get_dashboard_weather(lat, lon):
+    """
+    Obtiene los datos crudos y completos de Open-Meteo para un dashboard.
+    Esta función no procesa ni transforma los datos, simplemente los devuelve.
+    """
+    weather_data = get_weather_by_coords(lat, lon)
+    # Simplemente devuelve los datos tal como vienen del servicio de clima
+    return weather_data
