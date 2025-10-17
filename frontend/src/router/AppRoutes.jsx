@@ -51,7 +51,7 @@ function AppRoutes() {
       />
       <Route
         path="/meteorologist-dashboard"
-        element={user && user.role === 'meteorologo' ? <MeteorologistDashboard /> : <Navigate to="/" />}
+        element={user && ['meteorologo', 'superadmin'].includes(user.role) ? <MeteorologistDashboard /> : <Navigate to="/" />}
       />
       <Route
         path="/dashboard"

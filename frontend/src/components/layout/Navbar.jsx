@@ -15,17 +15,31 @@ function Navbar() {
             <nav className="hidden md:flex items-center space-x-6">
               {user ? (
                 <>
-                  <span className="text-sm">Hola, {user.email}</span>
+                  <span className="text-sm">Hola, {user.name || user.email}</span>
+                  
+                  {/* Enlace al Dashboard Principal */}
                   <Link to="/" className="hover:text-blue-300">Dashboard</Link>
+                  
+                  {/* Enlace al Panel de Admin para Admin y Superadmin */}
                   {['admin', 'superadmin'].includes(user.role) && (
                     <Link to="/admin" className="hover:text-blue-300">Panel Admin</Link>
                   )}
+
+                  {/* Menú de Supervisión para Superadmin */}
+                  {user.role === 'superadmin' && (
+                    <>
+                      <span className="border-l border-blue-700 h-6"></span>
+                      <Link to="/dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Usuario</Link>
+                      <Link to="/meteorologist-dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Meteorólogo</Link>
+                    </>
+                  )}
+                  
                   <button onClick={logout} className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Salir</button>
                 </>
               ) : (
                 <>
                   <Link to="/login" className="hover:text-blue-300">Iniciar Sesión</Link>
-                  <Link to="/register" className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">Regístra</Link>
+                  <Link to="/register" className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">Regístrate</Link>
                 </>
               )}
             </nav>

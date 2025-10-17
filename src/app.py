@@ -32,7 +32,7 @@ from src.services.clima import get_clima
 from src.services.news_service import get_news_safe
 from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
 from src.services.orchestration import get_hail_prediction
-from src.services.goes_service import get_latest_goes_image_url
+from src.services.goes_service import get_latest_goes_image_url, get_latest_goes_product
 from src.services.email_service import send_verification_email
 from src.database import db  # Importar db desde nuestro archivo database.py
 from src.services.logger import app_logger
@@ -74,6 +74,21 @@ def admin_required():
                 return fn(*args, **kwargs)
             else:
                 return jsonify(msg="¡Acceso denegado! Se requiere rol de administrador."), 403
+        return decorator
+    return wrapper
+
+# Decorador para proteger rutas y requerir un rol profesional
+def professional_required():
+    def wrapper(fn):
+        @wraps(fn)
+        @jwt_required()
+        def decorator(*args, **kwargs):
+            claims = get_jwt()
+            allowed_roles = ["admin", "superadmin", "meteorologo", "defensa_civil", "cientifico_datos"]
+            if claims.get("role") in allowed_roles:
+                return fn(*args, **kwargs)
+            else:
+                return jsonify(msg="¡Acceso denegado! Se requiere un rol profesional o de administrador."), 403
         return decorator
     return wrapper
 
@@ -512,6 +527,73 @@ def satellite_image():
     except Exception as e:
         app_logger.error(f"Error general en satellite_image: {str(e)}")
         return jsonify({"error": f"Error general: {str(e)}"}), 500
+
+@app.route('/api/meteorologist/satellite-product', methods=['GET'])
+@professional_required()
+def satellite_product():
+    """
+    Endpoint para que meteorólogos obtengan productos de imágenes satelitales (ej: GeoColor).
+    """
+    try:
+        product_id = request.args.get('product', type=str)
+        force_refresh = request.args.get('refresh', default='false').lower() == 'true'
+
+        if not product_id:
+            return jsonify({"error": "Se requiere el parámetro 'product'"}), 400
+
+        result = get_latest_goes_product(product_id=product_id, force_refresh=force_refresh)
+        
+        if "error" in result:
+            app_logger.error(f"Error en get_latest_goes_product: {result['error']}")
+            return jsonify(result), 500
+        
+        import base64
+        
+        possible_paths = [
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static', 'radar_images')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'radar_images')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), 'static', 'radar_images')),
+        ]
+        
+        image_filename = result["url"].split('/')[-1]
+        image_path = None
+        for path_dir in possible_paths:
+            path = os.path.join(path_dir, image_filename)
+            if os.path.exists(path):
+                image_path = path
+                break
+        
+        if not image_path:
+            return jsonify({"error": f"No se encontró la imagen generada: {image_filename}"}), 500
+
+        with open(image_path, "rb") as image_file:
+            image_data = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        legend_data = None
+        if result.get("legend_url"):
+            legend_filename = result["legend_url"].split('/')[-1]
+            legend_path = None
+            for path_dir in possible_paths:
+                path = os.path.join(path_dir, legend_filename)
+                if os.path.exists(path):
+                    legend_path = path
+                    break
+            
+            if legend_path:
+                with open(legend_path, "rb") as legend_file:
+                    legend_data = base64.b64encode(legend_file.read()).decode('utf-8')
+
+        return jsonify({
+            "image": f"data:image/png;base64,{image_data}",
+            "legend": f"data:image/png;base64,{legend_data}" if legend_data else None,
+            "timestamp": result["timestamp"],
+            "cached": result.get("cached", False)
+        })
+
+    except Exception as e:
+        app_logger.error(f"Error general en satellite_product: {str(e)}")
+        return jsonify({"error": f"Error general: {str(e)}"}), 500
+
 
 # --- RUTAS EXISTENTES ---
 @app.route('/api/clima/<city_name>', methods=['GET'])

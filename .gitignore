@@ -48,6 +48,7 @@ ayudas_y_recursos/
 
 # Ignorar imagenes satelitales
 data/raw/imagenes_satelitales/
+src/static/
 
 # Ignorar features_api
 # src/api/features_api.py
