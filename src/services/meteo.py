@@ -54,10 +54,11 @@ def get_weather_by_coords(lat, lon):
             "shortwave_radiation_sum", "et0_fao_evapotranspiration"
         ],
         "hourly": [
-            "dew_point_2m", "relative_humidity_2m", "pressure_msl"
+            "temperature_2m", "dew_point_2m", "relative_humidity_2m", "pressure_msl"
         ],
+        "current_weather": True,
         "timezone": "auto",
-        "forecast_days": 1
+        "forecast_days": 7
     }
     
     j = _get_json(WEATHER_URL, params=params)
