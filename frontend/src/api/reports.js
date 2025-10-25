@@ -1,7 +1,7 @@
 const API_URL = '/api';
 
 export const generateReport = async (lat, lon) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     if (!token) {
         throw new Error('No se encontró token de autenticación.');
     }
