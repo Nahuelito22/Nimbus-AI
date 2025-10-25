@@ -42,13 +42,19 @@ export const getSatelliteImage = async (band, palette, opts = {}) => {
 };
 
 
-export const getSatelliteProduct = async (productId, opts = {}) => {
+export const getSatelliteProduct = async (productId, coords, opts = {}) => {
   try {
     const params = new URLSearchParams();
     params.append('product', productId);
 
     if (opts.forceRefresh) {
       params.append('refresh', 'true');
+    }
+
+    // Añadir coordenadas si están disponibles
+    if (coords && typeof coords.lat === 'number' && typeof coords.lon === 'number') {
+        params.append('lat', coords.lat);
+        params.append('lon', coords.lon);
     }
 
     const url = `${API_URL}/meteorologist/satellite-product?${params.toString()}`;

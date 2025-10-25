@@ -276,8 +276,8 @@ def get_latest_goes_image_url(band: int, palette: str = 'inferno', force_refresh
 #  NUEVA SECCIÓN PARA EL DASHBOARD DEL METEORÓLOGO (SIMPLIFICADA)
 # =============================================================================
 
-def _get_product_cache_key(product_id: str):
-    """Genera una clave de caché única para un producto de meteorólogo."""
+def _get_product_cache_key(product_id: str, user_lat: float = None, user_lon: float = None):
+    """Genera una clave de caché única para un producto de meteorólogo, incluyendo el marcador."""
     now = datetime.utcnow()
     rounded_time = now.replace(
         minute=(now.minute // CACHE_DURATION_MINUTES) * CACHE_DURATION_MINUTES,
@@ -285,7 +285,14 @@ def _get_product_cache_key(product_id: str):
         microsecond=0
     )
     time_str = rounded_time.strftime("%Y%m%d_%H%M")
-    return f"product_{product_id}_{time_str}"
+    
+    marker_suffix = ""
+    if user_lat is not None and user_lon is not None:
+        lat_s = f"{round(float(user_lat), 4):.4f}"
+        lon_s = f"{round(float(user_lon), 4):.4f}"
+        marker_suffix = f"_marker_{lat_s}_{lon_s}"
+
+    return f"product_{product_id}_{time_str}{marker_suffix}"
 
 def _get_product_cached_image(cache_key: str):
     """Busca una imagen de producto en caché (imagen + leyenda opcional)."""
@@ -310,14 +317,13 @@ def _get_product_cached_image(cache_key: str):
     
     return None, None
 
-def get_latest_goes_product(product_id: str, force_refresh: bool = False):
+def get_latest_goes_product(product_id: str, force_refresh: bool = False, user_lat: float = None, user_lon: float = None):
     """
     Obtiene el producto de imagen más reciente de GOES-19 para el dashboard del meteorólogo.
-    Soporta bandas individuales como 'band_13', 'band_2', etc.
+    Soporta bandas individuales y ahora puede dibujar un marcador de ubicación.
     """
     try:
         # --- 1. Configuración del Producto ---
-        # Paletas de colores recomendadas para cada banda
         product_config = {
             'band_13': {'s3_product': 'ABI-L2-CMIPF', 'band_str': 'C13', 'palette': 'inferno', 'band_num': 13},
             'band_2': {'s3_product': 'ABI-L2-CMIPF', 'band_str': 'C02', 'palette': 'gray', 'band_num': 2},
@@ -330,7 +336,7 @@ def get_latest_goes_product(product_id: str, force_refresh: bool = False):
             return {"error": f"ID de producto no válido: {product_id}"}
 
         config = product_config[product_id]
-        cache_key = _get_product_cache_key(product_id)
+        cache_key = _get_product_cache_key(product_id, user_lat, user_lon)
 
         # --- 2. Verificación de Caché ---
         if not force_refresh:
@@ -406,6 +412,21 @@ def get_latest_goes_product(product_id: str, force_refresh: bool = False):
             fig = plt.figure(figsize=(5, 5), dpi=150)
             ax = fig.add_subplot(1, 1, 1)
             ax.imshow(recorte_limpio, cmap=config['palette'], vmin=vmin, vmax=vmax, origin='upper')
+            
+            # --- INICIO: Lógica del marcador --- 
+            if user_lat is not None and user_lon is not None:
+                try:
+                    user_x, user_y = p(user_lon, user_lat)
+                    if (min(x1, x2) <= user_x <= max(x1, x2) and min(y1, y2) <= user_y <= max(y1, y2)):
+                        width = recorte_limpio.shape[1]
+                        height = recorte_limpio.shape[0]
+                        pixel_x = np.interp(user_x, [min(x1, x2), max(x1, x2)], [0, width - 1])
+                        pixel_y = np.interp(user_y, [min(y1, y2), max(y1, y2)], [height - 1, 0])
+                        ax.scatter([pixel_x], [pixel_y], marker='o', s=100, facecolors='green', edgecolors='black', linewidths=1.5, zorder=10, alpha=0.9)
+                except Exception as e:
+                    print(f"Error al procesar la ubicación del usuario para el marcador: {str(e)}")
+            # --- FIN: Lógica del marcador ---
+
             ax.axis('off')
             fig.tight_layout(pad=0)
             plt.savefig(output_png_path, bbox_inches='tight', pad_inches=0, transparent=True)

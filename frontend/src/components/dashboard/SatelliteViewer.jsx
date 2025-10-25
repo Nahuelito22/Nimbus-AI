@@ -12,7 +12,7 @@ const SATELLITE_PRODUCTS = [
     { id: 'band_2', name: 'Banda 2 (Visible)' },
 ];
 
-function SatelliteViewer() {
+function SatelliteViewer({ coords }) {
     // 2. El estado ahora maneja el ID del producto (string)
     const [selectedProduct, setSelectedProduct] = useState(SATELLITE_PRODUCTS[0].id);
     const [imageData, setImageData] = useState(null);
@@ -21,6 +21,8 @@ function SatelliteViewer() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!coords) return;
+
         const fetchImage = async () => {
             setLoading(true);
             setError(null);
@@ -28,10 +30,10 @@ function SatelliteViewer() {
             setLegendData(null);
             
             try {
-                // 3. Usar la nueva función de la API
-                const response = await getSatelliteProduct(selectedProduct);
+                // 3. Usar la nueva función de la API, pasando las coordenadas
+                const response = await getSatelliteProduct(selectedProduct, coords);
                 setImageData(response.image);
-                setLegendData(response.legend); // Puede ser null para GeoColor
+                setLegendData(response.legend);
             } catch (err) {
                 console.error("Error fetching satellite product:", err);
                 setError(err.message || 'No se pudo cargar la imagen satelital.');
@@ -41,7 +43,7 @@ function SatelliteViewer() {
         };
 
         fetchImage();
-    }, [selectedProduct]);
+    }, [selectedProduct, coords]); // El efecto se dispara si cambia el producto o las coordenadas
 
     // 4. Función para descargar la imagen
     const handleDownload = () => {

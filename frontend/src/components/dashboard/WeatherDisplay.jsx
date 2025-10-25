@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { FiWind, FiDroplet, FiThermometer, FiSun, FiCloud, FiCloudRain, FiCloudSnow } from 'react-icons/fi';
-import { getWeatherByCity } from '../../api/weather';
+import { getDashboardWeatherData } from '../../api/weather'; // Cambiado a la nueva función
 
-// Mapeo de códigos de clima de WMO a iconos
+// Mapeo de códigos de clima de WMO a iconos (sin cambios)
 const weatherIconMap = {
     0: <FiSun className="text-yellow-500" />, // Clear sky
     1: <FiSun className="text-yellow-500" />, // Mainly clear
@@ -21,7 +21,8 @@ const weatherIconMap = {
 };
 
 const transformApiData = (apiData) => {
-    const { current_weather, hourly, daily } = apiData.weather;
+    // La nueva API devuelve directamente el formato que necesitamos, pero sin el wrapper 'weather'
+    const { current_weather, hourly, daily } = apiData;
 
     // Transformar datos horarios (tomar las próximas 12 horas)
     const now = new Date();
@@ -53,17 +54,19 @@ const transformApiData = (apiData) => {
     };
 };
 
-function WeatherDisplay({ city = "Mendoza" }) {
+function WeatherDisplay({ coords }) { // Recibe coords en lugar de city
     const [weatherData, setWeatherData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!coords) return;
+
         const fetchData = async () => {
             setLoading(true);
             setError(null);
             try {
-                const data = await getWeatherByCity(city);
+                const data = await getDashboardWeatherData(coords);
                 const transformedData = transformApiData(data);
                 setWeatherData(transformedData);
             } catch (err) {
@@ -75,7 +78,7 @@ function WeatherDisplay({ city = "Mendoza" }) {
         };
 
         fetchData();
-    }, [city]);
+    }, [coords]); // El efecto se ejecuta cuando cambian las coordenadas
 
     if (loading) {
         return <div className="text-center p-4 bg-white rounded-lg shadow-md">Cargando datos del clima...</div>;
@@ -93,7 +96,7 @@ function WeatherDisplay({ city = "Mendoza" }) {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Condiciones Climáticas en {city}</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Condiciones Climáticas</h2>
             
             {/* Current Conditions */}
             <div className="flex items-center justify-around p-4 bg-blue-50 rounded-lg mb-6">

@@ -35,18 +35,20 @@ const getLiColor = (li) => {
     return 'text-green-500';
 };
 
-function InstabilityIndices() {
+function InstabilityIndices({ coords }) { // Recibe coords
     const [indicesData, setIndicesData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!coords) return;
+
         const fetchData = async () => {
             setLoading(true);
             setError(null);
             try {
-                // Coordenadas para Mendoza
-                const data = await getDashboardWeatherData({ lat: -32.89, lon: -68.84 });
+                // Usar las coordenadas de las props
+                const data = await getDashboardWeatherData(coords);
                 
                 const { hourly } = data;
                 const nowIndex = findCurrentHourIndex(hourly.time);
@@ -75,7 +77,7 @@ function InstabilityIndices() {
         };
 
         fetchData();
-    }, []);
+    }, [coords]); // Se ejecuta cuando cambian las coords
 
     if (loading) {
         return (

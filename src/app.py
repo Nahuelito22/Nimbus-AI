@@ -536,15 +536,23 @@ def satellite_image():
 def satellite_product():
     """
     Endpoint para que meteorólogos obtengan productos de imágenes satelitales (ej: GeoColor).
+    Ahora acepta coordenadas para dibujar un marcador.
     """
     try:
         product_id = request.args.get('product', type=str)
         force_refresh = request.args.get('refresh', default='false').lower() == 'true'
+        user_lat = request.args.get('lat', type=float)
+        user_lon = request.args.get('lon', type=float)
 
         if not product_id:
             return jsonify({"error": "Se requiere el parámetro 'product'"}), 400
 
-        result = get_latest_goes_product(product_id=product_id, force_refresh=force_refresh)
+        result = get_latest_goes_product(
+            product_id=product_id, 
+            force_refresh=force_refresh,
+            user_lat=user_lat,
+            user_lon=user_lon
+        )
         
         if "error" in result:
             app_logger.error(f"Error en get_latest_goes_product: {result['error']}")
