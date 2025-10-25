@@ -20,7 +20,9 @@ from functools import wraps
 # Añade el directorio raíz del proyecto al path de Python
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, send_file
+import io
+from src.services.report_service import generate_report_pdf
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
@@ -593,6 +595,55 @@ def satellite_product():
     except Exception as e:
         app_logger.error(f"Error general en satellite_product: {str(e)}")
         return jsonify({"error": f"Error general: {str(e)}"}), 500
+
+@app.route('/api/meteorologist/generate-report', methods=['GET'])
+@professional_required()
+def generate_report():
+    """
+    Genera y devuelve un reporte en PDF con datos meteorológicos y satelitales.
+    """
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+
+    if not lat or not lon:
+        return jsonify({"error": "Se requieren los parámetros 'lat' y 'lon'"}), 400
+
+    try:
+        # 1. Obtener datos meteorológicos
+        weather_data = get_dashboard_weather(float(lat), float(lon))
+        if 'error' in weather_data:
+            return jsonify(weather_data), 500
+
+        # 2. Obtener la imagen satelital (usamos la banda 13 por defecto)
+        image_result = get_latest_goes_product(product_id='band_13', force_refresh=False)
+        image_path = None
+        if 'error' not in image_result:
+            # Construir la ruta absoluta a la imagen
+            image_filename = image_result["url"].split('/')[-1]
+            possible_paths = [
+                os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static', 'radar_images')),
+                os.path.abspath(os.path.join(os.path.dirname(__file__), 'static', 'radar_images')),
+            ]
+            for path_dir in possible_paths:
+                path = os.path.join(path_dir, image_filename)
+                if os.path.exists(path):
+                    image_path = path
+                    break
+        
+        # 3. Generar el PDF
+        pdf_bytes = generate_report_pdf(weather_data, image_path)
+        
+        # 4. Enviar el archivo PDF
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'reporte_nimbus_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        )
+
+    except Exception as e:
+        app_logger.error(f"Error al generar el reporte PDF: {str(e)}")
+        return jsonify({"error": f"No se pudo generar el reporte: {str(e)}"}), 500
 
 @app.route('/api/dashboard/weather-data', methods=['GET'])
 @professional_required()
