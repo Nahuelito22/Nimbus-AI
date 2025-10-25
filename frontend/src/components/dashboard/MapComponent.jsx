@@ -18,7 +18,7 @@ const MapPlaceholder = (
   </div>
 );
 
-const MapComponent = ({ coords, isLoading, onMapClick, onPredict }) => {
+const MapComponent = ({ coords, isLoading, onMapClick, onPredict, showPredictButton = true }) => {
   return (
     <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Mapa de Mendoza</h2>
@@ -39,16 +39,18 @@ const MapComponent = ({ coords, isLoading, onMapClick, onPredict }) => {
           <MapEvents onMapClick={onMapClick} />
         </MapContainer>
       </div>
-      <div className="mt-4 flex justify-center">
-        <button
-          id="predict-btn"
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition disabled:bg-gray-400"
-          onClick={onPredict}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Prediciendo...' : 'Predecir Granizo en la Ubicación'}
-        </button>
-      </div>
+      {showPredictButton && (
+        <div className="mt-4 flex justify-center">
+            <button
+            id="predict-btn"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition disabled:bg-gray-400"
+            onClick={onPredict}
+            disabled={isLoading}
+            >
+            {isLoading ? 'Prediciendo...' : 'Predecir Granizo en la Ubicación'}
+            </button>
+        </div>
+      )}
     </div>
   );
 };

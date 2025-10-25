@@ -49,7 +49,8 @@ function MeteorologistDashboard() {
                     <div className="h-[500px] bg-white rounded-lg shadow-md">
                         <MapComponent 
                             coords={coords} 
-                            onMapClick={handleMapClick} 
+                            onMapClick={handleMapClick}
+                            showPredictButton={false}
                         />
                     </div>
                     <PredictionAnalysis 

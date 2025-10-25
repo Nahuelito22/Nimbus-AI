@@ -68,7 +68,7 @@ function PredictionAnalysis({ coords, onGenerateReport, isGeneratingReport, repo
                 {predictionData && (
                     <div>
                         <h3 className="text-lg font-semibold text-center">Probabilidad de Granizo</h3>
-                        <Gauge value={predictionData.prediction_output.hail_probability} />
+                        <Gauge probability={predictionData.prediction_output.probabilidad_granizo} />
                         <h3 className="text-lg font-semibold mt-4">Datos Enviados al Modelo</h3>
                         <ModelInputTable data={predictionData.model_input} />
                     </div>
