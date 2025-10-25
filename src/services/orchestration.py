@@ -97,3 +97,36 @@ def get_dashboard_weather(lat, lon):
     weather_data = get_weather_by_coords(lat, lon)
     # Simplemente devuelve los datos tal como vienen del servicio de clima
     return weather_data
+
+def get_hail_prediction_with_details(lat, lon):
+    """
+    Función de orquestación para profesionales que devuelve tanto la entrada como la salida del modelo.
+    """
+    # 1. Obtener datos de Open-Meteo
+    weather_data = get_weather_by_coords(lat, lon)
+    if "error" in weather_data:
+        return weather_data
+
+    # 2. Transformar datos
+    try:
+        model_input = _transform_data_for_model(lat, lon, weather_data)
+    except ValueError as e:
+        return {"error": str(e)}
+
+    # 3. Llamar a la API de Hugging Face
+    if HUGGING_FACE_API_URL == "URL_DE_TU_API_EN_HUGGING_FACE_AQUI":
+        return {"error": "La URL de la API de Hugging Face no ha sido configurada."}
+
+    try:
+        response = requests.post(HUGGING_FACE_API_URL, json=model_input, timeout=20)
+        response.raise_for_status()  # Lanza un error para respuestas 4xx/5xx
+        prediction_output = response.json()
+        
+        # 4. Devolver un diccionario con ambas partes
+        return {
+            "model_input": model_input,
+            "prediction_output": prediction_output
+        }
+
+    except requests.RequestException as e:
+        return {"error": f"Error al contactar el modelo de predicción: {e}"}

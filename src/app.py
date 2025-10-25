@@ -34,7 +34,7 @@ from flask_migrate import Migrate
 from src.services.clima import get_clima
 from src.services.news_service import get_news_safe
 from src.services.meteo import get_weather_by_coords, get_clima_by_ip, get_clima_ciudad
-from src.services.orchestration import get_hail_prediction, get_dashboard_weather
+from src.services.orchestration import get_hail_prediction, get_dashboard_weather, get_hail_prediction_with_details
 from src.services.goes_service import get_latest_goes_image_url, get_latest_goes_product
 from src.services.email_service import send_verification_email
 from src.database import db  # Importar db desde nuestro archivo database.py
@@ -624,7 +624,12 @@ def generate_report():
             return jsonify(weather_data), 500
 
         # 2. Obtener la imagen satelital (usamos la banda 13 por defecto)
-        image_result = get_latest_goes_product(product_id='band_13', force_refresh=False)
+        image_result = get_latest_goes_product(
+            product_id='band_13', 
+            force_refresh=False,
+            user_lat=float(lat),
+            user_lon=float(lon)
+        )
         image_path = None
         if 'error' not in image_result:
             # Construir la ruta absoluta a la imagen
@@ -653,6 +658,28 @@ def generate_report():
     except Exception as e:
         app_logger.error(f"Error al generar el reporte PDF: {str(e)}")
         return jsonify({"error": f"No se pudo generar el reporte: {str(e)}"}), 500
+
+@app.route('/api/meteorologist/predict-with-details', methods=['GET'])
+@professional_required()
+def predict_with_details():
+    """
+    Endpoint para que meteorólogos obtengan una predicción detallada, incluyendo la entrada del modelo.
+    """
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+
+    if not lat or not lon:
+        return jsonify({"error": "Se requieren los parámetros 'lat' y 'lon'"}), 400
+
+    try:
+        result = get_hail_prediction_with_details(float(lat), float(lon))
+        if 'error' in result:
+            return jsonify(result), 500
+        return jsonify(result)
+
+    except Exception as e:
+        app_logger.error(f"Error en la predicción detallada: {str(e)}")
+        return jsonify({"error": f"Ocurrió un error en la predicción detallada: {str(e)}"}), 500
 
 @app.route('/api/dashboard/weather-data', methods=['GET'])
 @professional_required()
