@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+
 function Navbar() {
   const { user, logout } = useAuth();
 
@@ -9,7 +10,7 @@ function Navbar() {
     <header className="bg-blue-900 text-white shadow-lg">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
             <Link to="/" className="flex items-center space-x-2">
-                <img src="/images/logo.png" alt="Logo" className="h-10 w-10" />
+                <img src="/logo_no_letras.png" alt="Logo nimbus" className="h-10 w-15" />
                 <h1 className="text-xl font-bold">Nimbus AI</h1>
             </Link>
             <nav className="hidden md:flex items-center space-x-6">
