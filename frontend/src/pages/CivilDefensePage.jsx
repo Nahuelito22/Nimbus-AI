@@ -1,6 +1,7 @@
 import React from 'react';
 import AlertPanel from '../components/civil_defense/AlertPanel';
 import RiskMap from '../components/civil_defense/RiskMap';
+import QuickReportGenerator from '../components/civil_defense/QuickReportGenerator';
 
 const CivilDefensePage = () => {
   return (
@@ -11,9 +12,10 @@ const CivilDefensePage = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Columna de Alertas (ocupa 1 de 3 columnas) */}
-        <div className="lg:col-span-1">
+        {/* Columna de Alertas y Reportes (ocupa 1 de 3 columnas) */}
+        <div className="lg:col-span-1 space-y-8">
           <AlertPanel />
+          <QuickReportGenerator />
         </div>
         
         {/* Columna del Mapa (ocupa 2 de 3 columnas) */}
