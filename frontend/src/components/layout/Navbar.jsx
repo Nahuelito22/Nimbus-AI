@@ -31,6 +31,7 @@ function Navbar() {
                       <span className="border-l border-blue-700 h-6"></span>
                       <Link to="/dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Usuario</Link>
                       <Link to="/meteorologist-dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Meteorólogo</Link>
+                      <Link to="/civil-defense-dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Defensa Civil</Link>
                     </>
                   )}
                   
