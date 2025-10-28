@@ -5,12 +5,12 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import AdminPage from '../pages/AdminPage';
 import VerifyEmailPage from '../pages/VerifyEmailPage';
-import MeteorologistDashboard from '../pages/MeteorologistDashboard'; // 1. Importar el nuevo dashboard
+import MeteorologistDashboard from '../pages/MeteorologistDashboard';
+import CivilDefensePage from '../pages/CivilDefensePage'; // Importar la nueva página
 
 function AppRoutes() {
   const { user } = useAuth();
 
-  // 2. Componente mejorado para redirigir después del login o desde la raíz
   const RoleBasedRedirect = () => {
     if (!user) return <Navigate to="/login" />;
 
@@ -20,6 +20,8 @@ function AppRoutes() {
         return <Navigate to="/admin" />;
       case 'meteorologo':
         return <Navigate to="/meteorologist-dashboard" />;
+      case 'defensa_civil': // Añadir caso para defensa civil
+        return <Navigate to="/civil-defense-dashboard" />;
       default:
         return <Navigate to="/dashboard" />; // Dashboard genérico para 'user' y otros roles
     }
@@ -27,7 +29,6 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* 3. La ruta raíz ahora usa el redireccionador basado en rol */}
       <Route path="/" element={<RoleBasedRedirect />} />
 
       {/* Rutas de autenticación */}
@@ -44,7 +45,7 @@ function AppRoutes() {
         element={<VerifyEmailPage />} // Permitir acceso siempre para verificación
       />
 
-      {/* 4. Rutas protegidas por rol */}
+      {/* Rutas protegidas por rol */}
       <Route
         path="/admin"
         element={user && ['admin', 'superadmin'].includes(user.role) ? <AdminPage /> : <Navigate to="/" />}
@@ -54,11 +55,14 @@ function AppRoutes() {
         element={user && ['meteorologo', 'superadmin'].includes(user.role) ? <MeteorologistDashboard /> : <Navigate to="/" />}
       />
       <Route
+        path="/civil-defense-dashboard" // Añadir la nueva ruta protegida
+        element={user && ['defensa_civil', 'superadmin'].includes(user.role) ? <CivilDefensePage /> : <Navigate to="/" />}
+      />
+      <Route
         path="/dashboard"
         element={user ? <DashboardPage /> : <Navigate to="/login" />}
       />
       
-      {/* Ruta comodín para redirigir a la página principal si no se encuentra la ruta */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
