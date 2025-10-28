@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "tailwind:init": "tailwindcss init -p"
+    "tailwind:init": "tailwindcss init -p",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "jwt-decode": "^4.0.0",
