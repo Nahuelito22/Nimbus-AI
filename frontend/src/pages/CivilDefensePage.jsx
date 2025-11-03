@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import AlertPanel from '../components/civil_defense/AlertPanel';
 import RiskMap from '../components/civil_defense/RiskMap';
 import QuickReportGenerator from '../components/civil_defense/QuickReportGenerator';
@@ -46,6 +46,12 @@ const CivilDefensePage = () => {
     fetchData();
   }, [token]);
 
+  const highestAlert = useMemo(() => {
+    if (!alerts || alerts.length === 0) return null;
+    // Ordena por probabilidad descendente y luego toma el primero
+    return [...alerts].sort((a, b) => b.probability - a.probability)[0];
+  }, [alerts]);
+
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
@@ -59,7 +65,7 @@ const CivilDefensePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-8">
             <AlertPanel alerts={alerts} />
-            <QuickReportGenerator />
+            <QuickReportGenerator highestAlert={highestAlert} />
           </div>
           
           <div className="lg:col-span-2">
@@ -72,3 +78,4 @@ const CivilDefensePage = () => {
 };
 
 export default CivilDefensePage;
+
