@@ -14,7 +14,7 @@ const ManualAlertForm = ({ onSubmit, onCancel }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[2000]">
       <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Crear Alerta Manual</h2>
         <form onSubmit={handleSubmit}>

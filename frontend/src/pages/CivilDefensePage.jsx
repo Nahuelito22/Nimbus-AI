@@ -16,6 +16,7 @@ const CivilDefensePage = () => {
 
   // Estado para el flujo de creación manual
   const [newZone, setNewZone] = useState(null); // Almacena coordenadas de la zona dibujada
+  const [drawKey, setDrawKey] = useState(0); // Key para forzar el reseteo del componente de dibujo
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,49 +50,45 @@ const CivilDefensePage = () => {
   }, [token]);
 
   // Combina alertas de la API y manuales
-  const combinedAlerts = useMemo(() => [...apiAlerts, ...manualAlerts].sort((a, b) => b.id - a.id), [apiAlerts, manualAlerts]);
+  const combinedAlerts = useMemo(() => [...apiAlerts, ...manualAlerts].sort((a, b) => (b.id.toString().startsWith('manual') ? 1 : 0) - (a.id.toString().startsWith('manual') ? 1 : 0) || b.id - a.id), [apiAlerts, manualAlerts]);
   const combinedRiskZones = useMemo(() => [...apiRiskZones, ...manualZones], [apiRiskZones, manualZones]);
 
   const highestAlert = useMemo(() => {
     if (!combinedAlerts || combinedAlerts.length === 0) return null;
-    // Filtra solo las alertas con probabilidad para el generador de reportes
     const alertsWithProb = combinedAlerts.filter(a => a.probability !== null);
     if (alertsWithProb.length === 0) return null;
     return alertsWithProb.sort((a, b) => b.probability - a.probability)[0];
   }, [combinedAlerts]);
 
-  // Manejador para cuando se dibuja una zona en el mapa
   const handleManualZoneDrawn = (coordinates) => {
     setNewZone({ bounds: coordinates });
   };
 
-  // Manejador para la creación de la alerta manual desde el formulario
   const handleCreateManualAlert = ({ title, color }) => {
     const newManualAlert = {
       id: `manual-${Date.now()}`,
       title: title,
       region: 'Zona Manual',
-      probability: null, // Las alertas manuales no tienen probabilidad
+      probability: null,
       time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
       color: color,
       isManual: true
     };
-
     const newManualZone = {
       name: title,
       color: color,
       bounds: newZone.bounds,
       isManual: true
     };
-
     setManualAlerts(prev => [newManualAlert, ...prev]);
     setManualZones(prev => [newManualZone, ...prev]);
-    setNewZone(null); // Cierra el formulario
+    setNewZone(null);
+    setDrawKey(prev => prev + 1);
   };
 
-  // Manejador para cancelar la creación
   const handleCancelManualAlert = () => {
     setNewZone(null);
+    setDrawKey(prev => prev + 1);
   };
 
   return (
@@ -120,6 +117,7 @@ const CivilDefensePage = () => {
           <RiskMap 
             riskZones={combinedRiskZones} 
             onManualZoneDrawn={handleManualZoneDrawn} 
+            drawKey={drawKey}
           />
         </div>
       </div>
