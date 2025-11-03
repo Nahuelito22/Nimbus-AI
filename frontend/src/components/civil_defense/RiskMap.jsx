@@ -1,35 +1,11 @@
 import React from 'react';
-import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
+import { MapContainer, TileLayer, Polygon, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Coordenadas aproximadas de Mendoza
 const mendozaPosition = [-32.8908, -68.8272];
 
-// Datos de ejemplo para las zonas de riesgo. Esto vendrá de la API.
-const riskZones = [
-  {
-    name: 'Zona Roja',
-    color: 'red',
-    bounds: [
-      [-33.0, -68.9],
-      [-33.1, -68.9],
-      [-33.1, -68.8],
-      [-33.0, -68.8],
-    ]
-  },
-  {
-    name: 'Zona Naranja',
-    color: 'orange',
-    bounds: [
-      [-32.8, -68.7],
-      [-32.9, -68.7],
-      [-32.9, -68.6],
-      [-32.8, -68.6],
-    ]
-  }
-];
-
-const RiskMap = () => {
+const RiskMap = ({ riskZones }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-inner">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Mapa de Zonas de Riesgo</h2>
@@ -40,11 +16,20 @@ const RiskMap = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           
-          {/* Placeholder para las zonas de riesgo */}
-          {/* En el futuro, estos polígonos se generarán dinámicamente con datos de la API */}
-          {riskZones.map(zone => (
-            <Polygon key={zone.name} pathOptions={{ color: zone.color }} positions={zone.bounds} />
-          ))}
+          {riskZones && riskZones.length > 0 ? (
+            riskZones.map(zone => (
+              <Polygon key={zone.name} pathOptions={{ color: zone.color, fillOpacity: 0.5 }} positions={zone.bounds}>
+                <Tooltip sticky>
+                  <strong>{zone.name}</strong><br />
+                  Probabilidad: {zone.probability}%
+                </Tooltip>
+              </Polygon>
+            ))
+          ) : (
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000 }}>
+              <p className="text-gray-500 bg-white p-4 rounded-md shadow-lg">No hay zonas de riesgo definidas para mostrar.</p>
+            </div>
+          )}
 
         </MapContainer>
       </div>
@@ -53,3 +38,4 @@ const RiskMap = () => {
 };
 
 export default RiskMap;
+

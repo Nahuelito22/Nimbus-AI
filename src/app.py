@@ -39,6 +39,7 @@ from src.services.goes_service import get_latest_goes_image_url, get_latest_goes
 from src.services.email_service import send_verification_email
 from src.database import db  # Importar db desde nuestro archivo database.py
 from src.services.logger import app_logger
+from src.services.civil_defense_service import get_civil_defense_data
 from src.services.admin_services import (
     get_all_users_service,
     approve_user_service,
@@ -680,6 +681,19 @@ def predict_with_details():
     except Exception as e:
         app_logger.error(f"Error en la predicción detallada: {str(e)}")
         return jsonify({"error": f"Ocurrió un error en la predicción detallada: {str(e)}"}), 500
+
+@app.route('/api/civil-defense/dashboard', methods=['GET'])
+@professional_required()
+def civil_defense_dashboard():
+    """
+    Endpoint para que Defensa Civil obtenga datos de alertas y zonas de riesgo.
+    """
+    try:
+        data = get_civil_defense_data()
+        return jsonify(data)
+    except Exception as e:
+        app_logger.error(f"Error en el dashboard de Defensa Civil: {str(e)}")
+        return jsonify({"error": f"Ocurrió un error en el dashboard de Defensa Civil: {str(e)}"}), 500
 
 @app.route('/api/dashboard/weather-data', methods=['GET'])
 @professional_required()
