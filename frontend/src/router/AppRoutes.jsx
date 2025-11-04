@@ -8,6 +8,9 @@ import VerifyEmailPage from '../pages/VerifyEmailPage';
 import MeteorologistDashboard from '../pages/MeteorologistDashboard';
 import CivilDefensePage from '../pages/CivilDefensePage';
 import DataScientistDashboard from '../pages/DataScientistDashboard';
+import TermsPage from '../pages/TermsPage';
+import PrivacyPage from '../pages/PrivacyPage';
+import ContactPage from '../pages/ContactPage';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -35,18 +38,14 @@ function AppRoutes() {
       <Route path="/" element={<RoleBasedRedirect />} />
 
       {/* Rutas de autenticación */}
-      <Route 
-        path="/register" 
-        element={!user ? <RegisterPage /> : <RoleBasedRedirect />}
-      />
-      <Route 
-        path="/login" 
-        element={!user ? <LoginPage /> : <RoleBasedRedirect />}
-      />
-      <Route 
-        path="/verify-email" 
-        element={<VerifyEmailPage />} // Permitir acceso siempre para verificación
-      />
+      <Route path="/register" element={!user ? <RegisterPage /> : <RoleBasedRedirect />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <RoleBasedRedirect />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+
+      {/* Rutas públicas de información */}
+      <Route path="/terminos" element={<TermsPage />} />
+      <Route path="/privacidad" element={<PrivacyPage />} />
+      <Route path="/contacto" element={<ContactPage />} />
 
       {/* Rutas protegidas por rol */}
       <Route
