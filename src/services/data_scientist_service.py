@@ -2,6 +2,7 @@ import pandas as pd
 import json
 from shapely.geometry import Point, Polygon
 import os
+import numpy as np
 
 # --- Carga y Preparación de Datos ---
 
@@ -17,7 +18,6 @@ def load_department_polygons(json_path):
                 'shape': Polygon(feature['geometry']['coordinates'][0])
             })
         elif feature['geometry']['type'] == 'MultiPolygon':
-            # Manejar MultiPolygon creando un polígono unificado (simplificación)
             from shapely.ops import unary_union
             multi_poly = [Polygon(p[0]) for p in feature['geometry']['coordinates']]
             polygons.append({
@@ -53,13 +53,18 @@ class DataScientistService:
         self.df = load_and_enrich_data(csv_path, json_path)
         print("Datos listos.")
 
+    def _dataframe_to_json_safe(self, df):
+        """Convierte un DataFrame a una estructura compatible con JSON (manejando NaN)."""
+        # Reemplaza NaN con None, que se convierte en null en JSON
+        df_filled = df.replace({np.nan: None})
+        return df_filled.to_dict(orient='records')
+
     def get_filter_options(self):
         date_min = self.df['date'].min()
         date_max = self.df['date'].max()
         
-        # Obtener estaciones únicas con sus coordenadas
         stations_df = self.df[['station_name', 'latitude', 'longitude']].drop_duplicates('station_name').dropna()
-        stations = stations_df.to_dict(orient='records')
+        stations = self._dataframe_to_json_safe(stations_df)
 
         departments = sorted(self.df['departamento'].unique().tolist())
         
@@ -70,7 +75,8 @@ class DataScientistService:
         }
 
     def get_data_head(self, num_rows=5):
-        return self.df.head(num_rows).to_dict(orient='records')
+        head_df = self.df.head(num_rows)
+        return self._dataframe_to_json_safe(head_df)
 
     def get_csv_path(self):
         return self.csv_path
@@ -83,11 +89,10 @@ class DataScientistService:
         if filters.get('endDate'):
             filtered_df = filtered_df[filtered_df['date'] <= filters['endDate']]
             
-        # El filtro de estaciones ahora se basa en los nombres de estación seleccionados en el mapa
         if filters.get('stations') and len(filters['stations']) > 0:
             filtered_df = filtered_df[filtered_df['station_name'].isin(filters['stations'])]
             
-        return filtered_df.head(1000).to_dict(orient='records')
+        return self._dataframe_to_json_safe(filtered_df.head(1000))
 
 # --- Instancia del Servicio (Singleton) ---
 CSV_DATA_PATH = 'data/processed/dataset_final_enriquecido.csv'
