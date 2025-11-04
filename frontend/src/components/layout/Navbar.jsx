@@ -25,6 +25,11 @@ function Navbar() {
                     <Link to="/admin" className="hover:text-blue-300">Panel Admin</Link>
                   )}
 
+                  {/* Enlace específico para científico de datos */}
+                  {['cientifico_datos'].includes(user.role) && (
+                    <Link to="/data-scientist-dashboard" className="font-semibold text-blue-300 hover:text-white">Dashboard Científico</Link>
+                  )}
+
                   {/* Menú de Supervisión para Superadmin */}
                   {user.role === 'superadmin' && (
                     <>
@@ -32,11 +37,12 @@ function Navbar() {
                       <Link to="/dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Usuario</Link>
                       <Link to="/meteorologist-dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Meteorólogo</Link>
                       <Link to="/civil-defense-dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Defensa Civil</Link>
+                      <Link to="/data-scientist-dashboard" className="text-yellow-300 hover:text-yellow-200">Ver como Científico</Link>
                     </>
                   )}
                   
                   <button onClick={logout} className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Salir</button>
-                </>
+                </> 
               ) : (
                 <>
                   <Link to="/login" className="hover:text-blue-300">Iniciar Sesión</Link>
