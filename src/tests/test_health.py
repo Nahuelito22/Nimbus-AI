@@ -1,0 +1,4 @@
+def test_healthcheck(client):
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    assert response.json == {"status": "healthy", "message": "Nimbus API is running!"}
