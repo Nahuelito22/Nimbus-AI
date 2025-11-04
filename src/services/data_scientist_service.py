@@ -1,33 +1,34 @@
 import pandas as pd
 import json
 from shapely.geometry import Point, Polygon
+import os
 
 # --- Carga y Preparación de Datos ---
 
 def load_department_polygons(json_path):
-    """
-    Carga los polígonos de los departamentos desde un archivo GeoJSON.
-    """
     polygons = []
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     for feature in data['features']:
         dept_name = feature['properties']['departamento']
-        # Asegurarse de que la geometría es un polígono o multipolígono
-        if feature['geometry']['type'] in ['Polygon', 'MultiPolygon']:
+        if feature['geometry']['type'] == 'Polygon':
             polygons.append({
                 'name': dept_name,
-                'shape': Polygon(feature['geometry']['coordinates'][0]) # Simplificado para polígonos simples
+                'shape': Polygon(feature['geometry']['coordinates'][0])
+            })
+        elif feature['geometry']['type'] == 'MultiPolygon':
+            # Manejar MultiPolygon creando un polígono unificado (simplificación)
+            from shapely.ops import unary_union
+            multi_poly = [Polygon(p[0]) for p in feature['geometry']['coordinates']]
+            polygons.append({
+                'name': dept_name,
+                'shape': unary_union(multi_poly)
             })
     return polygons
 
 def get_department_for_coordinate(latitude, longitude, department_polygons):
-    """
-    Encuentra el departamento para una coordenada dada.
-    """
     if pd.isna(latitude) or pd.isna(longitude):
         return "Sin Departamento"
-    
     point = Point(longitude, latitude)
     for dept in department_polygons:
         if dept['shape'].contains(point):
@@ -35,22 +36,12 @@ def get_department_for_coordinate(latitude, longitude, department_polygons):
     return "Fuera de Mendoza"
 
 def load_and_enrich_data(csv_path, json_path):
-    """
-    Carga el dataset principal y lo enriquece con la información de departamento.
-    """
-    # Cargar datos principales
     df = pd.read_csv(csv_path)
-    
-    # Cargar polígonos
     department_polygons = load_department_polygons(json_path)
-    
-    # Aplicar la función para obtener departamentos
-    # Se usa una muestra para acelerar el desarrollo, quitar .head() para producción
     df['departamento'] = df.apply(
         lambda row: get_department_for_coordinate(row['latitude'], row['longitude'], department_polygons),
         axis=1
     )
-    
     return df
 
 # --- Lógica de Negocio para el Dashboard ---
@@ -58,55 +49,48 @@ def load_and_enrich_data(csv_path, json_path):
 class DataScientistService:
     def __init__(self, csv_path, json_path):
         print("Cargando y enriqueciendo datos para el dashboard científico...")
+        self.csv_path = csv_path
         self.df = load_and_enrich_data(csv_path, json_path)
         print("Datos listos.")
 
     def get_filter_options(self):
-        """
-        Devuelve las opciones disponibles para los filtros del frontend.
-        """
         date_min = self.df['date'].min()
         date_max = self.df['date'].max()
         
-        stations = self.df['station_name'].unique().tolist()
-        departments = self.df['departamento'].unique().tolist()
+        # Obtener estaciones únicas con sus coordenadas
+        stations_df = self.df[['station_name', 'latitude', 'longitude']].drop_duplicates('station_name').dropna()
+        stations = stations_df.to_dict(orient='records')
+
+        departments = sorted(self.df['departamento'].unique().tolist())
         
         return {
-            "dateRange": {
-                "min": date_min,
-                "max": date_max
-            },
-            "stations": sorted(stations),
-            "departments": sorted(departments)
+            "dateRange": {"min": date_min, "max": date_max},
+            "stations": stations,
+            "departments": departments
         }
 
+    def get_data_head(self, num_rows=5):
+        return self.df.head(num_rows).to_dict(orient='records')
+
+    def get_csv_path(self):
+        return self.csv_path
+
     def get_filtered_data(self, filters):
-        """
-        Filtra el dataframe principal basado en los filtros proporcionados.
-        """
         filtered_df = self.df.copy()
         
-        # Filtro por rango de fechas
-        if 'startDate' in filters and filters['startDate']:
+        if filters.get('startDate'):
             filtered_df = filtered_df[filtered_df['date'] >= filters['startDate']]
-        if 'endDate' in filters and filters['endDate']:
+        if filters.get('endDate'):
             filtered_df = filtered_df[filtered_df['date'] <= filters['endDate']]
             
-        # Filtro por estaciones
-        if 'stations' in filters and filters['stations']:
+        # El filtro de estaciones ahora se basa en los nombres de estación seleccionados en el mapa
+        if filters.get('stations') and len(filters['stations']) > 0:
             filtered_df = filtered_df[filtered_df['station_name'].isin(filters['stations'])]
             
-        # Filtro por departamentos
-        if 'departments' in filters and filters['departments']:
-            filtered_df = filtered_df[filtered_df['departamento'].isin(filters['departments'])]
-            
-        # Limitar a 1000 registros para no sobrecargar el frontend
         return filtered_df.head(1000).to_dict(orient='records')
 
 # --- Instancia del Servicio (Singleton) ---
-# Se asumen las rutas relativas al root del proyecto
 CSV_DATA_PATH = 'data/processed/dataset_final_enriquecido.csv'
 JSON_DEPT_PATH = 'data/raw/departamentos-mendoza.json'
 
-# Esta instancia se importará en la API
 data_scientist_service = DataScientistService(CSV_DATA_PATH, JSON_DEPT_PATH)

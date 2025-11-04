@@ -1,45 +1,32 @@
 import React, { useState, useEffect } from 'react';
 
-function DataFilterPanel({ options, onFilterChange, isLoading }) {
-  const [filters, setFilters] = useState({
+function DataFilterPanel({ dateRange, onDateChange, onSubmit, isLoading }) {
+  const [dates, setDates] = useState({
     startDate: '',
     endDate: '',
-    stations: [],
-    departments: [],
   });
 
   useEffect(() => {
-    // Inicializar los filtros cuando las opciones se cargan
-    if (options && options.dateRange) {
-      setFilters(prev => ({
-        ...prev,
-        startDate: options.dateRange.min || '',
-        endDate: options.dateRange.max || '',
-      }));
+    if (dateRange) {
+      setDates({
+        startDate: dateRange.min || '',
+        endDate: dateRange.max || '',
+      });
     }
-  }, [options]);
+  }, [dateRange]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleMultiSelectChange = (e) => {
-    const { name, options } = e.target;
-    const selectedValues = Array.from(options)
-      .filter(option => option.selected)
-      .map(option => option.value);
-    setFilters(prev => ({ ...prev, [name]: selectedValues }));
+    const newDates = { ...dates, [name]: value };
+    setDates(newDates);
+    // Notificar al padre en cada cambio de fecha
+    onDateChange(newDates);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onFilterChange(filters);
+    onSubmit(); // El padre ya tiene las fechas y las estaciones seleccionadas
   };
-
-  if (!options) {
-    return <div>Cargando opciones de filtro...</div>;
-  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -49,7 +36,7 @@ function DataFilterPanel({ options, onFilterChange, isLoading }) {
           type="date"
           id="startDate"
           name="startDate"
-          value={filters.startDate}
+          value={dates.startDate}
           onChange={handleInputChange}
           className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
@@ -61,42 +48,10 @@ function DataFilterPanel({ options, onFilterChange, isLoading }) {
           type="date"
           id="endDate"
           name="endDate"
-          value={filters.endDate}
+          value={dates.endDate}
           onChange={handleInputChange}
           className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
-      </div>
-
-      <div>
-        <label htmlFor="departments" className="block text-sm font-medium text-gray-700">Departamentos</label>
-        <select
-          multiple
-          id="departments"
-          name="departments"
-          onChange={handleMultiSelectChange}
-          className="mt-1 block w-full h-32 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          {options.departments?.map(dept => (
-            <option key={dept} value={dept}>{dept}</option>
-          ))}
-        </select>
-        <p className="text-xs text-gray-500 mt-1">Mantén Ctrl (o Cmd) para seleccionar varios.</p>
-      </div>
-
-      <div>
-        <label htmlFor="stations" className="block text-sm font-medium text-gray-700">Estaciones</label>
-        <select
-          multiple
-          id="stations"
-          name="stations"
-          onChange={handleMultiSelectChange}
-          className="mt-1 block w-full h-32 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          {options.stations?.map(station => (
-            <option key={station} value={station}>{station}</option>
-          ))}
-        </select>
-        <p className="text-xs text-gray-500 mt-1">Mantén Ctrl (o Cmd) para seleccionar varios.</p>
       </div>
 
       <button

@@ -1,28 +1,48 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from src.services.data_scientist_service import data_scientist_service
-# Importar el modelo y lógica de predicción (se completará)
-# from src.services.prediction_service import model
+import os
 
 data_scientist_api = Blueprint('data_scientist_api', __name__)
 
 @data_scientist_api.route('/api/ds/filters', methods=['GET'])
 def get_filters():
-    """
-    Endpoint para obtener las opciones de los filtros.
-    """
+    """Endpoint para obtener las opciones de los filtros (incluyendo estaciones con coords)."""
     try:
         filters = data_scientist_service.get_filter_options()
         return jsonify(filters)
     except Exception as e:
-        # En un futuro, usar un logger aquí
         print(f"Error al obtener filtros: {e}")
         return jsonify({"error": "Ocurrió un error al procesar la solicitud"}), 500
 
+@data_scientist_api.route('/api/ds/head', methods=['GET'])
+def get_head():
+    """Endpoint para obtener las primeras filas del dataset."""
+    try:
+        num_rows = request.args.get('rows', 5, type=int)
+        head_data = data_scientist_service.get_data_head(num_rows)
+        return jsonify(head_data)
+    except Exception as e:
+        print(f"Error al obtener la cabecera de los datos: {e}")
+        return jsonify({"error": "Ocurrió un error al procesar la solicitud"}), 500
+
+@data_scientist_api.route('/api/ds/download-csv', methods=['GET'])
+def download_csv():
+    """Endpoint para descargar el dataset completo en formato CSV."""
+    try:
+        csv_path = data_scientist_service.get_csv_path()
+        # La ruta debe ser absoluta para send_file
+        absolute_path = os.path.abspath(csv_path)
+        if not os.path.exists(absolute_path):
+            return jsonify({"error": "Archivo no encontrado en el servidor."}), 404
+        
+        return send_file(absolute_path, as_attachment=True, download_name='dataset_nimbus_ai.csv')
+    except Exception as e:
+        print(f"Error al descargar el archivo CSV: {e}")
+        return jsonify({"error": "Ocurrió un error al procesar la descarga"}), 500
+
 @data_scientist_api.route('/api/ds/query', methods=['POST'])
 def query_data():
-    """
-    Endpoint para obtener datos filtrados.
-    """
+    """Endpoint para obtener datos filtrados."""
     try:
         filters = request.json
         if not filters:
@@ -33,27 +53,3 @@ def query_data():
     except Exception as e:
         print(f"Error al consultar datos: {e}")
         return jsonify({"error": "Ocurrió un error al procesar la solicitud"}), 500
-
-@data_scientist_api.route('/api/ds/predict', methods=['POST'])
-def predict():
-    """
-    Endpoint para realizar una predicción con el modelo.
-    """
-    try:
-        # La data para predecir vendrá en el cuerpo de la solicitud
-        prediction_data = request.json
-        
-        # --- Lógica de Predicción (Placeholder) ---
-        # 1. Validar y pre-procesar `prediction_data` para que coincida con la entrada del modelo.
-        # 2. Cargar el modelo si no está en memoria.
-        # 3. Realizar la predicción: `probability = model.predict(processed_data)`
-        # 4. Devolver el resultado.
-        
-        # Por ahora, devolvemos un valor de ejemplo.
-        # Esto se reemplazará con la llamada real al modelo.
-        mock_probability = 0.1234 # Valor de ejemplo
-        
-        return jsonify({"hail_probability": mock_probability})
-    except Exception as e:
-        print(f"Error en la predicción: {e}")
-        return jsonify({"error": "Ocurrió un error al procesar la predicción"}), 500
