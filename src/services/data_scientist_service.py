@@ -54,8 +54,6 @@ class DataScientistService:
         print("Datos listos.")
 
     def _dataframe_to_json_safe(self, df):
-        """Convierte un DataFrame a una estructura compatible con JSON (manejando NaN)."""
-        # Reemplaza NaN con None, que se convierte en null en JSON
         df_filled = df.replace({np.nan: None})
         return df_filled.to_dict(orient='records')
 
@@ -81,7 +79,8 @@ class DataScientistService:
     def get_csv_path(self):
         return self.csv_path
 
-    def get_filtered_data(self, filters):
+    def get_filtered_data(self, filters, limit=1000):
+        """Filtra los datos y aplica un límite opcional."""
         filtered_df = self.df.copy()
         
         if filters.get('startDate'):
@@ -91,8 +90,11 @@ class DataScientistService:
             
         if filters.get('stations') and len(filters['stations']) > 0:
             filtered_df = filtered_df[filtered_df['station_name'].isin(filters['stations'])]
+        
+        if limit is not None:
+            filtered_df = filtered_df.head(limit)
             
-        return self._dataframe_to_json_safe(filtered_df.head(1000))
+        return self._dataframe_to_json_safe(filtered_df)
 
 # --- Instancia del Servicio (Singleton) ---
 CSV_DATA_PATH = 'data/processed/dataset_final_enriquecido.csv'
