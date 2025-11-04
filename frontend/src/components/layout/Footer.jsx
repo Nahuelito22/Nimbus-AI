@@ -17,7 +17,7 @@ function Footer() {
           </div>
         </div>
         <div className="mt-4 text-center text-blue-200 text-sm">
-          <p>© 2023 Nimbus AI. Todos los derechos reservados.</p>
+          <p>© 2025 Nimbus AI. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
