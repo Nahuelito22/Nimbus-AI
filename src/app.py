@@ -206,12 +206,12 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if user and user.is_suspended:
-            return jsonify({"msg": "Tu cuenta ha sido suspendida. Contacta al administrador."}), 403
+            return jsonify({"msg": "Tu cuenta ha sido suspendida. Contacta al administrador."} ), 403
 
         # Añadir comprobación de verificación de email
         if user and not user.is_verified:
             # Devolvemos un error específico para que el frontend pueda manejarlo
-            return jsonify({"error": "ACCOUNT_NOT_VERIFIED", "msg": "Tu cuenta no ha sido verificada."}), 401
+            return jsonify({"error": "ACCOUNT_NOT_VERIFIED", "msg": "Tu cuenta no ha sido verificada."} ), 401
 
         if user and user.check_password(password):  # Usar el método del modelo
             # Añadir ID y nombre al token para uso en el frontend
@@ -270,10 +270,10 @@ def resend_verification():
 
         if not user:
             # No revelamos si el usuario existe o no por seguridad
-            return jsonify({"msg": "Si existe una cuenta con este email, se ha enviado un nuevo código de verificación."}), 200
+            return jsonify({"msg": "Si existe una cuenta con este email, se ha enviado un nuevo código de verificación."} ), 200
 
         if user.is_verified:
-            return jsonify({"msg": "Esta cuenta ya ha sido verificada."}), 400
+            return jsonify({"msg": "Esta cuenta ya ha sido verificada."} ), 400
 
         # Generar un nuevo código y reenviar
         user.verification_code = ''.join(random.choices(string.digits, k=6))
@@ -281,7 +281,7 @@ def resend_verification():
         
         send_verification_email(mail, user.email, user.verification_code)
 
-        return jsonify({"msg": "Se ha enviado un nuevo código de verificación a tu correo."}), 200
+        return jsonify({"msg": "Se ha enviado un nuevo código de verificación a tu correo."} ), 200
 
     except Exception as e:
         app_logger.error(f"Error en resend_verification para {email}: {str(e)}")
@@ -361,7 +361,7 @@ def get_logs():
     try:
         log_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs', 'app.log'))
         if not os.path.exists(log_file_path):
-            return jsonify({"error": "El archivo de logs no se ha creado todavía."}), 404
+            return jsonify({"error": "El archivo de logs no se ha creado todavía."} ), 404
         
         # Leer las últimas N líneas del log (ej. 100)
         with open(log_file_path, 'r') as f:
@@ -370,7 +370,7 @@ def get_logs():
         return jsonify({"logs": '\n'.join(lines)})
     except Exception as e:
         app_logger.error(f"Error al leer el archivo de logs: {str(e)}")
-        return jsonify({"error": "No se pudo leer el archivo de logs."}), 500
+        return jsonify({"error": "No se pudo leer el archivo de logs."} ), 500
 
 @app.route('/api/admin/test/open-meteo', methods=['GET'])
 @admin_required()
