@@ -1,6 +1,5 @@
 import React from 'react';
-import { FaTable, FaImage, FaArrowRight, FaBrain, FaPlus } from 'react-icons/fa';
-import { GiHail } from 'react-icons/gi';
+import { FaTable, FaImage, FaArrowRight, FaBrain, FaPlus, FaCloudShowersHeavy } from 'react-icons/fa';
 
 const Card = ({ title, icon, children }) => (
   <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm text-center flex flex-col items-center justify-center h-32">
@@ -47,7 +46,7 @@ function ModelArchitectureDiagram() {
         {/* Columna 5: Predicción */}
         <div>
           <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-4 shadow-lg text-center flex flex-col items-center justify-center h-32">
-            <GiHail size="3em" className="text-blue-700" />
+            <FaCloudShowersHeavy size="3em" className="text-blue-700" />
             <h3 className="mt-2 text-base font-bold text-blue-800">Predicción de Granizo</h3>
           </div>
         </div>
