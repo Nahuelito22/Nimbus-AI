@@ -48,6 +48,7 @@ from src.services.admin_services import (
     suspend_user_service,
     unban_user_service
 )
+from src.api.data_scientist_api import data_scientist_api
 
 # 1. Inicialización de la App con configuración de archivos estáticos
 app = Flask(__name__, 
@@ -863,6 +864,9 @@ def disk_usage():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# --- REGISTRO DE BLUEPRINTS ---
+app.register_blueprint(data_scientist_api)
 
 # --- BLOQUE PRINCIPAL ---
 if __name__ == '__main__':

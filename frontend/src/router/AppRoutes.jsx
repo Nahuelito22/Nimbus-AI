@@ -6,7 +6,8 @@ import RegisterPage from '../pages/RegisterPage';
 import AdminPage from '../pages/AdminPage';
 import VerifyEmailPage from '../pages/VerifyEmailPage';
 import MeteorologistDashboard from '../pages/MeteorologistDashboard';
-import CivilDefensePage from '../pages/CivilDefensePage'; // Importar la nueva página
+import CivilDefensePage from '../pages/CivilDefensePage';
+import DataScientistDashboard from '../pages/DataScientistDashboard';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -20,10 +21,12 @@ function AppRoutes() {
         return <Navigate to="/admin" />;
       case 'meteorologo':
         return <Navigate to="/meteorologist-dashboard" />;
-      case 'defensa_civil': // Añadir caso para defensa civil
+      case 'defensa_civil':
         return <Navigate to="/civil-defense-dashboard" />;
+      case 'cientifico_datos':
+        return <Navigate to="/data-scientist-dashboard" />;
       default:
-        return <Navigate to="/dashboard" />; // Dashboard genérico para 'user' y otros roles
+        return <Navigate to="/dashboard" />;
     }
   };
 
@@ -55,8 +58,12 @@ function AppRoutes() {
         element={user && ['meteorologo', 'superadmin'].includes(user.role) ? <MeteorologistDashboard /> : <Navigate to="/" />}
       />
       <Route
-        path="/civil-defense-dashboard" // Añadir la nueva ruta protegida
-        element={user && ['defensa_civil', 'superadmin'].includes(user.role) ? <CivilDefensePage /> : <Navigate to="/" />}
+        path="/civil-defense-dashboard"
+        element={user && ['defensa_civil', 'admin', 'superadmin'].includes(user.role) ? <CivilDefensePage /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/data-scientist-dashboard"
+        element={user && ['cientifico_datos', 'admin', 'superadmin'].includes(user.role) ? <DataScientistDashboard /> : <Navigate to="/" />}
       />
       <Route
         path="/dashboard"
