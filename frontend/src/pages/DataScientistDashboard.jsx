@@ -3,6 +3,7 @@ import DatasetPreview from '../components/data_scientist/DatasetPreview';
 import InteractiveMap from '../components/data_scientist/InteractiveMap';
 import DataFilterPanel from '../components/data_scientist/DataFilterPanel';
 import DataTable from '../components/data_scientist/DataTable';
+import ModelArchitectureDiagram from '../components/data_scientist/ModelArchitectureDiagram'; // Importar el nuevo componente
 import { getFilterOptions, getDataHead, getFilteredData, downloadFilteredData } from '../api/dataScientist';
 
 function DataScientistDashboard() {
@@ -69,6 +70,7 @@ function DataScientistDashboard() {
       
       {error && <div className="bg-red-100 text-red-700 p-3 rounded-md mb-4">Error: {error}</div>}
 
+      {/* Sección de Vista Previa y Descarga */}
       <div className="bg-white p-4 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-semibold">Vista Previa del Dataset</h2>
@@ -77,6 +79,7 @@ function DataScientistDashboard() {
         <DatasetPreview data={headData} isLoading={isLoading} />
       </div>
 
+      {/* Sección Principal Interactiva */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 bg-white p-4 rounded-lg shadow-md space-y-4">
           <div>
@@ -100,6 +103,13 @@ function DataScientistDashboard() {
           <DataTable data={filteredData} isLoading={isDataLoading} />
         </div>
       </div>
+
+      {/* Sección de Arquitectura del Modelo */}
+      <div className="bg-white p-4 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-3">Arquitectura del Modelo Nimbus AI</h2>
+        <ModelArchitectureDiagram />
+      </div>
+
     </div>
   );
 }
