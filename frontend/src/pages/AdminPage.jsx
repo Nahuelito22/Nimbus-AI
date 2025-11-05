@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import ServiceStatusDashboard from '../components/ServiceStatusDashboard';
 import DiskUsageMonitor from '../components/DiskUsageMonitor';
 import SiteStats from '../components/SiteStats'; // 1. Importar SiteStats
+import KeepAliveManager from '../components/admin/KeepAliveManager';
 
 function AdminPage() {
     const { user: currentUser } = useAuth();
@@ -230,9 +231,13 @@ function AdminPage() {
             <DiskUsageMonitor />
             <ServiceStatusDashboard />
 
+            {currentUser && currentUser.role === 'superadmin' && (
+                <KeepAliveManager />
+            )}
+
             {/* Modales (sin cambios) */}
             {isModalOpen && (
-                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Cambiar Rol de {selectedUser?.name}</h3>
                         <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full px-3 py-2 border rounded-md mb-4">

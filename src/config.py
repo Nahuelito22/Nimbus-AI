@@ -8,6 +8,7 @@ class Config:
     # Configuración de APIs
     OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
     NEWSAPI_KEY = os.getenv('NEWSAPI_KEY')
+    HUGGINGFACE_HEALTH_URL = os.getenv('HUGGINGFACE_HEALTH_URL', 'https://nahuelito22-nimbus-ai.hf.space/api/health')
     
     # Ciudades de Mendoza que vamos a monitorear
     CITIES = {

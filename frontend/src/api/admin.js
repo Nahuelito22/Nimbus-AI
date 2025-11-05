@@ -75,3 +75,11 @@ export const testHuggingFace = async () => {
 export const getDiskUsage = async () => {
     return await apiRequest(`${API_URL}/disk-usage`);
 };
+
+export const getKeepAliveStatus = async () => {
+    return await apiRequest(`${API_URL}/admin/keep-alive`);
+};
+
+export const toggleKeepAlive = async () => {
+    return await apiRequest(`${API_URL}/admin/keep-alive`, 'POST');
+};

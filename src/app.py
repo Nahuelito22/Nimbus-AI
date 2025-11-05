@@ -64,8 +64,22 @@ bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 mail = Mail(app)
 
-# Importar el modelo de usuario DESPUÉS de inicializar db
-from src.models.user import User
+# Importar modelos DESPUÉS de inicializar db
+from src.models import User, SystemSetting
+
+# Decorador para proteger rutas y requerir rol de 'superadmin'
+def superadmin_required():
+    def wrapper(fn):
+        @wraps(fn)
+        @jwt_required()
+        def decorator(*args, **kwargs):
+            claims = get_jwt()
+            if claims.get("role") == "superadmin":
+                return fn(*args, **kwargs)
+            else:
+                return jsonify(msg="¡Acceso denegado! Se requiere rol de superadministrador."), 403
+        return decorator
+    return wrapper
 
 # Decorador para proteger rutas y requerir rol de 'admin'
 def admin_required():
@@ -371,6 +385,34 @@ def get_logs():
     except Exception as e:
         app_logger.error(f"Error al leer el archivo de logs: {str(e)}")
         return jsonify({"error": "No se pudo leer el archivo de logs."} ), 500
+
+# --- Rutas para el Scheduler Keep-Alive ---
+@app.route('/api/admin/keep-alive', methods=['GET'])
+@superadmin_required()
+def get_keep_alive_status():
+    """Obtiene el estado actual de la tarea programada de keep-alive."""
+    setting = SystemSetting.query.get('keep_alive_enabled')
+    is_enabled = setting.value == 'true' if setting else False
+    return jsonify({"is_enabled": is_enabled})
+
+@app.route('/api/admin/keep-alive', methods=['POST'])
+@superadmin_required()
+def toggle_keep_alive():
+    """Activa o desactiva la tarea programada de keep-alive."""
+    setting = SystemSetting.query.get('keep_alive_enabled')
+    if setting:
+        # Si existe, invierte el valor
+        setting.value = 'false' if setting.value == 'true' else 'true'
+    else:
+        # Si no existe, la crea y la activa por defecto
+        setting = SystemSetting(key='keep_alive_enabled', value='true')
+        db.session.add(setting)
+    
+    db.session.commit()
+    
+    new_status = setting.value == 'true'
+    return jsonify({"msg": f"La tarea de Keep-Alive ha sido {'activada' if new_status else 'desactivada'}.", "is_enabled": new_status})
+
 
 @app.route('/api/admin/test/open-meteo', methods=['GET'])
 @admin_required()
@@ -867,6 +909,10 @@ def disk_usage():
 
 # --- REGISTRO DE BLUEPRINTS ---
 app.register_blueprint(data_scientist_api)
+
+# --- INICIALIZACIÓN DEL SCHEDULER ---
+from src.scheduler import init_scheduler
+init_scheduler(app)
 
 # --- BLOQUE PRINCIPAL ---
 if __name__ == '__main__':
