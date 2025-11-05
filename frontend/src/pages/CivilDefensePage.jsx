@@ -31,7 +31,8 @@ const CivilDefensePage = () => {
       }
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/civil-defense/dashboard', {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/civil-defense/dashboard`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
