@@ -1,13 +1,15 @@
 import pytest
-from src.app import app as flask_app
+from src.app import app
 
 @pytest.fixture
-def app():
-    flask_app.config.update({
-        "TESTING": True,
-    })
-    yield flask_app
+def client():
+    """Fixture que proporciona cliente de testing con app context"""
+    with app.test_client() as client:
+        with app.app_context():
+            yield client
 
-@pytest.fixture
-def client(app):
-    return app.test_client()
+@pytest.fixture(autouse=True)
+def app_context():
+    """Fixture que asegura app context automáticamente para todos los tests"""
+    with app.app_context():
+        yield
