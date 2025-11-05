@@ -15,7 +15,6 @@ __pycache__/
 
 # Archivos de entorno (variables de configuración sensibles)
 .env
-.env.*
 
 # Archivos de bases de datos locales (si estás usando SQLite o similares)
 *.db
