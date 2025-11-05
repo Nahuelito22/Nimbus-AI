@@ -173,7 +173,7 @@ function AdminPage() {
             <SiteStats users={users} />
 
             {/* User Management Section */}
-            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Gestión de Usuarios</h2>
                     <div>
@@ -195,14 +195,14 @@ function AdminPage() {
                     </div>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white border border-gray-200">
+                    <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                         <thead>
-                            <tr className="w-full bg-gray-100 text-left text-sm font-semibold text-gray-600">
-                                <th className="py-2 px-4 border-b">Nombre</th>
-                                <th className="py-2 px-4 border-b">Email</th>
-                                <th className="py-2 px-4 border-b">Rol</th>
-                                <th className="py-2 px-4 border-b">Estado</th>
-                                <th className="py-2 px-4 border-b">Acciones</th>
+                            <tr className="w-full bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">Nombre</th>
+                                <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">Email</th>
+                                <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">Rol</th>
+                                <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">Estado</th>
+                                <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -215,12 +215,12 @@ function AdminPage() {
                                     <td colSpan="5" className="text-center py-4 text-red-600">Error: {error}</td>
                                 </tr>
                             ) : filteredUsers.map(user => (
-                                <tr key={user.id} className="hover:bg-gray-50">
-                                    <td className="py-2 px-4 border-b">{user.name}</td>
-                                    <td className="py-2 px-4 border-b">{user.email}</td>
-                                    <td className="py-2 px-4 border-b">{user.role}</td>
-                                    <td className="py-2 px-4 border-b">{renderUserStatus(user)}</td>
-                                    <td className="py-2 px-4 border-b">{renderUserActions(user)}</td>
+                                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">{user.name}</td>
+                                    <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">{user.email}</td>
+                                    <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">{user.role}</td>
+                                    <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">{renderUserStatus(user)}</td>
+                                    <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">{renderUserActions(user)}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -238,7 +238,7 @@ function AdminPage() {
             {/* Modales (sin cambios) */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-                    <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Cambiar Rol de {selectedUser?.name}</h3>
                         <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full px-3 py-2 border rounded-md mb-4">
                             <option value="user">Usuario</option>
@@ -258,7 +258,7 @@ function AdminPage() {
 
             {isDetailsModalOpen && selectedUserForDetails && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-                    <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-lg">
                         <h3 className="text-xl font-bold mb-4">Detalles de {selectedUserForDetails.name}</h3>
                         <div className="space-y-2 text-sm">
                             <p><strong>Email:</strong> {selectedUserForDetails.email}</p>

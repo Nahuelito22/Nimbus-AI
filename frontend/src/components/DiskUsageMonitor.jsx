@@ -25,7 +25,7 @@ const DiskUsageMonitor = () => {
 
     const renderContent = () => {
         if (loading) {
-            return <p className="text-center text-gray-500">Cargando datos de uso de disco...</p>;
+            return <p className="text-center text-gray-500 dark:text-gray-400">Cargando datos de uso de disco...</p>;
         }
 
         if (error) {
@@ -33,7 +33,7 @@ const DiskUsageMonitor = () => {
         }
 
         if (!diskUsage) {
-            return <p className="text-center text-gray-500">No se pudieron obtener los datos.</p>;
+            return <p className="text-center text-gray-500 dark:text-gray-400">No se pudieron obtener los datos.</p>;
         }
 
         // Función para formatear la fecha de forma segura
@@ -51,33 +51,33 @@ const DiskUsageMonitor = () => {
         return (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                    <p className="text-2xl font-bold text-blue-600">{diskUsage.total_size_mb} MB</p>
-                    <p className="text-sm text-gray-600">Espacio Total Utilizado</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{diskUsage.total_size_mb} MB</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Espacio Total Utilizado</p>
                 </div>
                 <div>
-                    <p className="text-2xl font-bold text-blue-600">{diskUsage.file_count}</p>
-                    <p className="text-sm text-gray-600">Nº de Imágenes</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{diskUsage.file_count}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Nº de Imágenes</p>
                 </div>
                 <div>
-                    <p className="text-lg font-semibold text-gray-800 truncate" title={diskUsage.newest_file?.name}>
+                    <p className="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate" title={diskUsage.newest_file?.name}>
                         {formatDate(diskUsage.newest_file)}
                     </p>
-                    <p className="text-sm text-gray-600">Archivo Más Reciente</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Archivo Más Reciente</p>
                 </div>
                 <div>
-                    <p className="text-lg font-semibold text-gray-800 truncate" title={diskUsage.oldest_file?.name}>
+                    <p className="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate" title={diskUsage.oldest_file?.name}>
                         {formatDate(diskUsage.oldest_file)}
                     </p>
-                    <p className="text-sm text-gray-600">Archivo Más Antiguo</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Archivo Más Antiguo</p>
                 </div>
             </div>
         );
     };
 
     return (
-        <div className="bg-white shadow-lg rounded-lg p-6 mt-6">
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mt-6">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-800">Monitor de Disco de Imágenes</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Monitor de Disco de Imágenes</h2>
                 <button
                     onClick={fetchDiskUsage}
                     disabled={loading}

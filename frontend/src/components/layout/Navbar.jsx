@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggleButton from './ThemeToggleButton';
 
 
 function Navbar() {
@@ -23,8 +24,8 @@ function Navbar() {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const renderLinks = (isMobile = false) => {
-    const linkClass = isMobile ? 'block px-3 py-2 rounded-md text-base font-medium text-gray-800' : 'hover:text-blue-300';
-    const activeLinkClass = isMobile ? 'bg-gray-200' : 'text-blue-300 font-semibold';
+    const linkClass = isMobile ? 'block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200' : 'hover:text-blue-300';
+    const activeLinkClass = isMobile ? 'bg-gray-200 dark:bg-gray-700' : 'text-blue-300 font-semibold';
 
     return (
       <>
@@ -57,11 +58,11 @@ function Navbar() {
                   Supervisar
                 </button>
                 {superadminMenuOpen && (
-                  <div className={`${isMobile ? 'pl-4' : 'absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20'}`}>
-                    <Link to="/dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver como Usuario</Link>
-                    <Link to="/meteorologist-dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver como Meteorólogo</Link>
-                    <Link to="/civil-defense-dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver como Defensa Civil</Link>
-                    <Link to="/data-scientist-dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver como Científico</Link>
+                  <div className={`${isMobile ? 'pl-4' : 'absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-20'}`}>
+                    <Link to="/dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Ver como Usuario</Link>
+                    <Link to="/meteorologist-dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Ver como Meteorólogo</Link>
+                    <Link to="/civil-defense-dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Ver como Defensa Civil</Link>
+                    <Link to="/data-scientist-dashboard" onClick={isMobile ? closeMobileMenu : undefined} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Ver como Científico</Link>
                   </div>
                 )}
               </div>
@@ -86,19 +87,24 @@ function Navbar() {
           <img src="/logo_no_letras.png" alt="Logo" className="h-10 w-auto" />
           <h1 className="text-xl font-bold">Nimbus AI</h1>
         </Link>
-        <nav className="hidden md:flex items-center space-x-4">
-          {renderLinks()}
-        </nav>
-        <div className="md:hidden">
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}></path>
-            </svg>
-          </button>
+        <div className="flex items-center">
+            <nav className="hidden md:flex items-center space-x-4">
+              {renderLinks()}
+            </nav>
+            <div className="ml-4">
+                <ThemeToggleButton />
+            </div>
+            <div className="md:hidden ml-2">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}></path>
+                </svg>
+              </button>
+            </div>
         </div>
       </div>
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white text-gray-800">
+        <div className="md:hidden bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {renderLinks(true)}
           </div>
