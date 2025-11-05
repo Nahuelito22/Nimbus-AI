@@ -1,4 +1,4 @@
-from src.api.app import app
+from src import app 
 
 if __name__ == '__main__':
     print("🚀 Iniciando servidor Nimbus API...")

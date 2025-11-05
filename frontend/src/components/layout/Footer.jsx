@@ -7,8 +7,12 @@ function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
-            <h3 className="text-lg font-bold">Nimbus AI</h3>
-            <p className="text-blue-200">Sistema de Alerta Temprana de Granizo</p>
+            <div className="flex items-center space-x-2">
+              <img src="/logo_no_letras.png" alt="Logo Nimbus AI" className="h-8 w-12" />
+              <div>
+                <h3 className="text-lg font-bold">NIMBUS AI</h3>
+              </div>
+            </div>
           </div>
           <div className="flex space-x-4">
             <Link to="/terminos" className="hover:text-blue-300">Términos</Link>
