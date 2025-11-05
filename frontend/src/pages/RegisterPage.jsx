@@ -144,7 +144,7 @@ function RegisterPage() {
               onChange={handleChange}
               disabled={success}
             >
-              <option value="user">Usuario normal</option>
+              <option value="user">Usuario</option>
               <option value="defensa_civil">Defensa Civil</option>
               <option value="meteorologo">Meteorólogo</option>
               <option value="cientifico_datos">Científico de Datos</option>
