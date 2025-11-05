@@ -1,8 +1,12 @@
 import os
 from dotenv import load_dotenv
 
-# Cargar variables del archivo .env
-load_dotenv()
+# Construir la ruta explícita al archivo .env en la raíz del proyecto
+basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+dotenv_path = os.path.join(basedir, '.env')
+
+# Cargar el archivo .env
+load_dotenv(dotenv_path=dotenv_path)
 
 class Config:
     # Configuración de APIs
@@ -38,7 +42,13 @@ class Config:
 
     # Configuración de la base de datos
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'instance', 'nimbus_v2.db'))
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', f'sqlite:///{db_path}')
+    
+    # Lógica para la URL de la base de datos
+    database_url = os.getenv('DATABASE_URL')
+    if database_url and database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = database_url or f'sqlite:///{db_path}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Configuración de Flask-Mail
