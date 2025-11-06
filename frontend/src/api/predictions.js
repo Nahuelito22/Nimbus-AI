@@ -1,10 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const getHailPrediction = async (coords) => {
   const { lat, lon } = coords;
 
   // El backend espera las coordenadas como parámetros en la URL.
-  const url = `${BACKEND_API_URL}?lat=${lat}&lon=${lon}`;
+  const url = `${API_URL}/predict?lat=${lat}&lon=${lon}`;
 
   // La petición al backend es un GET, no un POST.
   const response = await fetch(url, {

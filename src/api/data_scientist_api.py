@@ -1,12 +1,14 @@
 from flask import Blueprint, request, jsonify, send_file
+from flask_cors import CORS
 from src.services.data_scientist_service import data_scientist_service
 import os
 import pandas as pd
 import io
 
 data_scientist_api = Blueprint('data_scientist_api', __name__)
+CORS(data_scientist_api) # Aplicar CORS a todas las rutas de este blueprint
 
-@data_scientist_api.route('/api/ds/filters', methods=['GET'])
+@data_scientist_api.route('/api/filters', methods=['GET'])
 def get_filters():
     try:
         filters = data_scientist_service.get_filter_options()
@@ -14,7 +16,7 @@ def get_filters():
     except Exception as e:
         return jsonify({"error": f"Ocurrió un error al obtener filtros: {e}"}), 500
 
-@data_scientist_api.route('/api/ds/head', methods=['GET'])
+@data_scientist_api.route('/api/head', methods=['GET'])
 def get_head():
     try:
         num_rows = request.args.get('rows', 5, type=int)
@@ -23,7 +25,7 @@ def get_head():
     except Exception as e:
         return jsonify({"error": f"Ocurrió un error al obtener la cabecera: {e}"}), 500
 
-@data_scientist_api.route('/api/ds/download-csv', methods=['GET'])
+@data_scientist_api.route('/api/download-csv', methods=['GET'])
 def download_csv():
     try:
         csv_path = data_scientist_service.get_csv_path()
@@ -34,7 +36,7 @@ def download_csv():
     except Exception as e:
         return jsonify({"error": f"Error al descargar el archivo: {e}"}), 500
 
-@data_scientist_api.route('/api/ds/download-filtered-csv', methods=['POST'])
+@data_scientist_api.route('/api/download-filtered-csv', methods=['POST'])
 def download_filtered_csv():
     """Endpoint para descargar los datos filtrados como CSV."""
     try:
@@ -70,7 +72,7 @@ def download_filtered_csv():
     except Exception as e:
         return jsonify({"error": f"Error al generar el CSV filtrado: {e}"}), 500
 
-@data_scientist_api.route('/api/ds/query', methods=['POST'])
+@data_scientist_api.route('/api/query', methods=['POST'])
 def query_data():
     try:
         filters = request.json
