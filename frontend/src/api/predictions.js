@@ -4,7 +4,7 @@ export const getHailPrediction = async (coords) => {
   const { lat, lon } = coords;
 
   // El backend espera las coordenadas como parámetros en la URL.
-  const url = `${API_URL}/predict?lat=${lat}&lon=${lon}`;
+  const url = `${API_URL}/main-prediction?lat=${lat}&lon=${lon}`;
 
   // La petición al backend es un GET, no un POST.
   const response = await fetch(url, {
