@@ -38,7 +38,17 @@ class Config:
     BCRYPT_LOG_ROUNDS = int(os.getenv('BCRYPT_LOG_ROUNDS', 12))  # Número de rondas de hashing
     
     # Configuración de CORS (para producción, restringe los orígenes)
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(',')
+    CORS_ORIGINS = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        r"https://nimbus-.*-nahuelito22s-projects.vercel.app", # Regex para previews de Vercel
+        "https://nimbus-ai-mdz.vercel.app"  # URL de producción principal
+    ]
+    
+    # Permitir añadir más orígenes desde variables de entorno
+    cors_origins_env = os.getenv('CORS_ORIGINS')
+    if cors_origins_env:
+        CORS_ORIGINS.extend(cors_origins_env.split(','))
 
     # Configuración de la base de datos
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'instance', 'nimbus_v2.db'))

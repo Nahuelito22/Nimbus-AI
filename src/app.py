@@ -56,7 +56,7 @@ app = Flask(__name__,
 app.config.from_object('src.config.Config')
 
 # 2. Inicialización de las extensiones
-CORS(app, supports_credentials=True)  # Configuración global de CORS, lee desde app.config
+CORS(app, origins=app.config['CORS_ORIGINS'], supports_credentials=True)
 db.init_app(app)  # Inicializar db con la app
 migrate = Migrate(app, db) # Inicializar Flask-Migrate
 bcrypt = Bcrypt(app)
