@@ -57,7 +57,7 @@ app = Flask(__name__,
 app.config.from_object('src.config.Config')
 
 # 2. Inicialización de las extensiones
-CORS(app, resources={r"/api/*": {"origins": "*"}})  # Configurar CORS explícitamente
+CORS(app, resources={r"/api/.*": {"origins": "*"}})  # Configurar CORS explícitamente
 db.init_app(app)  # Inicializar db con la app
 migrate = Migrate(app, db) # Inicializar Flask-Migrate
 bcrypt = Bcrypt(app)
@@ -909,6 +909,35 @@ def disk_usage():
 
 # --- REGISTRO DE BLUEPRINTS ---
 app.register_blueprint(data_scientist_api)
+
+# --- LÓGICA PARA CONFIGURAR SUPERADMIN ---
+def setup_superadmin(app_instance):
+    """
+    Busca un email en la variable de entorno SUPERADMIN_EMAIL y, si lo encuentra,
+    promueve al usuario correspondiente a superadmin.
+    """
+    with app_instance.app_context():
+        superadmin_email = os.getenv('SUPERADMIN_EMAIL')
+        if superadmin_email:
+            # Prevenir que se ejecute en cada recarga del modo debug de Flask
+            if os.getenv('WERKZEUG_RUN_MAIN') == 'true' or not app_instance.debug:
+                print(f"INFO: Buscando promover al email '{superadmin_email}' a superadmin.")
+                user = User.query.filter_by(email=superadmin_email).first()
+                if user:
+                    if user.role != 'superadmin':
+                        user.role = 'superadmin'
+                        db.session.commit()
+                        print(f"SUCCESS: El usuario {superadmin_email} ha sido promovido a superadmin.")
+                    else:
+                        print(f"INFO: El usuario {superadmin_email} ya es superadmin.")
+                else:
+                    print(f"WARNING: La variable SUPERADMIN_EMAIL está configurada como '{superadmin_email}', pero no se encontró ningún usuario con ese email.")
+                
+                print("INFO: Por seguridad, considera eliminar la variable de entorno SUPERADMIN_EMAIL una vez confirmada la promoción.")
+
+# Llamar a la función de configuración al iniciar la app
+setup_superadmin(app)
+
 
 # --- INICIALIZACIÓN DEL SCHEDULER ---
 from src.scheduler import init_scheduler
