@@ -1,4 +1,4 @@
-const API_URL = '/api/ds'; // Base URL for Data Scientist endpoints
+const API_URL = import.meta.env.VITE_API_URL || '/api'; // Base URL for Data Scientist endpoints
 
 const getAuthToken = () => {
   return localStorage.getItem('authToken');
