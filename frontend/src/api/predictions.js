@@ -1,4 +1,3 @@
-// La URL debe apuntar al endpoint relativo que será manejado por el proxy de Vite.
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const getHailPrediction = async (coords) => {
