@@ -27,7 +27,6 @@ from src.services.report_service import generate_report_pdf
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
-from flask_mail import Mail
 from flask_migrate import Migrate
 
 # Importaciones existentes
@@ -62,7 +61,6 @@ db.init_app(app)  # Inicializar db con la app
 migrate = Migrate(app, db) # Inicializar Flask-Migrate
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
-mail = Mail(app)
 
 # Importar modelos DESPUÉS de inicializar db
 from src.models import User, SystemSetting
@@ -197,7 +195,7 @@ def register():
         db.session.commit()
 
         # Enviar correo de verificación
-        send_verification_email(mail, new_user.email, new_user.verification_code)
+        send_verification_email(new_user.email, new_user.verification_code)
 
         # Preparar respuesta segura
         response_data = {"msg": "Usuario creado exitosamente. Revisa tu correo para verificar tu cuenta."}
@@ -293,7 +291,7 @@ def resend_verification():
         user.verification_code = ''.join(random.choices(string.digits, k=6))
         db.session.commit()
         
-        send_verification_email(mail, user.email, user.verification_code)
+        send_verification_email(user.email, user.verification_code)
 
         return jsonify({"msg": "Se ha enviado un nuevo código de verificación a tu correo."} ), 200
 
