@@ -51,11 +51,13 @@ Nimbus AI ofrece una solución proactiva y focalizada:
 
 *Aquí puedes insertar un diagrama de la arquitectura del sistema.*
 
-`[Diagrama de Arquitectura]`
+`<img width="811" height="471" alt="EstrcuturaProyecto2 drawio" src="https://github.com/user-attachments/assets/19fc4a14-bdb4-415c-b55d-0dae5e33db0a" />
+`
 
 *Y aquí, una captura de pantalla del dashboard principal.*
 
-`[Captura de Pantalla del Dashboard]`
+`<img width="1284" height="635" alt="app_funcional" src="https://github.com/user-attachments/assets/f2c1101e-5e2d-4881-a7cf-3cd71c09ea5d" />
+`
 
 ---
 
