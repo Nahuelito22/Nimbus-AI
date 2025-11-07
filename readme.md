@@ -51,15 +51,11 @@ Nimbus AI ofrece una solución proactiva y focalizada:
 
 *Arquitectura del sistema.*
 
-`
-![Arquitectura del sistema](imagenes_github/app_funcional.pngdiagrama_estructura.png)
-`
+![Arquitectura del sistema](./imagenes_github/diagrama_estructura.png)
 
 *Login.*
 
-`
-![Login Nimbus](imagenes_github/app_funcional.png)
-`
+![Login Nimbus](./imagenes_github/app_funcional.png)
 
 ---
 
