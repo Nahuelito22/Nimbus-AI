@@ -55,11 +55,25 @@ app = Flask(__name__,
             static_url_path='/static')
 app.config.from_object('src.config.Config')
 
-# 2. Inicialización de las extensiones
-# PRUEBA DE FUEGO PARA CORS: Ser lo más permisivo posible para diagnóstico.
-origins = "*"
-app_logger.info(f"DIAGNÓSTICO: Configurando CORS para los siguientes orígenes: {origins}")
-CORS(app, origins=origins, supports_credentials=True)
+
+# Lista explícita de orígenes permitidos
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://nimbus-ai-mdz.vercel.app",
+    "https://nimbus-ai-nahuelito22s-projects.vercel.app" # Añadido tu otro dominio de Vercel por si acaso
+]
+
+app_logger.info(f"CORS FINAL: Aplicando a r'/api/*' con orígenes: {origins}")
+
+CORS(
+    app,
+    resources={r"/api/*": {"origins": origins}},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"], # Clave: permite estas cabeceras
+    methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"] # Clave: permite estos métodos
+)
+
 
 db.init_app(app)  # Inicializar db con la app
 migrate = Migrate(app, db) # Inicializar Flask-Migrate
