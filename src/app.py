@@ -80,17 +80,25 @@ from flask import make_response, Response
 # --- Manejador de OPTIONS (preflight) para Railway / proxies ---
 @app.before_request
 def handle_options():
-    # Solo interferimos para peticiones OPTIONS dirigidas a /api/*
+    # Manejar SIEMPRE preflight OPTIONS de /api/*,
+    # incluso si falta Origin o no coincide
     if request.method == "OPTIONS" and request.path.startswith("/api/"):
         resp = make_response("", 200)
+
         origin = request.headers.get("Origin")
-        # Permitimos solo orígenes en la lista 'origins'
+
+        # Si el origen está permitido, añadimos los headers CORS
         if origin and origin in origins:
             resp.headers["Access-Control-Allow-Origin"] = origin
             resp.headers["Access-Control-Allow-Credentials"] = "true"
-            resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-            resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        return resp  # preflight OK
+
+        # Estos headers deben devolverse siempre
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        resp.headers["Access-Control-Max-Age"] = "3600"
+
+        return resp
+
 
 # --- Asegurar cabeceras CORS en TODAS las respuestas a /api/* ---
 @app.after_request
