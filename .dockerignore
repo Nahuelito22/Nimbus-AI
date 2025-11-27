@@ -16,8 +16,8 @@ __pycache__/
 .idea/
 .DS_Store
 
-# Ignorar carpetas de datos pesadas, pero no los CSV procesados
-data/raw/
+# Ignorar carpetas de datos pesadas, pero no los archivos de datos necesarios
+data/raw/imagenes_satelitales/
 data/imagenes_satelitales_muestra/
 
 # Ignorar logs locales
