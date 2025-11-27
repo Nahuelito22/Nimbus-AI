@@ -56,66 +56,67 @@ app = Flask(__name__,
 app.config.from_object('src.config.Config')
 
 
-# 2. Inicialización de las extensiones
+# ----------------- CORS (robusto y explícito) -----------------
+from flask import make_response, Response
+
 # Lista explícita de orígenes permitidos
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://nimbus-ai-mdz.vercel.app",
-    "https://nimbus-ai-nahuelito22s-projects.vercel.app" # Se añade el otro dominio de Vercel
+    "https://nimbus-ai-nahuelito22s-projects.vercel.app"
 ]
 
 app_logger.info(f"CORS FINAL: Aplicando a r'/api/*' con orígenes: {origins}")
 
+# Ajustes adicionales en la config de Flask para CORS
+app.config['CORS_HEADERS'] = 'Content-Type,Authorization'
+app.config['CORS_RESOURCES'] = {r"/api/*": {"origins": origins}}
+
+# Inicializar flask-cors de forma explícita
 CORS(
     app,
-    resources={r"/api/*": {"origins": origins}},
+    resources=app.config['CORS_RESOURCES'],
     supports_credentials=True,
-    allow_headers=["Content-Type", "Authorization"], # Clave: permite estas cabeceras
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"] # Clave: permite estos métodos
+    origins=origins,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 )
 
-from flask import make_response, Response
+# Rutas OPTIONS explícitas para asegurar preflight (evita que el proxy / edge responda sin headers)
+@app.route('/api', methods=['OPTIONS'])
+@app.route('/api/<path:subpath>', methods=['OPTIONS'])
+def handle_preflight(subpath: str = None):
+    """Responder preflight CORS con cabeceras explícitas."""
+    resp = make_response('', 204)
+    origin = request.headers.get('Origin')
+    if origin and origin in origins:
+        resp.headers['Access-Control-Allow-Origin'] = origin
+        resp.headers['Access-Control-Allow-Credentials'] = 'true'
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    else:
+        # Si no viene origin o no está en la whitelist, devolvemos 204 sin las cabeceras.
+        # Esto ayuda a detectar si el origin no coincide exactamente con lo que esperas.
+        pass
+    return resp
 
-# --- Manejador de OPTIONS (preflight) para Railway / proxies ---
-@app.before_request
-def handle_options():
-    # Manejar SIEMPRE preflight OPTIONS de /api/*,
-    # incluso si falta Origin o no coincide
-    if request.method == "OPTIONS" and request.path.startswith("/api/"):
-        resp = make_response("", 200)
-
-        origin = request.headers.get("Origin")
-
-        # Si el origen está permitido, añadimos los headers CORS
-        if origin and origin in origins:
-            resp.headers["Access-Control-Allow-Origin"] = origin
-            resp.headers["Access-Control-Allow-Credentials"] = "true"
-
-        # Estos headers deben devolverse siempre
-        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        resp.headers["Access-Control-Max-Age"] = "3600"
-
-        return resp
-
-
-# --- Asegurar cabeceras CORS en TODAS las respuestas a /api/* ---
+# Asegurar cabeceras CORS en TODAS las respuestas a /api/*
 @app.after_request
 def add_cors_headers(response: Response):
-    # Solo añadimos cabeceras para rutas API
     try:
         origin = request.headers.get("Origin")
-        if request.path.startswith("/api/") and origin and origin in origins:
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            # Estas dos ayudan si el preflight falla por headers/methods
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        if request.path.startswith("/api/") or request.path == "/api":
+            if origin and origin in origins:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     except Exception:
-        # No queremos que fallos al añadir headers rompan la respuesta
         pass
     return response
+# --------------------------------------------------------------
+
 
 db.init_app(app)  # Inicializar db con la app
 migrate = Migrate(app, db) # Inicializar Flask-Migrate
