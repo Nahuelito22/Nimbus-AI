@@ -16,21 +16,9 @@ __pycache__/
 .idea/
 .DS_Store
 
-# Ignorar archivos de entorno (estos se deben gestionar con variables de entorno en Railway)
-.env
-.env.*
-!/.env.example
-
-# Ignorar carpetas de datos y notebooks que no son parte de la app en producción
-data/
-notebooks/
-ayudas_y_recursos/
-reports/
-imagenes_github/
-
-# Ignorar dependencias del frontend (se deben construir por separado o no son parte del backend)
-frontend/node_modules/
-**/node_modules/
+# Ignorar carpetas de datos pesadas, pero no los CSV procesados
+data/raw/
+data/imagenes_satelitales_muestra/
 
 # Ignorar logs locales
 logs/
