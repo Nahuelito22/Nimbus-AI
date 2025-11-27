@@ -1,0 +1,46 @@
+# Ignorar el entorno virtual
+venv/
+**/venv/
+
+# Ignorar artefactos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar el directorio de Git
+.git/
+
+# Ignorar configuraciones de IDE y herramientas
+.vscode/
+.idea/
+.DS_Store
+
+# Ignorar archivos de entorno (estos se deben gestionar con variables de entorno en Railway)
+.env
+.env.*
+!/.env.example
+
+# Ignorar carpetas de datos y notebooks que no son parte de la app en producción
+data/
+notebooks/
+ayudas_y_recursos/
+reports/
+imagenes_github/
+
+# Ignorar dependencias del frontend (se deben construir por separado o no son parte del backend)
+frontend/node_modules/
+**/node_modules/
+
+# Ignorar logs locales
+logs/
+*.log
+
+# Ignorar archivos de caché de pytest
+.pytest_cache/
+.coverage
+
+# Ignorar archivos de SQLite si se usan para desarrollo local
+instance/
+*.db
+*.sqlite3
