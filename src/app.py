@@ -56,7 +56,22 @@ app = Flask(__name__,
 app.config.from_object('src.config.Config')
 
 # 2. Inicialización de las extensiones
-CORS(app, origins=app.config['CORS_ORIGINS'], supports_credentials=True)
+# Configuración explícita de CORS para depuración
+cors_env = os.getenv('CORS_ORIGINS')
+if cors_env:
+    # Si la variable de entorno existe, úsala exclusivamente.
+    origins = cors_env.split(',')
+else:
+    # Si no, usa una lista por defecto.
+    origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://nimbus-ai-mdz.vercel.app"
+    ]
+
+print(f"INFO: Configurando CORS para los siguientes orígenes: {origins}")
+CORS(app, origins=origins, supports_credentials=True)
+
 db.init_app(app)  # Inicializar db con la app
 migrate = Migrate(app, db) # Inicializar Flask-Migrate
 bcrypt = Bcrypt(app)
