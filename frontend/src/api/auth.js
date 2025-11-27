@@ -1,29 +1,30 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL + '/api';
 
 export const loginUser = async (credentials) => {
   try {
     const response = await fetch(`${API_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(credentials),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      // Lanzar un objeto de error con más detalles
-      const error = new Error(data.msg || 'Error al iniciar sesión.');
-      error.response = data; // Adjuntar toda la respuesta de error
+      const error = new Error(data.msg || "Error al iniciar sesión.");
+      error.response = data;
       throw error;
+    }
+
+    // 👉 Guarda el token con la misma key que usa el resto del front
+    if (data.access_token) {
+      localStorage.setItem("authToken", data.access_token);
     }
 
     return data;
   } catch (error) {
-    // Manejar errores de red
-    if (error.message === 'Failed to fetch') {
-      throw new Error('No se pudo conectar con el servidor. Verifica tu conexión.');
+    if (error.message === "Failed to fetch") {
+      throw new Error("No se pudo conectar con el servidor. Verifica tu conexión.");
     }
     throw error;
   }

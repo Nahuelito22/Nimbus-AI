@@ -1,12 +1,10 @@
 from flask import Blueprint, request, jsonify, send_file
-from flask_cors import CORS
 from src.services.data_scientist_service import data_scientist_service
 import os
 import pandas as pd
 import io
 
 data_scientist_api = Blueprint('data_scientist_api', __name__)
-CORS(data_scientist_api) # Aplicar CORS a todas las rutas de este blueprint
 
 @data_scientist_api.route('/api/filters', methods=['GET'])
 def get_filters():

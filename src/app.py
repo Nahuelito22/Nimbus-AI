@@ -56,12 +56,13 @@ app = Flask(__name__,
 app.config.from_object('src.config.Config')
 
 
+# 2. Inicialización de las extensiones
 # Lista explícita de orígenes permitidos
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://nimbus-ai-mdz.vercel.app",
-    "https://nimbus-ai-nahuelito22s-projects.vercel.app" # Añadido tu otro dominio de Vercel por si acaso
+    "https://nimbus-ai-nahuelito22s-projects.vercel.app" # Se añade el otro dominio de Vercel
 ]
 
 app_logger.info(f"CORS FINAL: Aplicando a r'/api/*' con orígenes: {origins}")
@@ -71,9 +72,42 @@ CORS(
     resources={r"/api/*": {"origins": origins}},
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"], # Clave: permite estas cabeceras
-    methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"] # Clave: permite estos métodos
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"] # Clave: permite estos métodos
 )
 
+from flask import make_response, Response
+
+# --- Manejador de OPTIONS (preflight) para Railway / proxies ---
+@app.before_request
+def handle_options():
+    # Solo interferimos para peticiones OPTIONS dirigidas a /api/*
+    if request.method == "OPTIONS" and request.path.startswith("/api/"):
+        resp = make_response("", 200)
+        origin = request.headers.get("Origin")
+        # Permitimos solo orígenes en la lista 'origins'
+        if origin and origin in origins:
+            resp.headers["Access-Control-Allow-Origin"] = origin
+            resp.headers["Access-Control-Allow-Credentials"] = "true"
+            resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return resp  # preflight OK
+
+# --- Asegurar cabeceras CORS en TODAS las respuestas a /api/* ---
+@app.after_request
+def add_cors_headers(response: Response):
+    # Solo añadimos cabeceras para rutas API
+    try:
+        origin = request.headers.get("Origin")
+        if request.path.startswith("/api/") and origin and origin in origins:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            # Estas dos ayudan si el preflight falla por headers/methods
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    except Exception:
+        # No queremos que fallos al añadir headers rompan la respuesta
+        pass
+    return response
 
 db.init_app(app)  # Inicializar db con la app
 migrate = Migrate(app, db) # Inicializar Flask-Migrate
@@ -924,7 +958,7 @@ def disk_usage():
         return jsonify({"error": str(e)}), 500
 
 # --- REGISTRO DE BLUEPRINTS ---
-app.register_blueprint(data_scientist_api)
+app.register_blueprint(data_scientist_api, url_prefix="/api")
 
 # --- LÓGICA PARA CONFIGURAR SUPERADMIN ---
 def setup_superadmin(app_instance):
