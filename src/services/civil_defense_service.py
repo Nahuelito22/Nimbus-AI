@@ -60,13 +60,25 @@ def get_civil_defense_data():
                 continue
 
             try:
-                # CORRECCIÓN: Quitar solo el '%' en lugar de un texto largo
-                prob_str = prediction_result.get("prob_granizo", "0.0%").replace('%','').strip()
-                current_prob = float(prob_str)
+                # --- CORRECCIÓN CRÍTICA ---
+                # 1. Usamos la clave correcta: "probabilidad_granizo"
+                # 2. La API devuelve un float (ej: 0.85), multiplicamos por 100 para tener %
+                raw_prob = prediction_result.get("probabilidad_granizo", 0.0)
+                
+                # Si por alguna razón viene como string, lo convertimos
+                if isinstance(raw_prob, str):
+                   raw_prob = float(raw_prob.replace('%', '').strip())
+
+                # Convertimos a porcentaje (0.85 -> 85.0)
+                # NOTA: Si tu API ya devolvía 85.0, quita el * 100. 
+                # Pero normalmente las redes neuronales dan 0.0 a 1.0.
+                current_prob = raw_prob * 100 
+                
                 if current_prob > max_prob:
                     max_prob = current_prob
+                    
             except (ValueError, TypeError) as e:
-                app_logger.error(f"Error al parsear la probabilidad '{prediction_result.get('prob_granizo')}': {e}")
+                app_logger.error(f"Error procesando probabilidad: {e}")
                 continue
 
             time.sleep(0.2)
