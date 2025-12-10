@@ -76,12 +76,13 @@ app.config['CORS_RESOURCES'] = {r"/*": {"origins": origins}}
 # Inicializar flask-cors de forma explícita
 CORS(
     app,
-    resources=app.config['CORS_RESOURCES'], 
+    resources={r"/*": {"origins": origins}},
     supports_credentials=True,
-    origins=origins,
     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
 )
+
+app_logger.info(f"CORS FINAL: Aplicando a r'/api/*' con orígenes: {origins}")
 
 # Rutas OPTIONS explícitas para asegurar preflight (evita que el proxy / edge responda sin headers)
 @app.route('/api', methods=['OPTIONS'])
