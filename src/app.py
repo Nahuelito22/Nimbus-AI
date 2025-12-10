@@ -71,15 +71,15 @@ app_logger.info(f"CORS FINAL: Aplicando a r'/api/*' con orígenes: {origins}")
 
 # Ajustes adicionales en la config de Flask para CORS
 app.config['CORS_HEADERS'] = 'Content-Type,Authorization'
-app.config['CORS_RESOURCES'] = {r"/api/*": {"origins": origins}}
+app.config['CORS_RESOURCES'] = {r"/*": {"origins": origins}}
 
 # Inicializar flask-cors de forma explícita
 CORS(
     app,
-    resources=app.config['CORS_RESOURCES'],
+    resources=app.config['CORS_RESOURCES'], 
     supports_credentials=True,
     origins=origins,
-    allow_headers=["Content-Type", "Authorization"],
+    allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 )
 
