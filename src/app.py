@@ -969,7 +969,7 @@ def disk_usage():
         return jsonify({"error": str(e)}), 500
 
 # --- REGISTRO DE BLUEPRINTS ---
-app.register_blueprint(data_scientist_api, url_prefix="/api")
+app.register_blueprint(data_scientist_api)
 
 # --- LÓGICA PARA CONFIGURAR SUPERADMIN ---
 def setup_superadmin(app_instance):
