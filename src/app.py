@@ -785,6 +785,7 @@ def predict_with_details():
         app_logger.error(f"Error en la predicción detallada: {str(e)}")
         return jsonify({"error": f"Ocurrió un error en la predicción detallada: {str(e)}"}), 500
 
+@app.route('/civil-defense/dashboard', methods=['GET'])
 @app.route('/api/civil-defense/dashboard', methods=['GET'])
 @professional_required()
 def civil_defense_dashboard():
