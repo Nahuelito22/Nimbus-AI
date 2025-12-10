@@ -67,22 +67,22 @@ origins = [
     "https://nimbus-ai-nahuelito22s-projects.vercel.app"
 ]
 
-app_logger.info(f"CORS FINAL: Aplicando a r'/api/*' con orígenes: {origins}")
-
 # Ajustes adicionales en la config de Flask para CORS
 app.config['CORS_HEADERS'] = 'Content-Type,Authorization'
+# CLAVE: Usamos r"/*" para cubrir TODO (api, civil-defense, static, etc.)
 app.config['CORS_RESOURCES'] = {r"/*": {"origins": origins}}
 
-# Inicializar flask-cors de forma explícita
+# Inicializar flask-cors de forma explícita y permisiva
 CORS(
     app,
-    resources={r"/*": {"origins": origins}},
+    resources={r"/*": {"origins": origins}}, # <--- EL CAMBIO IMPORTANTE ESTÁ AQUÍ
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
 )
 
-app_logger.info(f"CORS FINAL: Aplicando a r'/api/*' con orígenes: {origins}")
+# Log con el cohete para confirmar en Railway que se actualizó el código
+app_logger.info(f"🚀 CORS ACTUALIZADO V2: Habilitado para TODO EL SITIO (r'/*') con orígenes: {origins}")
 
 # Rutas OPTIONS explícitas para asegurar preflight (evita que el proxy / edge responda sin headers)
 @app.route('/api', methods=['OPTIONS'])
