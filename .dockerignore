@@ -1,34 +1,34 @@
-# Ignorar el entorno virtual
+# --- 1. Lo estándar de Python y Git (Lo que ya tenías) ---
 venv/
 **/venv/
-
-# Ignorar artefactos de Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Ignorar el directorio de Git
 .git/
-
-# Ignorar configuraciones de IDE y herramientas
 .vscode/
 .idea/
 .DS_Store
-
-# Ignorar carpetas de datos pesadas, pero no los archivos de datos necesarios
-data/raw/imagenes_satelitales/
-data/imagenes_satelitales_muestra/
-
-# Ignorar logs locales
 logs/
 *.log
-
-# Ignorar archivos de caché de pytest
 .pytest_cache/
 .coverage
 
-# Ignorar archivos de SQLite si se usan para desarrollo local
+# --- 2. Bases de datos locales (Vital para no borrar datos) ---
+# Ahora usaremos Neon (Postgres)
 instance/
 *.db
 *.sqlite3
+
+# --- 3. EL GRAN CAMBIO: El Frontend ---
+frontend/
+
+# --- 4. Archivos de "Laboratorio" (No necesarios para producción) ---
+notebooks/
+reports/
+presentation/
+imagenes_github/
+
+# --- 5. Datos y Modelos ---
+data/
+models/
