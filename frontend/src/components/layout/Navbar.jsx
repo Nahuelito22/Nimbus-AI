@@ -72,6 +72,7 @@ function Navbar() {
           </>
         ) : (
           <>
+            <NavLink to="/" onClick={isMobile ? closeMobileMenu : undefined} className={({ isActive }) => `${linkClass} ${isActive ? activeLinkClass : ''}`}>Inicio</NavLink>
             <NavLink to="/login" onClick={isMobile ? closeMobileMenu : undefined} className={({ isActive }) => `${linkClass} ${isActive ? activeLinkClass : ''}`}>Iniciar Sesión</NavLink>
             <NavLink to="/register" onClick={isMobile ? closeMobileMenu : undefined} className={`px-3 py-1 rounded ${isMobile ? 'block text-white bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}>Regístrate</NavLink>
           </>
