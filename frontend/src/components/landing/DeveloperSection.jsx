@@ -110,6 +110,14 @@ function DeveloperSection() {
               {/* Links */}
               <div className="flex justify-center gap-3 mt-6">
                 <a 
+                  href="https://github.com/GustiGarcia" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors group"
+                >
+                  <FiGithub className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-teal-600 dark:group-hover:text-teal-400" />
+                </a>
+                <a 
                   href="mailto:gg.prof.ef@gmail.com"
                   className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors group"
                 >
