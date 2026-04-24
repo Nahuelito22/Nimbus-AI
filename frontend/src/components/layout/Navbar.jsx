@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggleButton from './ThemeToggleButton';
 
 
 function Navbar() {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [superadminMenuOpen, setSuperadminMenuOpen] = useState(false);
 
@@ -86,6 +87,7 @@ function Navbar() {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/" onClick={closeMobileMenu} className="flex items-center space-x-2">
           <img src="/logo_no_letras.png" alt="Logo" className="h-10 w-auto" />
+          {location.pathname !== '/' && <h1 className="text-xl font-bold">Nimbus AI</h1>}
         </Link>
         <div className="flex items-center">
             <nav className="hidden md:flex items-center space-x-4">
