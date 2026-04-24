@@ -18,9 +18,9 @@ function ContactPage() {
             </li>
             <li>
               <span className="font-semibold block">Gustavo Garcia</span>
-              <span className="text-sm text-gray-600">Desarrollo Back-end, Prototipado y Testing (QA)</span>
+              <span className="text-sm text-gray-600">Prototipado (MVP) y Testing (QA)</span>
               <br />
-              <a href="mailto:[EMAIL_DE_GUSTAVO]" className="text-blue-600 hover:underline">[Email Profesional de Gustavo]</a>
+              <a href="mailto:[EMAIL_DE_GUSTAVO]" className="text-blue-600 hover:underline">gg.prof.ef@gmail.com</a>
             </li>
           </ul>
         </div>
