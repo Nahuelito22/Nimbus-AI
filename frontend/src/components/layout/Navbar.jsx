@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggleButton from './ThemeToggleButton';
 
 
 function Navbar() {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [superadminMenuOpen, setSuperadminMenuOpen] = useState(false);
 
@@ -72,6 +73,7 @@ function Navbar() {
           </>
         ) : (
           <>
+            <NavLink to="/" onClick={isMobile ? closeMobileMenu : undefined} className={({ isActive }) => `${linkClass} ${isActive ? activeLinkClass : ''}`}>Inicio</NavLink>
             <NavLink to="/login" onClick={isMobile ? closeMobileMenu : undefined} className={({ isActive }) => `${linkClass} ${isActive ? activeLinkClass : ''}`}>Iniciar Sesión</NavLink>
             <NavLink to="/register" onClick={isMobile ? closeMobileMenu : undefined} className={`px-3 py-1 rounded ${isMobile ? 'block text-white bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}>Regístrate</NavLink>
           </>
@@ -81,11 +83,11 @@ function Navbar() {
   };
 
   return (
-    <header className="bg-blue-900 text-white shadow-lg sticky top-0 z-10">
+    <header className="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/" onClick={closeMobileMenu} className="flex items-center space-x-2">
           <img src="/logo_no_letras.png" alt="Logo" className="h-10 w-auto" />
-          <h1 className="text-xl font-bold">Nimbus AI</h1>
+          {location.pathname !== '/' && <h1 className="text-xl font-bold">Nimbus AI</h1>}
         </Link>
         <div className="flex items-center">
             <nav className="hidden md:flex items-center space-x-4">

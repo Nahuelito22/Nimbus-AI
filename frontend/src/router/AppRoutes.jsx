@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LandingPage from '../pages/LandingPage';
 import DashboardPage from '../pages/DashboardPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
@@ -16,7 +17,7 @@ function AppRoutes() {
   const { user } = useAuth();
 
   const RoleBasedRedirect = () => {
-    if (!user) return <Navigate to="/login" />;
+    if (!user) return <Navigate to="/" />;
 
     switch (user.role) {
       case 'admin':
@@ -35,7 +36,8 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={<RoleBasedRedirect />} />
+      {/* Landing page for unauthenticated users, redirect for authenticated */}
+      <Route path="/" element={user ? <RoleBasedRedirect /> : <LandingPage />} />
 
       {/* Rutas de autenticación */}
       <Route path="/register" element={!user ? <RegisterPage /> : <RoleBasedRedirect />} />
