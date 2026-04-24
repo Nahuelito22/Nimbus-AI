@@ -23,20 +23,19 @@ function HeroSection() {
       </div>
 
       <div className="relative z-10 container mx-auto px-6 text-center">
-        {/* Logo */}
-        <div className="animate-fade-in mb-8">
-          <img 
-            src="/logo_letras.png" 
-            alt="Nimbus AI - Logo" 
-            className="mx-auto h-40 md:h-52 w-auto drop-shadow-2xl"
-          />
-        </div>
-
         {/* Tagline */}
-        <h1 className="animate-fade-in-up delay-200 text-3xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6 max-w-4xl mx-auto">
-          Sistema de Alerta Temprana de Granizo
-          <span className="block mt-2 gradient-text">impulsado por Inteligencia Artificial</span>
-        </h1>
+        <div className="animate-fade-in-up delay-200 mb-10 mt-12 md:mt-0">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white leading-tight max-w-6xl mx-auto tracking-tighter mb-4 px-4 drop-shadow-sm">
+            Nimbus AI
+          </h1>
+          <div className="flex items-center justify-center gap-3 md:gap-5">
+            <div className="h-[2px] w-8 md:w-16 bg-gradient-to-r from-transparent to-blue-400/40 rounded-full"></div>
+            <span className="text-lg md:text-2xl lg:text-3xl font-bold gradient-text uppercase tracking-[0.1em] md:tracking-[0.2em]">
+              Impulsado por Inteligencia Artificial
+            </span>
+            <div className="h-[2px] w-8 md:w-16 bg-gradient-to-l from-transparent to-blue-400/40 rounded-full"></div>
+          </div>
+        </div>
 
         {/* Subtitle */}
         <p className="animate-fade-in-up delay-400 text-lg md:text-xl text-blue-100/80 max-w-2xl mx-auto mb-10 leading-relaxed">

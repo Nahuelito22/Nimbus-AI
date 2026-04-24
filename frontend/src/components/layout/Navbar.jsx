@@ -86,7 +86,6 @@ function Navbar() {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/" onClick={closeMobileMenu} className="flex items-center space-x-2">
           <img src="/logo_no_letras.png" alt="Logo" className="h-10 w-auto" />
-          <h1 className="text-xl font-bold">Nimbus AI</h1>
         </Link>
         <div className="flex items-center">
             <nav className="hidden md:flex items-center space-x-4">
