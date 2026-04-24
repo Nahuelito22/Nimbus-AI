@@ -99,13 +99,13 @@ function TechStack() {
         {/* Deploy platforms */}
         <div className="mt-12 flex flex-wrap justify-center gap-4 text-sm text-gray-400 dark:text-gray-500">
           <span className="px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
-            🚀 Frontend: <span className="font-medium text-gray-600 dark:text-gray-300">Vercel</span>
+            Frontend: <span className="font-medium text-gray-600 dark:text-gray-300">Vercel</span>
           </span>
           <span className="px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
-            ⚙️ Backend: <span className="font-medium text-gray-600 dark:text-gray-300">Render</span>
+            Backend: <span className="font-medium text-gray-600 dark:text-gray-300">Render</span>
           </span>
           <span className="px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
-            🤖 Modelo: <span className="font-medium text-gray-600 dark:text-gray-300">Hugging Face Spaces</span>
+            Modelo: <span className="font-medium text-gray-600 dark:text-gray-300">Hugging Face Spaces</span>
           </span>
         </div>
       </div>
