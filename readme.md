@@ -235,6 +235,5 @@ Este proyecto está bajo la Licencia MIT.
 ## 👥 Equipo y Contacto
 
 *   **Nahuel Ghilardi:** Data Science, Backend & Frontend Development
-*   **Gustavo Garcia:** Prototipado (MVP) y Testing (QA)
 
 Para reportar un problema o hacer una pregunta, por favor, abre un [issue en GitHub](https://github.com/tu-usuario/Nimbus_AI/issues).
