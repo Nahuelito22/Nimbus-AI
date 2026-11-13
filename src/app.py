@@ -63,6 +63,8 @@ from flask import make_response, Response
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://nimbusai.com.ar",
+    "https://www.nimbusai.com.ar",
     "https://nimbus-ai-mdz.vercel.app",
     "https://nimbus-ai-nahuelito22s-projects.vercel.app"
 ]
@@ -1002,8 +1004,17 @@ def setup_superadmin(app_instance):
                 
                 print("INFO: Por seguridad, considera eliminar la variable de entorno SUPERADMIN_EMAIL una vez confirmada la promoción.")
 
-# Llamar a la función de configuración al iniciar la app
-setup_superadmin(app)
+# Llamar a la función de configuración al iniciar la app.
+# Esto intenta crear el superadmin, pero si falla porque no hay tablas, no rompe la app.
+with app.app_context():
+    try:
+        from sqlalchemy.exc import ProgrammingError, OperationalError
+        setup_superadmin(app)
+    except (ProgrammingError, OperationalError):
+        # Este error es normal la primera vez (Tablas no existen)
+        print("⚠️ AVISO: Las tablas aún no existen. Se omite búsqueda de superadmin.")
+    except Exception as e:
+        print(f"⚠️ AVISO: Error no crítico al buscar superadmin: {e}")
 
 
 # --- INICIALIZACIÓN DEL SCHEDULER ---

@@ -61,7 +61,7 @@ Nimbus AI ofrece una solución proactiva y focalizada:
 
 ## 🔗 Aplicación Web
 
-*   **Acceso a la plataforma:** [https://nimbus-ai-mdz.vercel.app/](https://nimbus-ai-mdz.vercel.app/)
+*   **Acceso a la plataforma:** [https://nimbusai.com.ar](https://nimbusai.com.ar)
 
 ---
 
