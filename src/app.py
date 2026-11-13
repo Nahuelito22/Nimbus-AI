@@ -63,6 +63,8 @@ from flask import make_response, Response
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://nimbusai.com.ar",
+    "https://www.nimbusai.com.ar",
     "https://nimbus-ai-mdz.vercel.app",
     "https://nimbus-ai-nahuelito22s-projects.vercel.app"
 ]
