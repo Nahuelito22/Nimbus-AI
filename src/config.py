@@ -63,6 +63,13 @@ class Config:
     SQLALCHEMY_DATABASE_URI = database_url or f'sqlite:///{db_path}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # --- FIX CONEXIÓN: Mantener viva la conexión con Neon ---
+    # Esto evita el error "SSL connection has been closed unexpectedly"
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,  # Verifica "¿Estás ahí?" antes de hacer una consulta
+        "pool_recycle": 300,    # Recicla la conexión cada 300 segundos (5 min)
+    }
+
     # Configuración de Brevo
     BREVO_API_KEY = os.getenv('BREVO_API_KEY')
     BREVO_DEFAULT_SENDER = os.getenv('BREVO_DEFAULT_SENDER', 'noreply@nimbus-ai.com')
