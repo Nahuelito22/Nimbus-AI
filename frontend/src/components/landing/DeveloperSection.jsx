@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiGithub, FiMail, FiCode, FiUser } from 'react-icons/fi';
+import { FiGithub, FiMail } from 'react-icons/fi';
 import useReveal from './useReveal';
 
 function DeveloperSection() {
@@ -17,7 +17,7 @@ function DeveloperSection() {
           <div className="w-20 h-1 bg-blue-600 mx-auto mt-4 rounded-full" />
         </div>
 
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="max-w-md mx-auto">
           {/* Lead Developer */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow duration-300">
             {/* Gradient accent */}
@@ -77,55 +77,6 @@ function DeveloperSection() {
             </div>
           </div>
 
-          {/* Collaborator */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            {/* Gradient accent */}
-            <div className="h-2 bg-gradient-to-r from-teal-500 to-emerald-600" />
-            
-            <div className="p-8 text-center">
-              {/* Avatar placeholder */}
-              <div className="w-28 h-28 rounded-full mx-auto mb-5 overflow-hidden bg-gradient-to-br from-teal-200 to-emerald-300 dark:from-teal-700 dark:to-emerald-800 flex items-center justify-center shadow-lg ring-4 ring-teal-100 dark:ring-teal-900/50">
-                <FiUser className="w-14 h-14 text-teal-600 dark:text-teal-300" />
-              </div>
-              
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Gustavo García</h3>
-              <p className="text-teal-600 dark:text-teal-400 text-sm font-medium mt-1">Colaborador</p>
-              
-              <div className="mt-4 space-y-1">
-                <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold">Roles en el proyecto</p>
-                <div className="flex flex-wrap gap-2 justify-center mt-2">
-                  {['Prototipado (MVP)', 'Testing (QA)'].map((role) => (
-                    <span key={role} className="text-xs bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 px-2.5 py-1 rounded-full font-medium">
-                      {role}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <p className="text-gray-500 dark:text-gray-400 text-sm mt-5 leading-relaxed">
-                Participación en el prototipado inicial (MVP) del proyecto y apoyo en tareas de 
-                testing y aseguramiento de calidad (QA).
-              </p>
-
-              {/* Links */}
-              <div className="flex justify-center gap-3 mt-6">
-                <a 
-                  href="https://github.com/GustiGarcia" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors group"
-                >
-                  <FiGithub className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-teal-600 dark:group-hover:text-teal-400" />
-                </a>
-                <a 
-                  href="mailto:gg.prof.ef@gmail.com"
-                  className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors group"
-                >
-                  <FiMail className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-teal-600 dark:group-hover:text-teal-400" />
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* GitHub repo link */}
