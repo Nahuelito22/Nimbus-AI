@@ -1,28 +1,22 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 function Footer() {
+  const { pathname } = useLocation();
+
   return (
-    <footer className="bg-blue-900 text-white py-6 mt-12">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <div className="flex items-center space-x-2">
-              <img src="/logo_no_letras.png" alt="Logo Nimbus AI" className="h-8 w-12" />
-              <div>
-                <h3 className="text-lg font-bold">NIMBUS AI</h3>
-              </div>
-            </div>
-          </div>
-          <div className="flex space-x-4">
-            <Link to="/terminos" className="hover:text-blue-300">Términos</Link>
-            <Link to="/privacidad" className="hover:text-blue-300">Privacidad</Link>
-            <Link to="/contacto" className="hover:text-blue-300">Contacto</Link>
-          </div>
+    <footer className={`bg-[#10171a] text-white/70 py-8 ${pathname === '/' ? '' : 'mt-12'}`}>
+      <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <img src="/logo_no_letras.png" alt="" className="h-7 w-auto" />
+          <span className="text-white font-semibold">Nimbus</span>
+          <span className="hidden sm:inline">· © 2023–2026 Nahuel Ghilardi · Licencia MIT</span>
         </div>
-        <div className="mt-4 text-center text-blue-200 text-sm">
-          <p>© 2025 Nimbus AI. Todos los derechos reservados.</p>
-        </div>
+        <nav className="flex gap-5" aria-label="Enlaces legales">
+          <Link to="/terminos" className="hover:text-white">Términos</Link>
+          <Link to="/privacidad" className="hover:text-white">Privacidad</Link>
+          <Link to="/contacto" className="hover:text-white">Contacto</Link>
+        </nav>
       </div>
     </footer>
   );
