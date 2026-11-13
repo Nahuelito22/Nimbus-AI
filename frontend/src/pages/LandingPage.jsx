@@ -1,26 +1,24 @@
 import React from 'react';
 import HeroSection from '../components/landing/HeroSection';
-import ProblemSolution from '../components/landing/ProblemSolution';
-import ResearchTimeline from '../components/landing/ResearchTimeline';
-import ModelMetrics from '../components/landing/ModelMetrics';
-import ArchitectureSection from '../components/landing/ArchitectureSection';
-import NimbusPlayground from '../components/landing/NimbusPlayground';
-import DatasetSection from '../components/landing/DatasetSection';
-import TechStack from '../components/landing/TechStack';
-import DeveloperSection from '../components/landing/DeveloperSection';
+import ProblemSection from '../components/landing/ProblemSection';
+import SatelliteSection from '../components/landing/SatelliteSection';
+import DataSection from '../components/landing/DataSection';
+import HowItWorksSection from '../components/landing/HowItWorksSection';
+import HonestySection from '../components/landing/HonestySection';
+import JourneySection from '../components/landing/JourneySection';
+import AuthorSection from '../components/landing/AuthorSection';
 
 function LandingPage() {
   return (
-    <div className="landing-page">
+    <div className="landing">
       <HeroSection />
-      <ProblemSolution />
-      <ResearchTimeline />
-      <ModelMetrics />
-      <ArchitectureSection />
-      <NimbusPlayground />
-      <DatasetSection />
-      <TechStack />
-      <DeveloperSection />
+      <ProblemSection />
+      <SatelliteSection />
+      <DataSection />
+      <HowItWorksSection />
+      <HonestySection />
+      <JourneySection />
+      <AuthorSection />
     </div>
   );
 }

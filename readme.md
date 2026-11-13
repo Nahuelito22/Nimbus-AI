@@ -8,7 +8,7 @@ app_port: 7860
 ---
 # Nimbus AI 🌩️
 
-![Estado](https://img.shields.io/badge/estado-Desplegado-success)
+![Estado](https://img.shields.io/badge/estado-Prototipo%20de%20investigaci%C3%B3n-orange)
 ![Versión](https://img.shields.io/badge/modelo-V3.1%20Multimodal-blue)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-green)
 
@@ -41,7 +41,7 @@ El granizo representa una amenaza significativa en regiones agrícolas como Mend
 
 Nimbus AI ofrece una solución proactiva y focalizada:
 
-*   **Modelo Multimodal:** Fusiona datos numéricos (temperatura, humedad, viento) con datos visuales (imágenes satelitales del satélite GOES-16) para una predicción más robusta y precisa.
+*   **Modelo Multimodal:** Fusiona datos numéricos (temperatura, humedad, viento) con datos visuales (imágenes satelitales GOES-16 para entrenar y GOES-19 en producción, ambos de NOAA) para una predicción más robusta y precisa.
 *   **Salida Probabilística:** Entrega una probabilidad de granizo, permitiendo a los usuarios tomar decisiones informadas basadas en su propio umbral de riesgo.
 *   **Plataforma Centralizada:** Provee una interfaz web con dashboards especializados para diferentes roles (Administrador, Defensa Civil, Meteorólogo, Científico de Datos y Usuario General).
 
@@ -67,26 +67,24 @@ Nimbus AI ofrece una solución proactiva y focalizada:
 
 ## 🤖 Modelo de IA y API
 
-### Rendimiento del Modelo (V3.1)
+### Estado del Modelo (honesto)
 
-| Métrica                 | Valor    | Descripción                                                                                   |
-| :---------------------- | :------: | :-------------------------------------------------------------------------------------------- |
-| **Recall (Sensibilidad)** | **100%** | El modelo fue capaz de identificar **todos** los eventos de granizo reales en el set de prueba.     |
-| **Precisión**             | **~14%** | De todas las alertas generadas, el 14% fueron correctas, minimizando las falsas alarmas.        |
-| **F1-Score**              | **~0.24**| Un balance saludable entre Precisión y Recall para un problema altamente desbalanceado.        |
+Nimbus es un **prototipo de investigación**, no un sistema operativo de alerta. Estas son las métricas sobre el conjunto de prueba (94 filas, 10 con granizo, 10,6 % de positivos):
 
-### Interpretación de Métricas
+| Versión | Umbral | Recall | Precisión | Comentario |
+| :------ | :----: | :----: | :-------: | :--------- |
+| V3.0 | 0,50 | 0,70 | 0,21 | Doble de precisión que el azar (10,6 %), pero con solo 10 positivos la incertidumbre es enorme. |
+| V3.1 | 0,50 | 1,00 | 0,14 | Alerta en el 75 % de los días sin granizo: casi no discrimina. |
+| V3.1 | 0,56 (desplegado) | 0,00 | — | Con el umbral de la API no detecta ningún evento del test. |
 
-Dado que los eventos de granizo son **raros**, el modelo fue optimizado intencionalmente para **no omitir ningún evento real** (logrando un Recall del 100%). Esto significa:
+### Limitaciones conocidas (en corrección para V4)
 
-*   ✅ **Se detectan todos los granizos que ocurren**, lo cual es crítico para la prevención.
-*   ⚠️ Se generan algunas falsas alarmas (Precisión del 14%). En la práctica, **de cada 7 alertas, 1 corresponderá a un evento de granizo real**.
+*   **Fuga de validación:** el conjunto de prueba se usó como validación del EarlyStopping (V3.0) y como objetivo del Keras Tuner (V3.1). No hubo un holdout sin tocar.
+*   **Fuga por fecha:** cada fecha aparece en ~5 estaciones que comparten la misma imagen satelital; la división aleatoria por filas deja la misma tormenta en train y test.
+*   **Etiquetas incompletas:** provienen de noticias y registros públicos. Un día sin reporte no implica un día sin granizo, y los reportes crecen con los años por la mayor cobertura online.
+*   **Diferencias entre entrenamiento y producción:** variables como `año` o `SNWD` y la secuencia de 5 imágenes no se reproducen igual al predecir.
 
-Este balance es preferible a no alertar sobre un evento de granizo que sí ocurre.
-
-### Reproducibilidad de Métricas
-
-Las métricas fueron calculadas sobre un conjunto de prueba que corresponde al **20%** del dataset final, utilizando una división estratificada para mantener la proporción de clases. El 80% restante se utilizó para el entrenamiento del modelo.
+El plan de V4 incluye validación temporal por temporada, un test que no se toca, comparación contra modelos de referencia y variables convectivas (CAPE, cizalladura, isoterma de 0 °C, rayos).
 
 ### API Desplegada
 
@@ -97,49 +95,30 @@ El modelo está desplegado y accesible a través de los siguientes endpoints en 
 
 ### Ejemplos de Uso
 
-**`curl`**
+La API recibe las 21 variables diarias que usa el modelo; la imagen GOES-19 la descarga ella misma. En la plataforma, el backend arma este payload desde Open-Meteo a partir de `lat`/`lon` (`GET /api/main-prediction?lat=..&lon=..`).
+
 ```bash
-curl -X POST "https://nahuelito22-nimbus-ai.hf.space/api/predict" \
-     -H "Content-Type: application/json" \
-     -d '{
-           "meteorological_data": {
-             "temperature": 25.5, "humidity": 65, "wind_speed": 12.3, "pressure": 1013.2
-           },
-           "satellite_image_url": "https://example.com/satellite_image.jpg"
+curl -X POST "https://nahuelito22-nimbus-ai.hf.space/api/predict"      -H "Content-Type: application/json"      -d '{
+           "PRCP": 2.1, "SNWD": 0, "TAVG": 24.5, "TMAX": 32.0, "TMIN": 17.0,
+           "latitude": -32.89, "longitude": -68.84,
+           "om_weather_code": 63, "om_rain_sum": 2.1, "om_snowfall_sum": 0,
+           "om_precipitation_hours": 3, "om_wind_gusts_10m_max": 45.0,
+           "om_wind_direction_10m_dominant": 180, "om_shortwave_radiation_sum": 22.0,
+           "om_et0_fao_evapotranspiration": 5.5, "om_dew_point_2m_mean": 12.0,
+           "om_relative_humidity_2m_mean": 55, "om_pressure_msl_mean": 1010.0,
+           "mes": 1, "dia_del_año": 15, "rango_temp_diario": 15.0
          }'
-```
-
-**`Python (requests)`**
-```python
-import requests
-import json
-
-api_url = "https://nahuelito22-nimbus-ai.hf.space/api/predict"
-
-payload = {
-    "meteorological_data": {
-        "temperature": 25.5,
-        "humidity": 65,
-        "wind_speed": 12.3,
-        "pressure": 1013.2
-    },
-    "satellite_image_url": "https://example.com/satellite_image.jpg"
-}
-
-response = requests.post(api_url, data=json.dumps(payload), headers={"Content-Type": "application/json"})
-
-print(response.json())
 ```
 
 ### Ejemplo de Respuesta de la API
 
 ```json
 {
-  "prediction": {
-    "probability": 0.87,
-    "label": "Granizo Probable"
-  },
-  "model_version": "v3.1"
+  "probabilidad_granizo": 0.43,
+  "umbral_aplicado": 0.56,
+  "alerta_sugerida": "No",
+  "timestamp_prediccion_utc": "2026-01-15T18:00:00+00:00",
+  "fuente_imagen_utilizada": "ABI-L2-CMIPF/2026/015/17/OR_ABI-L2-CMIPF-M6C13_G19_..."
 }
 ```
 
@@ -154,7 +133,7 @@ La construcción del dataset fue un proceso iterativo y de enriquecimiento progr
 3.  **Etiquetado de Eventos (Web Scraping):** El desafío principal fue obtener etiquetas precisas de eventos de granizo. Se realizó web scraping sobre el portal `TuTiempo.net` y se complementó con una exhaustiva verificación manual de noticias y registros históricos entre 2000 y 2024. El resultado fue el archivo `dataset_final_enriquecido.csv`.
 4.  **Incorporación de Imágenes Satelitales (GOES-16):** Para el modelo multimodal (v3.0), se recolectaron imágenes del satélite GOES-16 para cada fecha etiquetada como "evento" y "no evento" a partir de 2017 (año de despliegue del satélite).
 
-Este dataset multimodal fue el utilizado para entrenar el modelo final v3.1, optimizado con Keras Tuner.
+Este dataset multimodal (101 fechas, 466 filas estación-día) se usó para entrenar V3.0 y V3.1 (V3.1 optimizado con Keras Tuner). Ver *Limitaciones conocidas*.
 
 ---
 
@@ -168,11 +147,11 @@ Para una exploración más profunda de la arquitectura, el análisis exploratori
 
 ## 🛠️ Stack Tecnológico
 
-*   **Backend:** Python, FastAPI, SQLAlchemy
+*   **Backend:** Python, Flask, SQLAlchemy, JWT (API del modelo: FastAPI)
 *   **Frontend:** React.js, Vite, Tailwind CSS
 *   **Data Science:** TensorFlow/Keras, Pandas, Scikit-learn, Xarray
 *   **Base de Datos:** PostgreSQL
-*   **Despliegue:** Render (Backend), Vercel (Frontend), Docker (Modelo IA)
+*   **Despliegue:** Vercel (Frontend), Hugging Face Spaces con Docker (Backend y API del modelo)
 
 ---
 
@@ -198,7 +177,7 @@ pip install -r requirements.txt
 
 # Configura y corre el servidor
 cp .env.example .env # Ajusta tus variables en .env
-uvicorn src.app:app --reload
+python run.py
 ```
 
 ### 2. Configuración del Frontend
@@ -232,7 +211,7 @@ Este proyecto está bajo la Licencia MIT.
 
 ---
 
-## 👥 Equipo y Contacto
+## 👤 Autor y Contacto
 
 *   **Nahuel Ghilardi:** Data Science, Backend & Frontend Development
 
