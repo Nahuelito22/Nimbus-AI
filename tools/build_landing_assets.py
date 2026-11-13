@@ -16,6 +16,8 @@ import pandas as pd
 import xarray as xr
 from matplotlib import colors
 from pyproj import Proj
+from shapely.geometry import shape
+from shapely.ops import unary_union
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DATASET = os.path.join(ROOT, "data", "processed", "dataset_final_enriquecido.csv")
@@ -24,25 +26,43 @@ SAMPLES = os.path.join(ROOT, "data", "raw", "imagenes_satelitales_muestra")
 OUT_JS = os.path.join(ROOT, "frontend", "src", "components", "landing", "data", "landingData.js")
 OUT_IMG = os.path.join(ROOT, "frontend", "public", "landing")
 
-# Misma caja que usa el modelo para recortar las imágenes
+# Misma caja que usa el modelo para recortar las imágenes GOES (no la del mapa)
 BBOX = {"lon_min": -70.5, "lon_max": -66.5, "lat_min": -37.5, "lat_max": -32.0}
 MAP_W = 400
 NOMBRES = {"MALARGUE, AR": "Malargüe", "SAN MARTIN, AR": "San Martín"}
 MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
 
+def _map_bounds():
+    """Límites reales de la provincia (con un margen), independientes de la caja GOES."""
+    gj = json.load(open(GEOJSON, encoding="utf-8"))
+    lon_min, lat_min, lon_max, lat_max = unary_union([shape(f["geometry"]) for f in gj["features"]]).bounds
+    pad = 0.05
+    return lon_min - pad, lat_min - pad, lon_max + pad, lat_max + pad
+
+
+MAP_BOUNDS = _map_bounds()
+
+
 def project(lon, lat):
     """Equirectangular corregida por coseno de la latitud media, en px de un SVG de MAP_W de ancho."""
-    k = np.cos(np.radians((BBOX["lat_min"] + BBOX["lat_max"]) / 2))
-    w = (BBOX["lon_max"] - BBOX["lon_min"]) * k
-    scale = MAP_W / w
-    x = (lon - BBOX["lon_min"]) * k * scale
-    y = (BBOX["lat_max"] - lat) * scale
+    lon_min, lat_min, lon_max, lat_max = MAP_BOUNDS
+    k = np.cos(np.radians((lat_min + lat_max) / 2))
+    scale = MAP_W / ((lon_max - lon_min) * k)
+    x = (lon - lon_min) * k * scale
+    y = (lat_max - lat) * scale
     return round(float(x), 1), round(float(y), 1)
 
 
 def map_height():
-    return project(BBOX["lon_min"], BBOX["lat_min"])[1]
+    return project(MAP_BOUNDS[0], MAP_BOUNDS[1])[1]
+
+
+def _path(geom):
+    """Geometría (Polygon o MultiPolygon, exteriores) a un atributo d de SVG."""
+    polys = geom.geoms if geom.geom_type == "MultiPolygon" else [geom]
+    return "".join("M" + "L".join(f"{x},{y}" for x, y in (project(lon, lat) for lon, lat in p.exterior.coords)) + "Z"
+                   for p in polys)
 
 
 def build_stats():
@@ -83,20 +103,21 @@ def build_stats():
 
 
 def build_map():
+    """Contorno provincial relleno + límites departamentales como líneas.
+
+    Los departamentos se simplifican por separado, así que sus bordes compartidos no coinciden
+    exactamente; dibujarlos como líneas sobre un único contorno evita huecos y solapamientos.
+    """
     gj = json.load(open(GEOJSON, encoding="utf-8"))
-    paths = []
-    for f in gj["features"]:
-        geom = f["geometry"]
-        polys = geom["coordinates"] if geom["type"] == "MultiPolygon" else [geom["coordinates"]]
-        d = []
-        for poly in polys:
-            ring = np.array(poly[0])
-            # Simplificación simple: uno de cada N vértices alcanza para un mapa de 400 px
-            step = max(1, len(ring) // 120)
-            pts = [project(lon, lat) for lon, lat in ring[::step]]
-            d.append("M" + "L".join(f"{x},{y}" for x, y in pts) + "Z")
-        paths.append({"nombre": f["properties"]["departamento"].title(), "d": "".join(d)})
-    return {"width": MAP_W, "height": map_height(), "departamentos": paths}
+    deptos = [(f["properties"]["departamento"].title(), shape(f["geometry"])) for f in gj["features"]]
+    tol = 0.004  # grados (~400 m): menos de medio píxel a 400 px de ancho
+    provincia = unary_union([g for _, g in deptos]).simplify(tol, preserve_topology=True)
+    return {
+        "width": MAP_W,
+        "height": map_height(),
+        "provincia": _path(provincia),
+        "departamentos": [{"nombre": n, "d": _path(g.simplify(tol, preserve_topology=True))} for n, g in deptos],
+    }
 
 
 def render_goes(nc_path, out_name):

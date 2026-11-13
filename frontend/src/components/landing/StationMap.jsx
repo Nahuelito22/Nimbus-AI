@@ -24,9 +24,12 @@ function StationMap() {
       </figcaption>
       <svg viewBox={`-60 -10 ${mapa.width + 120} ${mapa.height + 20}`} className="w-full h-auto max-h-[560px]" role="img"
         aria-label="Mapa de Mendoza con las cinco estaciones meteorológicas y su cantidad de días con granizo">
+        <path d={mapa.provincia} fill="var(--surface)" />
         {mapa.departamentos.map((d) => (
-          <path key={d.nombre} d={d.d} fill="var(--surface)" stroke="var(--rule)" strokeWidth="1" />
+          <path key={d.nombre} d={d.d} fill="none" stroke="var(--muted)" strokeOpacity="0.35" strokeWidth="1"
+            strokeLinejoin="round" />
         ))}
+        <path d={mapa.provincia} fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeLinejoin="round" />
         {estaciones.map((e) => {
           const side = LABEL_SIDE[e.nombre] || { dx: 1, anchor: 'start' };
           const r = radius(e.eventos);
