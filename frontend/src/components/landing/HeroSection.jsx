@@ -1,75 +1,54 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import landingData from './data/landingData';
+import BrightnessLegend from './BrightnessLegend';
+
+const { granizo } = landingData.goes;
 
 function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden gradient-nimbus" id="hero">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Cloud-like blurred shapes */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-40 right-20 w-96 h-96 bg-blue-300/15 rounded-full blur-3xl animate-float-delayed" />
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-indigo-400/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-40 right-10 w-64 h-64 bg-sky-300/10 rounded-full blur-3xl animate-float" />
-        
-        {/* Subtle grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 container mx-auto px-6 text-center">
-        {/* Tagline */}
-        <div className="animate-fade-in-up delay-200 mb-10 mt-12 md:mt-0">
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white leading-tight max-w-6xl mx-auto tracking-tighter mb-4 px-4 drop-shadow-sm">
-            Nimbus AI
+    <section id="inicio" style={{ background: 'var(--night)', color: 'var(--night-ink)' }}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-16 md:pt-20 md:pb-24 grid md:grid-cols-12 gap-10 md:gap-12 items-center">
+        <div className="md:col-span-6">
+          <p className="kicker" style={{ color: 'var(--night-muted)' }}>
+            Proyecto de investigación abierto · Mendoza, Argentina
+          </p>
+          <h1 className="serif font-light text-5xl sm:text-6xl lg:text-7xl leading-[1.02] mt-5">
+            Granizo en Mendoza,<br />visto desde arriba.
           </h1>
-          <div className="flex items-center justify-center gap-3 md:gap-5">
-            <div className="h-[2px] w-8 md:w-16 bg-gradient-to-r from-transparent to-blue-400/40 rounded-full"></div>
-            <span className="text-lg md:text-2xl lg:text-3xl font-bold gradient-text uppercase tracking-[0.1em] md:tracking-[0.2em]">
-              Impulsado por Inteligencia Artificial
-            </span>
-            <div className="h-[2px] w-8 md:w-16 bg-gradient-to-l from-transparent to-blue-400/40 rounded-full"></div>
+          <p className="mt-6 text-lg max-w-xl" style={{ color: 'var(--night-muted)' }}>
+            Nimbus cruza datos meteorológicos de superficie con imágenes infrarrojas del satélite GOES
+            para estimar la probabilidad de granizo. Es un prototipo: acá mostramos qué hace, con qué
+            datos, y qué tan bien funciona de verdad.
+          </p>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <Link to="/login"
+              className="px-5 py-3 rounded font-medium transition-colors"
+              style={{ background: 'var(--night-ink)', color: 'var(--night)' }}>
+              Entrar a la plataforma
+            </Link>
+            <a href="#honestidad"
+              className="px-5 py-3 rounded font-medium border transition-colors hover:bg-white/5"
+              style={{ borderColor: 'var(--night-rule)', color: 'var(--night-ink)' }}>
+              Qué tan bien funciona
+            </a>
           </div>
         </div>
 
-        {/* Subtitle */}
-        <p className="animate-fade-in-up delay-400 text-lg md:text-xl text-blue-100/80 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Protegiendo Mendoza con predicciones multimodales de última generación.
-          Datos meteorológicos + Imágenes satelitales GOES-16 = Prevención inteligente.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="animate-fade-in-up delay-600 flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link
-            to="/login"
-            className="px-8 py-4 bg-white text-blue-900 font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:bg-blue-50 transform hover:-translate-y-0.5 transition-all duration-300"
-          >
-            Acceder a la Plataforma
-          </Link>
-          <a
-            href="https://deepwiki.com/Nahuelito22/Nimbus-AI"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-8 py-4 bg-white/10 text-white font-semibold text-lg rounded-xl border border-white/30 hover:bg-white/20 backdrop-blur-sm transform hover:-translate-y-0.5 transition-all duration-300"
-          >
-            Ver Documentación
-          </a>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="animate-fade-in delay-800 mt-16">
-          <a href="#problema" className="inline-block text-white/50 hover:text-white/80 transition-colors">
-            <svg className="w-6 h-6 mx-auto animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-            <span className="text-xs mt-1 block">Descubrir más</span>
-          </a>
-        </div>
+        <figure className="md:col-span-6 m-0">
+          <img src={granizo.archivo} width="800" height="810"
+            alt="Imagen infrarroja de GOES-16 sobre Mendoza: grandes topes de tormenta muy fríos en el sur y el este de la provincia"
+            className="w-full h-auto rounded-sm block" />
+          <figcaption className="mt-4 text-sm" style={{ color: 'var(--night-muted)' }}>
+            <span className="mono text-xs" style={{ color: 'var(--night-ink)' }}>
+              GOES-16 · infrarrojo 10,3 µm · {granizo.fecha} {granizo.hora}
+            </span>
+            <br />
+            Ese día hubo granizo en San Rafael. Los topes de nube más fríos llegaron a{' '}
+            {String(granizo.btMin).replace('.', ',').replace('-', '−')} °C.
+            <div className="mt-3"><BrightnessLegend tone="night" /></div>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );

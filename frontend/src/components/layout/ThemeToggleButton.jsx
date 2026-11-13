@@ -8,8 +8,8 @@ const ThemeToggleButton = () => {
     return (
         <button
             onClick={toggleTheme}
-            className="p-2 rounded-full text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
-            aria-label="Toggle theme"
+            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 transition-colors"
+            aria-label="Cambiar tema claro u oscuro"
         >
             {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
         </button>
