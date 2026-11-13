@@ -210,6 +210,8 @@ def internal_error(error):
     return jsonify({"error": "Error interno del servidor"}), 500
 
 # 5. Rutas de Autenticación
+REGISTRABLE_ROLES = ['user', 'defensa_civil', 'meteorologo', 'cientifico_datos']
+
 @app.route('/api/register', methods=['POST'])
 def register():
     try:
@@ -221,6 +223,10 @@ def register():
 
         if not email or not password or not name:
             return jsonify({"msg": "Email, contraseña y nombre son requeridos"}), 400
+
+        # Los roles administrativos nunca se pueden autoasignar al registrarse
+        if role not in REGISTRABLE_ROLES:
+            return jsonify({"msg": "Tipo de cuenta no válido"}), 400
 
         user_exists = User.query.filter_by(email=email).first()
         if user_exists:
