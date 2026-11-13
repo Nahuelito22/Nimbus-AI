@@ -42,7 +42,9 @@ class Config:
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         r"https://nimbus-.*-nahuelito22s-projects.vercel.app", # Regex para previews de Vercel
-        "https://nimbus-ai-mdz.vercel.app"  # URL de producción principal
+        "https://nimbusai.com.ar",  # Dominio propio
+        "https://www.nimbusai.com.ar",
+        "https://nimbus-ai-mdz.vercel.app"  # URL de Vercel
     ]
     
     # Permitir añadir más orígenes desde variables de entorno
