@@ -6,7 +6,7 @@ Prototipo de investigación abierto (MIT) que estima la probabilidad de granizo 
 
 | Pieza | Dónde vive | Despliegue |
 | --- | --- | --- |
-| Frontend (React 18, Vite, Tailwind 3, Leaflet, Recharts) | `frontend/` | Vercel (`nimbus-ai-mdz.vercel.app`) |
+| Frontend (React 18, Vite, Tailwind 3, Leaflet, Recharts) | `frontend/` | Vercel (`nimbusai.com.ar`; también `nimbus-ai-mdz.vercel.app`) |
 | Backend (**Flask**, JWT, SQLAlchemy, Alembic) | `src/` (`src/app.py` concentra las rutas) | Space de HF `Nahuelito22/Nimbus-Backend`, desde la rama `deploy-backend` (remote `space`) |
 | API del modelo (FastAPI + Keras V3.1) | **No está en este repo**: solo en el Space `Nahuelito22/Nimbus-AI` (`src/api/main.py`) | `nahuelito22-nimbus-ai.hf.space/api/predict` |
 | Investigación | `notebooks/01`–`11` (escritos para Colab, rutas de Google Drive) | — |
